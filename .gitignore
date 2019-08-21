@@ -1,5 +1,7 @@
 #
 /build/
+main.log
+main.pdf
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
