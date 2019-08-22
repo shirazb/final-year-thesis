@@ -1,7 +1,5 @@
 \ProvidesPackage{packages/notation}
 
-\usepackage{packages/dsfont}
-
 \newcommand{\ci}[0]{\perp\!\!\!\!\!\perp} % conditional independence
 \newcommand{\point}[1]{{#1}} % points 
 \renewcommand{\vec}[1]{{\boldsymbol{{#1}}}} % vector
@@ -12,9 +10,9 @@
 \newcommand{\nat}[0]{\mathds{N}} % natural numbers
 \newcommand{\Q}[0]{\mathds{Q}} % rational numbers
 \ifxetex
-\newcommand{\C}[0]{\mathds{C}} % complex numbers
+\newcommand{\Cx}[0]{\mathds{C}} % complex numbers
 \else
-\newcommand{\C}[0]{\mathds{C}} % complex numbers
+\newcommand{\Cx}[0]{\mathds{C}} % complex numbers
 \fi
 \newcommand{\tr}[0]{\text{tr}} % trace
 \renewcommand{\d}[0]{\mathrm{d}} % total derivative

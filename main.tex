@@ -1,20 +1,69 @@
-\documentclass[12pt]{article}
+\documentclass[12pt,twoside]{report}
 
 \usepackage{packages/preamble}
 
+% some definitions for the title page
 \newcommand{\reporttitle}{Precise Optimal Checkpointing for Memory-Efficient Deep Learning}
 \newcommand{\reportauthor}{Shiraz Butt}
-\newcommand{\reporttype}{Master's Thesis}
-\newcommand{\cid}{01064070}
+\newcommand{\supervisor}{Prof. Peter Pietzuch}
+\newcommand{\reporttype}{MEng Individual Project}
+\newcommand{\degreetype}{MEng Computer Science}
 
 \begin{document}
 
 \import{./}{titlepage.tex}
 
-\tableofcontents
+% page numbering etc.
+\pagenumbering{roman}
+\clearpage{\pagestyle{empty}\cleardoublepage}
+\setcounter{page}{1}
+\pagestyle{fancy}
 
-\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+Your abstract.
+\end{abstract}
 
+\cleardoublepage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgments}
+Comment this out if not needed.
+
+\clearpage{\pagestyle{empty}\cleardoublepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%--- table of contents
+\fancyhead[RE,LO]{\hdrfamily {Table of Contents}}
+\tableofcontents 
+
+
+\clearpage{\pagestyle{empty}\cleardoublepage}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\fancyhead[LE,RO]{\slshape \rightmark}
+\fancyhead[LO,RE]{\slshape \leftmark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introduction}
 \import{sections/}{introduction.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Background}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Contribution}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Experimental Results}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Conclusion}
+
+
+%% bibliography
+\bibliographystyle{apa}
 
 \end{document}
