@@ -2,12 +2,14 @@
 
 \usepackage{packages/preamble}
 
+
 % some definitions for the title page
 \newcommand{\reporttitle}{Precise Optimal Checkpointing for Memory-Efficient Deep Learning}
 \newcommand{\reportauthor}{Shiraz Butt}
 \newcommand{\supervisor}{Prof. Peter Pietzuch}
 \newcommand{\reporttype}{MEng Individual Project}
 \newcommand{\degreetype}{MEng Computer Science}
+
 
 \begin{document}
 
@@ -21,13 +23,13 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-Your abstract.
+I did some things.
 \end{abstract}
 
 \cleardoublepage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Acknowledgments}
-Comment this out if not needed.
+Thank you person.
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
 
@@ -45,25 +47,32 @@ Comment this out if not needed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Introduction}
-\import{sections/}{introduction.tex}
+\import{sections/1-introduction/}{0-introduction.tex}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Background}
+\import{sections/2-background/}{0-overview.tex}
+\import{sections/2-background/}{1-deep_learning.tex}
+\import{sections/2-background/}{2-autodiff.tex}
+\import{sections/2-background/}{3-pytorch.tex}
+\import{sections/2-background/}{4-checkpointing.tex}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Contribution}
+\chapter{Implementation}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Experimental Results}
+\chapter{Evaluation}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% bibliography
-\bibliographystyle{apa}
+\bibliography{references}
 
 \end{document}

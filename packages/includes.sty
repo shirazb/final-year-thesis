@@ -22,6 +22,7 @@
 
 \usepackage{import}
 \usepackage{graphicx}
+  \graphicspath{{./figures/}}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{ifxetex}
@@ -29,8 +30,10 @@
 
 
 \usepackage{textpos}
-\usepackage{natbib} % for bibliography
-\usepackage{tabularx,longtable,multirow,subfigure,caption}%hangcaption
+\usepackage[square, numbers]{natbib} % for bibliography
+  \bibliographystyle{newapa}
+\usepackage{tocbibind} % bib in contents
+\usepackage{tabularx,longtable,multirow,caption,subcaption}%hangcaption
 \usepackage{fncylab} %formatting of labels
 \usepackage{fancyhdr} % page layout
 \usepackage{url} % URLs
