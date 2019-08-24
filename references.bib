@@ -1,71 +1,441 @@
+@techreport{Vinyals2017,
+abstract = {This paper introduces SC2LE (StarCraft II Learning Environment), a reinforcement learning environment based on the StarCraft II game. This domain poses a new grand challenge for reinforcement learning, representing a more difficult class of problems than considered in most prior work. It is a multi-agent problem with multiple players interacting; there is imperfect information due to a partially observed map; it has a large action space involving the selection and control of hundreds of units; it has a large state space that must be observed solely from raw input feature planes; and it has delayed credit assignment requiring long-term strategies over thousands of steps. We describe the observation, action, and reward specification for the StarCraft II domain and provide an open source Python-based interface for communicating with the game engine. In addition to the main game maps, we provide a suite of mini-games focusing on different elements of StarCraft II gameplay. For the main game maps, we also provide an accompanying dataset of game replay data from human expert players. We give initial baseline results for neural networks trained from this data to predict game outcomes and player actions. Finally, we present initial baseline results for canonical deep reinforcement learning agents applied to the StarCraft II domain. On the mini-games, these agents learn to achieve a level of play that is comparable to a novice player. However, when trained on the main game, these agents are unable to make significant progress. Thus, SC2LE offers a new and challenging environment for exploring deep reinforcement learning algorithms and architectures.},
+archivePrefix = {arXiv},
+arxivId = {1708.04782},
+author = {Vinyals, Oriol and Ewalds, Timo and Bartunov, Sergey and Georgiev, Petko and Vezhnevets, Alexander Sasha and Yeo, Michelle and Makhzani, Alireza and Kttler, Heinrich and Agapiou, John and Schrittwieser, Julian and Quan, John and Gaffney, Stephen and Petersen, Stig and Simonyan, Karen and Schaul, Tom and van Hasselt, Hado and Silver, David and Lillicrap, Timothy and Calderone, Kevin and Keet, Paul and Brunasso, Anthony and Lawrence, David and Ekermo, Anders and Repp, Jacob and Tsing, Rodney},
+eprint = {1708.04782},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Vinyals Timo Ewalds Sergey Bartunov Petko Georgiev Alexander Sasha Vezhnevets Michelle Yeo Alireza Makhzani Heinrich, John Agapiou Julia.pdf:pdf},
+institution = {Google DeepMind},
+title = {{StarCraft II: A New Challenge for Reinforcement Learning}},
+url = {http://arxiv.org/abs/1708.04782},
+year = {2017}
+}
+@article{Zhou2016,
+abstract = {We propose DoReFa-Net, a method to train convolutional neural networks that have low bitwidth weights and activations using low bitwidth parameter gradients. In particular, during backward pass, parameter gradients are stochastically quantized to low bitwidth numbers before being propagated to convolutional layers. As convolutions during forward/backward passes can now operate on low bitwidth weights and activations/gradients respectively, DoReFa-Net can use bit convolution kernels to accelerate both training and inference. Moreover, as bit convolutions can be efficiently implemented on CPU, FPGA, ASIC and GPU, DoReFa-Net opens the way to accelerate training of low bitwidth neural network on these hardware. Our experiments on SVHN and ImageNet datasets prove that DoReFa-Net can achieve comparable prediction accuracy as 32-bit counterparts. For example, a DoReFa-Net derived from AlexNet that has 1-bit weights, 2-bit activations, can be trained from scratch using 6-bit gradients to get 46.1$\backslash${\%} top-1 accuracy on ImageNet validation set. The DoReFa-Net AlexNet model is released publicly.},
+archivePrefix = {arXiv},
+arxivId = {1606.06160},
+author = {Zhou, Shuchang and Wu, Yuxin and Ni, Zekun and Zhou, Xinyu and Wen, He and Zou, Yuheng},
+eprint = {1606.06160},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Zhou et al. - 2016 - DoReFa-Net Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients.pdf:pdf},
+month = {jun},
+title = {{DoReFa-Net: Training Low Bitwidth Convolutional Neural Networks with Low Bitwidth Gradients}},
+url = {http://arxiv.org/abs/1606.06160},
+year = {2016}
+}
+@online{Abdulkader2016,
+author = {Abdulkader, Ahmad and Lakshmiratan, Aparna and Zhang, Joy},
+title = {{Introducing DeepText: Facebook's text understanding engine - Facebook Engineering}},
+url = {https://engineering.fb.com/core-data/introducing-deeptext-facebook-s-text-understanding-engine},
+year = {2016},
+organization = {Facebook},
+urldate = {2019-08-24}
+}
+@article{Fridman2019,
+abstract = {For the foreseeble future, human beings will likely remain an integral part of the driving task, monitoring the AI system as it performs anywhere from just over 0{\%} to just under 100{\%} of the driving. The governing objectives of the MIT Autonomous Vehicle Technology (MIT-AVT) study are to (1) undertake large-scale real-world driving data collection that includes high-definition video to fuel the development of deep learning based internal and external perception systems, (2) gain a holistic understanding of how human beings interact with vehicle automation technology by integrating video data with vehicle state data, driver characteristics, mental models, and self-reported experiences with technology, and (3) identify how technology and other factors related to automation adoption and use can be improved in ways that save lives. In pursuing these objectives, we have instrumented 23 Tesla Model S and Model X vehicles, 2 Volvo S90 vehicles, 2 Range Rover Evoque, and 2 Cadillac CT6 vehicles for both long-term (over a year per driver) and medium term (one month per driver) naturalistic driving data collection. Furthermore, we are continually developing new methods for analysis of the massive-scale dataset collected from the instrumented vehicle fleet. The recorded data streams include IMU, GPS, CAN messages, and high-definition video streams of the driver face, the driver cabin, the forward roadway, and the instrument cluster (on select vehicles). The study is on-going and growing. To date, we have 122 participants, 15,610 days of participation, 511,638 miles, and 7.1 billion video frames. This paper presents the design of the study, the data collection hardware, the processing of the data, and the computer vision algorithms currently being used to extract actionable knowledge from the data.},
+archivePrefix = {arXiv},
+arxivId = {1711.06976},
+author = {Fridman, Lex and Brown, Daniel E. and Glazer, Michael and Angell, William and Dodd, Spencer and Jenik, Benedikt and Terwilliger, Jack and Patsekin, Aleksandr and Kindelsberger, Julia and Ding, Li and Seaman, Sean and Mehler, Alea and Sipperley, Andrew and Pettinato, Anthony and Seppelt, Bobbie D. and Angell, Linda and Mehler, Bruce and Reimer, Bryan},
+doi = {10.1109/access.2019.2926040},
+eprint = {1711.06976},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Fridman et al. - 2019 - MIT Advanced Vehicle Technology Study Large-Scale Naturalistic Driving Study of Driver Behavior and Interaction.pdf:pdf},
+journal = {IEEE Access},
+month = {jul},
+pages = {102021--102038},
+publisher = {Institute of Electrical and Electronics Engineers (IEEE)},
+title = {{MIT Advanced Vehicle Technology Study: Large-Scale Naturalistic Driving Study of Driver Behavior and Interaction With Automation}},
+url = {https://arxiv.org/abs/1711.06976},
+volume = {7},
+year = {2019}
+}
+@article{Karpathy2017,
+abstract = {We present a model that generates natural language descriptions of images and their regions. Our approach leverages datasets of images and their sentence descriptions to learn about the inter-modal correspondences between language and visual data. Our alignment model is based on a novel combination of Convolutional Neural Networks over image regions, bidirectional Recurrent Neural Networks over sentences, and a structured objective that aligns the two modalities through a multimodal embedding. We then describe a Multimodal Recurrent Neural Network architecture that uses the inferred alignments to learn to generate novel descriptions of image regions. We demonstrate that our alignment model produces state of the art results in retrieval experiments on Flickr8K, Flickr30K and MSCOCO datasets. We then show that the generated descriptions significantly outperform retrieval baselines on both full images and on a new dataset of region-level annotations.},
+author = {Karpathy, Andrej and Fei-Fei, Li},
+doi = {10.1109/TPAMI.2016.2598339},
+issn = {01628828},
+journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+keywords = {Image captioning,deep neural networks,language model,recurrent neural network,visual-semantic embeddings},
+months = {apr},
+number = {4},
+pages = {664--676},
+publisher = {IEEE Computer Society},
+title = {{Deep Visual-Semantic Alignments for Generating Image Descriptions}},
+volume = {39},
+year = {2017}
+}
+@phdthesis{DalPozzolo2015,
+abstract = {Billions of dollars of loss are caused every year by fraudulent credit card transactions. The design of efficient fraud detection algorithms is key for reducing these losses, and more and more algorithms rely on advanced machine learning techniques to assist fraud investigators. The design of fraud detection algorithms is however particularly challenging due to the non-stationary distribution of the data, the highly unbalanced classes distributions and the availability of few transactions labeled by fraud investigators. At the same time public data are scarcely available for confidentiality issues, leaving unanswered many questions about what is the best strategy. In this thesis we aim to provide some answers by focusing on crucial issues such as: i) why and how undersampling is useful in the presence of class imbalance (i.e. frauds are a small percentage of the transactions), ii) how to deal with unbalanced and evolving data streams (non-stationarity due to fraud evolution and change of spending behavior), iii) how to assess performances in a way which is relevant for detection and iv) how to use feedbacks provided by investigators on the fraud alerts generated. Finally, we design and assess a prototype of a Fraud Detection System able to meet real-world working conditions and that is able to integrate investigators' feedback to generate accurate alerts.},
+author = {{Dal Pozzolo}, Andrea},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Dal Pozzolo - 2015 - Adaptive Machine Learning for Credit Card Fraud Detection.pdf:pdf},
+school = {Universit{\'{e}} Libre de Bruxelles},
+title = {{Adaptive Machine Learning for Credit Card Fraud Detection}},
+url = {http://di.ulb.ac.be/map/adalpozz/pdf/Dalpozzolo2015PhD.pdf},
+year = {2015}
+}
+@mastersthesis{Zlocha2019,
+abstract = {Accurate, automated lesion detection is an important yet challenging task due to the large variation of lesion types, sizes, locations and appearances. Most of the recent work only focuses on lesion detection in a constrained setting - detecting lesions in a specific organ. We tackle the general problem of detecting lesions across the whole body and propose approaches which are not limited to a particular dataset. This is done by redesigning RetinaNet to be more applicable to medical imaging, using a general approach for optimising anchor configurations and by generating additional weak labels from the provided ground truth. We evaluate our approach on two different datasets - a large public Computed Tomography (CT) dataset called DeepLesion, consisting of 32,735 lesions, and a much smaller whole-body Magnetic Resonance Imaging (MRI) dataset made up of only 213 scans. We show that our approach achieves state-of-the-art results, significantly outperforming the best reported methods by over 5{\%} on the DeepLesion benchmark, while being generalisable enough to achieve excellent results on the much smaller whole-body MRI dataset.},
+author = {Zlocha, Martin and Glocker, Ben},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Zlocha, Glocker - 2019 - MEng Individual Project Universal Lesion Detector Deep Learning for Analysing Medical Scans.pdf:pdf},
+school = {Imperial College London},
+title = {{Universal Lesion Detector: Deep Learning for Analysing Medical Scans}},
+url = {https://www.imperial.ac.uk/media/imperial-college/faculty-of-engineering/computing/public/1819-ug-projects/ZlochaM-Universal-Lesion-Detector-Deep-Learning-for-Analysing-Medical-Scans.pdf},
+year = {2019}
+}
 @incollection{NIPS2015_5782,
-    title = {{Character-level Convolutional Networks for Text Classification}},
-    year = {2015},
-    booktitle = {Advances in Neural Information Processing Systems 28},
-    author = {Zhang, Xiang and Zhao, Junbo and LeCun, Yann},
-    editor = {Cortes, C and Lawrence, N D and Lee, D D and Sugiyama, M and Garnett, R},
-    pages = {649--657},
-    publisher = {Curran Associates, Inc.},
-    url = {http://papers.nips.cc/paper/5782-character-level-convolutional-networks-for-text-classification.pdf}
+abstract = {This article offers an empirical exploration on the use of character-level convolutional networks (ConvNets) for text classification. We constructed several largescale datasets to show that character-level convolutional networks could achieve state-of-the-art or competitive results. Comparisons are offered against traditional models such as bag of words, n-grams and their TFIDF variants, and deep learning models such as word-based ConvNets and recurrent neural networks.},
+author = {Zhang, Xiang and Zhao, Junbo and LeCun, Yann},
+booktitle = {Advances in Neural Information Processing Systems 28},
+editor = {Cortes, C and Lawrence, N D and Lee, D D and Sugiyama, M and Garnett, R},
+pages = {649--657},
+publisher = {Curran Associates, Inc.},
+title = {{Character-level Convolutional Networks for Text Classification}},
+url = {http://papers.nips.cc/paper/5782-character-level-convolutional-networks-for-text-classification.pdf},
+year = {2015}
 }
-
-@phdthesis{DalPozzolo2015AdaptiveDetection,
-    title = {{Adaptive Machine Learning for Credit Card Fraud Detection}},
-    year = {2015},
-    author = {Dal Pozzolo, Andrea},
-    url = {http://di.ulb.ac.be/map/adalpozz/pdf/Dalpozzolo2015PhD.pdf},
-    school = {Universit{\'{e}} Libre de Bruxelles}
+@inproceedings{Rhu2016,
+abstract = {The most widely used machine learning frameworks require users to carefully tune their memory usage so that the deep neural network (DNN) fits into the DRAM capacity of a GPU. This restriction hampers a researcher's flexibility to study different machine learning algorithms, forcing them to either use a less desirable network architecture or parallelize the processing across multiple GPUs. We propose a runtime memory manager that virtualizes the memory usage of DNNs such that both GPU and CPU memory can simultaneously be utilized for training larger DNNs. Our virtualized DNN (vDNN) reduces the average GPU memory usage of AlexNet by up to 89{\%}, OverFeat by 91{\%}, and GoogLeNet by 95{\%}, a significant reduction in memory requirements of DNNs. Similar experiments on VGG-16, one of the deepest and memory hungry DNNs to date, demonstrate the memory-efficiency of our proposal. vDNN enables VGG-16 with batch size 256 (requiring 28 GB of memory) to be trained on a single NVIDIA Titan X GPU card containing 12 GB of memory, with 18{\%} performance loss compared to a hypothetical, oracular GPU with enough memory to hold the entire DNN.},
+archivePrefix = {arXiv},
+arxivId = {1602.08124},
+author = {Rhu, Minsoo and Gimelshein, Natalia and Clemons, Jason and Zulfiqar, Arslan and Keckler, Stephen W.},
+booktitle = {Proceedings of the Annual International Symposium on Microarchitecture, MICRO},
+doi = {10.1109/MICRO.2016.7783721},
+eprint = {1602.08124},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Rhu et al. - 2016 - Virtualizing Deep Neural Networks for Memory-Efficient Neural Network Design.pdf:pdf},
+isbn = {9781509035083},
+issn = {10724451},
+mendeley-groups = {Individual Project},
+title = {{vDNN: Virtualized deep neural networks for scalable, memory-efficient neural network design}},
+url = {http://arxiv.org/abs/1602.08124},
+volume = {2016-Decem},
+year = {2016}
 }
-
-@article{Karpathy2017DeepDescriptions,
-    title = {{Deep Visual-Semantic Alignments for Generating Image Descriptions}},
-    year = {2017},
-    journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
-    author = {Karpathy, Andrej and Fei-Fei, Li},
-    number = {4},
-    month = {4},
-    pages = {664--676},
-    volume = {39},
-    publisher = {IEEE Computer Society},
-    doi = {10.1109/TPAMI.2016.2598339},
-    issn = {01628828},
-    keywords = {Image captioning, deep neural networks, language model, recurrent neural network, visual-semantic embeddings}
+@techreport{B,
+abstract = {Deep learning has been widely adopted for different applications of artificial intelligence-speech recognition, natural language processing, computer vision etc. The growing size of Deep Neural Networks (DNNs) has compelled the researchers to design memory efficient and performance optimal algorithms. Apart from algorithmic improvements, specialized hardware like Graphics Processing Units (GPUs) are being widely employed to accelerate the training and inference phases of deep networks. However, the limited GPU memory capacity limits the upper bound on the size of networks that can be offloaded to and trained using GPUs. vDNN addresses the GPU memory bottleneck issue and provides a solution which enables training of deep networks that are larger than GPU memory. In our work, we characterize and identify multiple bottlenecks with vDNN like delayed computation start, high pinned memory requirements and GPU memory fragmentation. We present vDNN++ which extends vDNN and resolves the identified issues. Our results show that the performance of vDNN++ is comparable or better (up to 60{\%} relative improvement) than vDNN. We propose different heuristics and order for memory allocation, and empirically evaluate the extent of memory fragmentation with them. We are also able to reduce the pinned memory requirement by up to 60{\%}.},
+author = {B, Shriram S and Garg, Anshuj and Kulkarni, Purushottam},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/B, Garg, Kulkarni - Unknown - Dynamic Memory Management for GPU-based training of Deep Neural Networks(2).pdf:pdf},
+keywords = {Deep Learning,Deep Neural Networks,GPU,Memory management},
+mendeley-groups = {Individual Project},
+title = {{Dynamic Memory Management for GPU-based training of Deep Neural Networks}},
+url = {https://www.cse.iitb.ac.in/{~}shriramsb/submissions/GPU{\_}mem{\_}ML.pdf}
 }
-
-@misc{Abdulkader2016IntroducingEngineering,
-    title = {{Introducing DeepText: Facebook's text understanding engine - Facebook Engineering}},
-    year = {2016},
-    author = {Abdulkader, Ahmad and Lakshmiratan, Aparna and Zhang, Joy},
-    url = {https://engineering.fb.com/core-data/introducing-deeptext-facebook-s-text-understanding-engine/}
+@article{Zhang2019,
+abstract = {GPU (graphics processing unit) has been used for many data-intensive applications. Among them, deep learning systems are one of the most important consumer systems for GPU nowadays. As deep learning applications impose deeper and larger models in order to achieve higher accuracy, memory management becomes an important research topic for deep learning systems, given that GPU has limited memory size. Many approaches have been proposed towards this issue, e.g., model compression and memory swapping. However, they either degrade the model accuracy or require a lot of manual intervention. In this paper, we propose two orthogonal approaches to reduce the memory cost from the system perspective. Our approaches are transparent to the models, and thus do not affect the model accuracy. They are achieved by exploiting the iterative nature of the training algorithm of deep learning to derive the lifetime and read/write order of all variables. With the lifetime semantics, we are able to implement a memory pool with minimal fragments. However, the optimization problem is NP-complete. We propose a heuristic algorithm that reduces up to 13.3{\%} of memory compared with Nvidia's default memory pool with equal time complexity. With the read/write semantics, the variables that are not in use can be swapped out from GPU to CPU to reduce the memory footprint. We propose multiple swapping strategies to automatically decide which variable to swap and when to swap out (in), which reduces the memory cost by up to 34.2{\%} without communication overhead.},
+archivePrefix = {arXiv},
+arxivId = {1903.06631},
+author = {Zhang, Junzhe and Yeung, Sai Ho and Shu, Yao and He, Bingsheng and Wang, Wei},
+eprint = {1903.06631},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Zhang et al. - 2019 - Efficient Memory Management for GPU-based Deep Learning Systems.pdf:pdf},
+mendeley-groups = {Individual Project},
+month = {feb},
+title = {{Efficient Memory Management for GPU-based Deep Learning Systems}},
+url = {http://arxiv.org/abs/1903.06631},
+year = {2019}
 }
-
-@article{Fridman2019MITAutomation,
-    title = {{MIT Advanced Vehicle Technology Study: Large-Scale Naturalistic Driving Study of Driver Behavior and Interaction With Automation}},
-    year = {2019},
-    journal = {IEEE Access},
-    author = {Fridman, Lex and Brown, Daniel E. and Glazer, Michael and Angell, William and Dodd, Spencer and Jenik, Benedikt and Terwilliger, Jack and Patsekin, Aleksandr and Kindelsberger, Julia and Ding, Li and Seaman, Sean and Mehler, Alea and Sipperley, Andrew and Pettinato, Anthony and Seppelt, Bobbie D. and Angell, Linda and Mehler, Bruce and Reimer, Bryan},
-    month = {7},
-    pages = {102021--102038},
-    volume = {7},
-    publisher = {Institute of Electrical and Electronics Engineers (IEEE)},
-    url = {https://arxiv.org/abs/1711.06976},
-    doi = {10.1109/access.2019.2926040},
-    arxivId = {1711.06976}
+@article{Chen2016,
+abstract = {We propose a systematic approach to reduce the memory consumption of deep neural network training. Specifically, we design an algorithm that costs O(sqrt(n)) memory to train a n layer network, with only the computational cost of an extra forward pass per mini-batch. As many of the state-of-the-art models hit the upper bound of the GPU memory, our algorithm allows deeper and more complex models to be explored, and helps advance the innovations in deep learning research. We focus on reducing the memory cost to store the intermediate feature maps and gradients during training. Computation graph analysis is used for automatic in-place operation and memory sharing optimizations. We show that it is possible to trade computation for memory - giving a more memory efficient training algorithm with a little extra computation cost. In the extreme case, our analysis also shows that the memory consumption can be reduced to O(log n) with as little as O(n log n) extra cost for forward computation. Our experiments show that we can reduce the memory cost of a 1,000-layer deep residual network from 48G to 7G with only 30 percent additional running time cost on ImageNet problems. Similarly, significant memory cost reduction is observed in training complex recurrent neural networks on very long sequences.},
+archivePrefix = {arXiv},
+arxivId = {1604.06174},
+author = {Chen, Tianqi and Xu, Bing and Zhang, Chiyuan and Guestrin, Carlos},
+eprint = {1604.06174},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Chen et al. - 2016 - Training Deep Nets with Sublinear Memory Cost(2).pdf:pdf},
+mendeley-groups = {Individual Project},
+month = {apr},
+title = {{Training Deep Nets with Sublinear Memory Cost}},
+url = {http://arxiv.org/abs/1604.06174},
+year = {2016}
 }
-
-@techreport{Vinyals2017StarCraftLearning,
-    title = {{StarCraft II: A New Challenge for Reinforcement Learning}},
-    year = {2017},
-    author = {Vinyals, Oriol and Ewalds, Timo and Bartunov, Sergey and Georgiev, Petko and Vezhnevets, Alexander Sasha and Yeo, Michelle and Makhzani, Alireza and K{\"{u}}ttler, Heinrich and Agapiou, John and Schrittwieser, Julian and Quan, John and Gaffney, Stephen and Petersen, Stig and Simonyan, Karen and Schaul, Tom and van Hasselt, Hado and Silver, David and Lillicrap, Timothy and Calderone, Kevin and Keet, Paul and Brunasso, Anthony and Lawrence, David and Ekermo, Anders and Repp, Jacob and Tsing, Rodney},
-    url = {https://en.wikipedia.org/wiki/Professional_StarCraft_competition http://arxiv.org/abs/1708.04782},
-    institution = {Google DeepMind},
-    arxivId = {1708.04782}
+@inproceedings{Gruslys2016,
+abstract = {We propose a novel approach to reduce memory consumption of the backpropagation through time (BPTT) algorithm when training recurrent neural networks (RNNs). Our approach uses dynamic programming to balance a trade-off between caching of intermediate results and recomputation. The algorithm is capable of tightly fitting within almost any user-set memory budget while finding an optimal execution policy minimizing the computational cost. Computational devices have limited memory capacity and maximizing a computational performance given a fixed memory budget is a practical use-case. We provide asymptotic computational upper bounds for various regimes. The algorithm is particularly effective for long sequences. For sequences of length 1000, our algorithm saves 95$\backslash${\%} of memory usage while using only one third more time per iteration than the standard BPTT.},
+archivePrefix = {arXiv},
+arxivId = {1606.03401},
+author = {Gruslys, Audrunas and Munos, R{\'{e}}mi and Danihelka, Ivo and Lanctot, Marc and Graves, Alex},
+booktitle = {Advances in Neural Information Processing Systems},
+eprint = {1606.03401},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Gruslys et al. - 2016 - Memory-Efficient Backpropagation Through Time.pdf:pdf},
+issn = {10495258},
+mendeley-groups = {Individual Project},
+month = {jun},
+pages = {4132--4140},
+title = {{Memory-efficient backpropagation through time}},
+url = {http://arxiv.org/abs/1606.03401},
+year = {2016}
 }
-
-@misc{Zlocha2019UniversalScans,
-    title = {{Universal Lesion Detector: Deep Learning for Analysing Medical Scans}},
-    year = {2019},
-    author = {Zlocha, Martin and Glocker, Ben},
-    url = {https://www.imperial.ac.uk/media/imperial-college/faculty-of-engineering/computing/public/1819-ug-projects/ZlochaM-Universal-Lesion-Detector-Deep-Learning-for-Analysing-Medical-Scans.pdf},
-    institution = {Imperial College London}
+@inproceedings{Wang2018,
+abstract = {Going deeper and wider in neural architectures improves the accuracy, while the limited GPU DRAM places an undesired restriction on the network design domain. Deep Learning (DL) practitioners either need change to less desired network architectures, or nontrivially dissect a network across multiGPUs. These distract DL practitioners from concentrating on their original machine learning tasks. We present SuperNeurons: a dynamic GPU memory scheduling runtime to enable the network training far beyond the GPU DRAM capacity. SuperNeurons features 3 memory optimizations, $\backslash$textit{\{}Liveness Analysis{\}}, $\backslash$textit{\{}Unified Tensor Pool{\}}, and $\backslash$textit{\{}Cost-Aware Recomputation{\}}, all together they effectively reduce the network-wide peak memory usage down to the maximal memory usage among layers. We also address the performance issues in those memory saving techniques. Given the limited GPU DRAM, SuperNeurons not only provisions the necessary memory for the training, but also dynamically allocates the memory for convolution workspaces to achieve the high performance. Evaluations against Caffe, Torch, MXNet and TensorFlow have demonstrated that SuperNeurons trains at least 3.2432 deeper network than current ones with the leading performance. Particularly, SuperNeurons can train ResNet2500 that has {\$}10{\^{}}4{\$} basic network layers on a 12GB K40c.},
+author = {Wang, Linnan and Ye, Jinmian and Zhao, Yiyang and Wu, Wei and Li, Ang and Song, Shuaiwen Leon and Xu, Zenglin and Kraska, Tim},
+booktitle = {Proceedings of the ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming, PPOPP},
+doi = {10.1145/3178487.3178491},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Wang et al. - 2018 - SuperNeurons Dynamic GPU memory management for training deep neural networks(2).pdf:pdf},
+isbn = {9781450349826},
+keywords = {GPU Memory Management,Neural Networks,Runtime Scheduling},
+mendeley-groups = {Individual Project},
+month = {feb},
+pages = {41--53},
+publisher = {Association for Computing Machinery},
+title = {{SuperNeurons: Dynamic GPU memory management for training deep neural networks}},
+year = {2018}
+}
+@inproceedings{Dauvergne2006,
+abstract = {Checkpointing is a technique to reduce the memory consumption of adjoint programs produced by reverse Automatic Differentiation. However, checkpointing also uses a non-negligible memory space for the so-called "snapshots". We analyze the data-flow of checkpointing, yielding a precise characterization of all possible memory-optimal options for snapshots. This characterization is formally derived from the structure of checkpoints and from classical data-flow equations. In particular, we select two very different options and study their behavior on a number of real codes. Although no option is uniformly better, the so-called "lazy-snapshot" option appears preferable in general.},
+author = {Dauvergne, Benjamin and Hasco{\"{e}}t, Laurent},
+booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+doi = {10.1007/11758549_78},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Dauvergne, Hasco{\"{e}}t - 2006 - The data-flow equations of checkpointing in reverse Automatic Differentiation.pdf:pdf},
+isbn = {3540343857},
+issn = {16113349},
+mendeley-groups = {Individual Project},
+pages = {566--573},
+publisher = {Springer Verlag},
+title = {{The data-flow equations of checkpointing in reverse Automatic Differentiation}},
+volume = {3994 LNCS - IV},
+year = {2006}
+}
+@article{Siskind2018,
+abstract = {Classical reverse-mode automatic differentiation (AD) imposes only a small constant-factor overhead in operation count over the original computation, but has storage requirements that grow, in the worst case, in proportion to the time consumed by the original computation. This storage blowup can be ameliorated by checkpointing, a process that reorders application of classical reverse-mode AD over an execution interval to tradeoff space $\backslash$vs$\backslash$ time. Application of checkpointing in a divide-and-conquer fashion to strategically chosen nested execution intervals can break classical reverse-mode AD into stages which can reduce the worst-case growth in storage from linear to sublinear. Doing this has been fully automated only for computations of particularly simple form, with checkpoints spanning execution intervals resulting from a limited set of program constructs. Here we show how the technique can be automated for arbitrary computations. The essential innovation is to apply the technique at the level of the language implementation itself, thus allowing checkpoints to span any execution interval.},
+author = {Siskind, Jeffrey Mark and Pearlmutter, Barak A.},
+doi = {10.1080/10556788.2018.1459621},
+issn = {10294937},
+journal = {Optimization Methods and Software},
+keywords = {46G05,58C20,65D25,65F50,68N18,68N20,Reverse-mode automatic differentiation,binomial checkpointing,compiler theory,lambda calculus,programming language theory,treeverse},
+mendeley-groups = {Individual Project},
+month = {nov},
+number = {4-6},
+pages = {1288--1330},
+publisher = {Taylor and Francis Ltd.},
+title = {{Divide-and-conquer checkpointing for arbitrary programs with no user annotation}},
+volume = {33},
+year = {2018}
+}
+@inproceedings{Paszke2017,
+abstract = {In this article, we describe an automatic differentiation module of PyTorch — a library designed to enable rapid research on machine learning models. It builds upon a few projects, most notably Lua Torch, Chainer, and HIPS Autograd, and provides a high performance environment with easy access to automatic differentiation of models executed on different devices (CPU and GPU). To make prototyping easier, PyTorch does not follow the symbolic approach used in many other deep learning frameworks, but focuses on differentiation of purely imperative programs, with a focus on extensibility and low overhead. Note that this preprint is a draft of certain sections from an upcoming paper covering all PyTorch features.},
+archivePrefix = {arXiv},
+arxivId = {arXiv:1011.1669v3},
+author = {Paszke, Adam and Chanan, Gregory and Lin, Zeming and Gross, Sam and Yang, Edward and Antiga, Luca and Devito, Zachary},
+booktitle = {31st Conference on Neural Information Processing Systems},
+doi = {10.1017/CBO9781107707221.009},
+eprint = {arXiv:1011.1669v3},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Paszke et al. - Unknown - Automatic differentiation in PyTorch.pdf:pdf},
+isbn = {9788578110796},
+issn = {1098-6596},
+mendeley-groups = {Individual Project},
+number = {Nips},
+pages = {1--4},
+pmid = {25246403},
+title = {{Automatic differentiation in PyTorch}},
+url = {https://openreview.net/pdf?id=BJJsrmfCZ},
+year = {2017}
+}
+@misc{tensorflow2015-whitepaper,
+title={ {TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
+url={https://www.tensorflow.org/},
+urldate = {2019-08-24},
+note={Software available from tensorflow.org},
+author={
+    Mart\'{\i}n~Abadi and
+    Ashish~Agarwal and
+    Paul~Barham and
+    Eugene~Brevdo and
+    Zhifeng~Chen and
+    Craig~Citro and
+    Greg~S.~Corrado and
+    Andy~Davis and
+    Jeffrey~Dean and
+    Matthieu~Devin and
+    Sanjay~Ghemawat and
+    Ian~Goodfellow and
+    Andrew~Harp and
+    Geoffrey~Irving and
+    Michael~Isard and
+    Yangqing Jia and
+    Rafal~Jozefowicz and
+    Lukasz~Kaiser and
+    Manjunath~Kudlur and
+    Josh~Levenberg and
+    Dandelion~Man\'{e} and
+    Rajat~Monga and
+    Sherry~Moore and
+    Derek~Murray and
+    Chris~Olah and
+    Mike~Schuster and
+    Jonathon~Shlens and
+    Benoit~Steiner and
+    Ilya~Sutskever and
+    Kunal~Talwar and
+    Paul~Tucker and
+    Vincent~Vanhoucke and
+    Vijay~Vasudevan and
+    Fernanda~Vi\'{e}gas and
+    Oriol~Vinyals and
+    Pete~Warden and
+    Martin~Wattenberg and
+    Martin~Wicke and
+    Yuan~Yu and
+    Xiaoqiang~Zheng},
+  year={2015}
+}
+@misc{Salimans2018,
+author = {Salimans, Tim and Bulatov, Yaroslav},
+mendeley-groups = {Individual Project},
+title = {gradient-checkpointing},
+url = {https://github.com/cybertronai/gradient-checkpointing},
+urldate = {2019-08-24},
+year = {2018}
+}
+@article{mxnet2015,
+abstract = {MXNet is a multi-language machine learning (ML) library to ease the development of ML algorithms, especially for deep neural networks. Embedded in the host language, it blends declarative symbolic expression with imperative tensor computation. It offers auto differentiation to derive gradients. MXNet is computation and memory efficient and runs on various heterogeneous systems, ranging from mobile devices to distributed GPU clusters. This paper describes both the API design and the system implementation of MXNet, and explains how embedding of both symbolic expression and tensor operation is handled in a unified fashion. Our preliminary experiments reveal promising results on large scale deep neural network applications using multiple GPU machines.},
+archivePrefix = {arXiv},
+arxivId = {1512.01274},
+author = {Chen, Tianqi and Li, Mu and Li, Yutian and Lin, Min and Wang, Naiyan and Wang, Minjie and Xiao, Tianjun and Xu, Bing and Zhang, Chiyuan and Zhang, Zheng},
+eprint = {1512.01274},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Chen et al. - 2015 - MXNet A Flexible and Efficient Machine Learning Library for Heterogeneous Distributed Systems.pdf:pdf},
+mendeley-groups = {Individual Project},
+month = {dec},
+title = {{MXNet: A Flexible and Efficient Machine Learning Library for Heterogeneous Distributed Systems}},
+url = {http://arxiv.org/abs/1512.01274},
+year = {2015}
+}
+@article{Baydin2015,
+abstract = {Derivatives, mostly in the form of gradients and Hessians, are ubiquitous in machine learning. Automatic differentiation (AD), also called algorithmic differentiation or simply "autodiff", is a family of techniques similar to but more general than backpropagation for efficiently and accurately evaluating derivatives of numeric functions expressed as computer programs. AD is a small but established field with applications in areas including computational fluid dynamics, atmospheric sciences, and engineering design optimization. Until very recently, the fields of machine learning and AD have largely been unaware of each other and, in some cases, have independently discovered each other's results. Despite its relevance, general-purpose AD has been missing from the machine learning toolbox, a situation slowly changing with its ongoing adoption under the names "dynamic computational graphs" and "differentiable programming". We survey the intersection of AD and machine learning, cover applications where AD has direct relevance, and address the main implementation techniques. By precisely defining the main differentiation techniques and their interrelationships, we aim to bring clarity to the usage of the terms "autodiff", "automatic differentiation", and "symbolic differentiation" as these are encountered more and more in machine learning settings.},
+archivePrefix = {arXiv},
+arxivId = {1502.05767},
+author = {Baydin, Atilim G$\backslash$"unes and Pearlmutter, Barak A. and Radul, Alexey Andreyevich and Siskind, Jeffrey Mark},
+doi = {10.1016/j.advwatres.2018.01.009},
+eprint = {1502.05767},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Baydin et al. - 2015 - Automatic differentiation in machine learning a survey.pdf:pdf},
+isbn = {0002-9645 (Print)$\backslash$r0002-9645 (Linking)},
+issn = {03091708},
+journal = {Journal of Machine Learning},
+mendeley-groups = {Individual Project},
+number = {14},
+pages = {1--43},
+pmid = {7020497},
+title = {{Automatic differentiation in machine learning: a survey}},
+url = {http://jmlr.org/papers/v18/16-107.html http://arxiv.org/abs/1502.05767},
+volume = {18},
+year = {2015}
+}
+@article{Cauchy1847,
+author = {Cauchy, Augustin-Louis},
+journal = {Comptes Rendus a l'Acad{\'{e}}mie des Sciences, Series A},
+number = {25},
+mendeley-groups = {Individual Project},
+pages = {536--538},
+title = {{M{\'{e}}thode G{\'{e}}n{\'{e}}rale pour la R{\'{e}}solution des Syst{\`{e}}mes d'{\'{E}}quations Simultan{\'{e}}es}},
+year = {1847}
+}
+@article{ILSVRC15,
+Author = {Olga Russakovsky and Jia Deng and Hao Su and Jonathan Krause and Sanjeev Satheesh and Sean Ma and Zhiheng Huang and Andrej Karpathy and Aditya Khosla and Michael Bernstein and Alexander C. Berg and Li Fei-Fei},
+Title = {{ImageNet Large Scale Visual Recognition Challenge}},
+Year = {2015},
+note={Object Localization Dataset},
+journal   = {International Journal of Computer Vision (IJCV)},
+doi = {10.1007/s11263-015-0816-y},
+volume={115},
+number={3},
+pages={211-252}
+}
+@inproceedings{Li2018,
+abstract = {Neural network training relies on our ability to find "good" minimizers of highly non-convex loss functions. It is well-known that certain network architecture designs (e.g., skip connections) produce loss functions that train easier, and well-chosen training parameters (batch size, learning rate, optimizer) produce minimizers that generalize better. However, the reasons for these differences, and their effects on the underlying loss landscape, are not well understood. In this paper, we explore the structure of neural loss functions, and the effect of loss landscapes on generalization, using a range of visualization methods. First, we introduce a simple "filter normalization" method that helps us visualize loss function curvature and make meaningful side-by-side comparisons between loss functions. Then, using a variety of visualizations, we explore how network architecture affects the loss landscape, and how training parameters affect the shape of minimizers.},
+archivePrefix = {arXiv},
+arxivId = {1712.09913},
+author = {Li, Hao and Xu, Zheng and Taylor, Gavin and Studer, Christoph and Goldstein, Tom},
+booktitle = {Advances in Neural Information Processing Systems},
+eprint = {1712.09913},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Li et al. - 2017 - Visualizing the Loss Landscape of Neural Nets.pdf:pdf},
+issn = {10495258},
+mendeley-groups = {Individual Project},
+month = {dec},
+pages = {6389--6399},
+title = {{Visualizing the loss landscape of neural nets}},
+url = {http://arxiv.org/abs/1712.09913},
+volume = {2018-Decem},
+year = {2018}
+}
+@article{Simonyan2014,
+abstract = {In this work we investigate the effect of the convolutional network depth on its accuracy in the large-scale image recognition setting. Our main contribution is a thorough evaluation of networks of increasing depth using an architecture with very small (3x3) convolution filters, which shows that a significant improvement on the prior-art configurations can be achieved by pushing the depth to 16-19 weight layers. These findings were the basis of our ImageNet Challenge 2014 submission, where our team secured the first and the second places in the localisation and classification tracks respectively. We also show that our representations generalise well to other datasets, where they achieve state-of-the-art results. We have made our two best-performing ConvNet models publicly available to facilitate further research on the use of deep visual representations in computer vision.},
+archivePrefix = {arXiv},
+arxivId = {1409.1556},
+author = {Simonyan, Karen and Zisserman, Andrew},
+eprint = {1409.1556},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Simonyan, Zisserman - 2014 - Very Deep Convolutional Networks for Large-Scale Image Recognition.pdf:pdf},
+mendeley-groups = {Individual Project},
+month = {sep},
+title = {{Very Deep Convolutional Networks for Large-Scale Image Recognition}},
+url = {http://arxiv.org/abs/1409.1556},
+year = {2014}
+}
+@misc{Bottou2018,
+abstract = {This paper provides a review and commentary on the past, present, and future of numerical optimization algorithms in the context of machine learning applications. Through case studies on text classification and the training of deep neural networks, we discuss how optimization problems arise in machine learning and what makes them challenging. A major theme of our study is that large-scale machine learning represents a distinctive setting in which the stochastic gradient (SG) method has traditionally played a central role while conventional gradient-based nonlinear optimization techniques typically falter. Based on this viewpoint, we present a comprehensive theory of a straightforward, yet versatile SG algorithm, discuss its practical behavior, and highlight opportunities for designing algorithms with improved performance. This leads to a discussion about the next generation of optimization methods for large-scale machine learning, including an investigation of two main streams of research on techniques that diminish noise in the stochastic directions and methods that make use of second-order derivative approximations.},
+archivePrefix = {arXiv},
+arxivId = {1606.04838},
+author = {Bottou, L{\'{e}}on and Curtis, Frank E. and Nocedal, Jorge},
+booktitle = {SIAM Review},
+doi = {10.1137/16M1080173},
+eprint = {1606.04838},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Bottou, Curtis, Nocedal - 2016 - Optimization Methods for Large-Scale Machine Learning(2).pdf:pdf},
+issn = {00361445},
+keywords = {Algorithm complexity analysis,Machine learning,Noise reduction methods,Numerical optimization,Second-order methods,Stochastic gradient methods},
+mendeley-groups = {Individual Project},
+month = {jun},
+number = {2},
+pages = {223--311},
+title = {{Optimization methods for large-scale machine learning}},
+url = {http://arxiv.org/abs/1606.04838},
+volume = {60},
+year = {2018}
+}
+@inproceedings{Ng2004,
+abstract = {We consider supervised learning in the presence of very many irrelevant features, and study two different regularization methods for preventing overfitting. Focusing on logistic regression, we show that using L 1 regu-larization of the parameters, the sample complexity (i.e., the number of training examples required to learn "well,") grows only logarithmically in the number of irrelevant features. This logarithmic rate matches the best known bounds for feature selection, and indicates that L 1 regularized logistic regression can be effective even if there are exponentially many irrelevant features as there are training examples. We also give a lower-bound showing that any rotationally invariant algorithm-including logistic regression with L 2 regularization, SVMs, and neural networks trained by backpropagation-has a worst case sample complexity that grows at least linearly in the number of irrelevant features .},
+author = {Ng, Andrew Y},
+booktitle = {Proceedings of the twenty-first international conference on Machine learning},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Ng - 2004 - Feature selection, L 1 vs. L 2 regularization, and rotational invariance BT - Proceedings of the twenty-first international.pdf:pdf},
+mendeley-groups = {Individual Project},
+pages = {379--387},
+title = {{Feature selection, L1 vs. L2 regularization, and rotational invariance}},
+url = {https://icml.cc/Conferences/2004/proceedings/papers/354.pdf},
+year = {2004}
+}
+@article{Srivastava2014,
+abstract = {Deep neural nets with a large number of parameters are very powerful machine learning systems. However, overfitting is a serious problem in such networks. Large networks are also slow to use, making it difficult to deal with overfitting by combining the predictions of many different large neural nets at test time. Dropout is a technique for addressing this problem. The key idea is to randomly drop units (along with their connections) from the neural network during training. This prevents units from co-adapting too much. During training, dropout samples from an exponential number of different "thinned" networks. At test time, it is easy to approximate the effect of averaging the predictions of all these thinned networks by simply using a single unthinned network that has smaller weights. This significantly reduces overfitting and gives major improvements over other regularization methods. We show that dropout improves the performance of neural networks on supervised learning tasks in vision, speech recognition, document classification and computational biology, obtaining state-of-the-art results on many benchmark data sets.},
+author = {Srivastava, Nitish and Hinton, Geoffrey and Krizhevsky, Alex and Salakhutdinov, Ruslan},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Srivastava et al. - 2014 - Dropout A Simple Way to Prevent Neural Networks from Overfitting.pdf:pdf},
+journal = {Journal of Machine Learning Research},
+keywords = {deep learning,model combination,neural networks,regularization},
+mendeley-groups = {Individual Project},
+pages = {1929--1958},
+title = {{Dropout: A Simple Way to Prevent Neural Networks from Overfitting}},
+url = {http://jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf},
+volume = {15},
+year = {2014}
+}
+@incollection{Anders1992-weight-decay,
+author = {Krogh, Anders and Hertz, John A},
+booktitle = {Advances in Neural Information Processing Systems 4},
+editor = {Moody, J E and Hanson, S J and Lippmann, R P},
+mendeley-groups = {Individual Project},
+pages = {950--957},
+publisher = {Morgan-Kaufmann},
+title = {{A Simple Weight Decay Can Improve Generalization}},
+url = {http://papers.nips.cc/paper/563-a-simple-weight-decay-can-improve-generalization.pdf},
+year = {1992}
+}
+@inproceedings{Sutskever2013,
+abstract = {Deep and recurrent neural networks (DNNs and RNNs respectively) are powerful models that were considered to be almost impossible to train using stochastic gradient descent with momentum. In this paper, we show that when stochastic gradient descent with momentum uses a well-designed random initialization and a particular type of slowly increasing schedule for the momentum parameter, it can train both DNNs and RNNs (on datasets with long-term dependencies) to levels of performance that were previously achievable only with Hessian-Free optimization. We find that both the initialization and the momentum are crucial since poorly initialized networks cannot be trained with momentum and well-initialized networks perform markedly worse when the momentum is absent or poorly tuned. Our success training these models suggests that previous attempts to train deep and recurrent neural networks from random initializations have likely failed due to poor initialization schemes. Furthermore, carefully tuned momentum methods suffice for dealing with the curvature issues in deep and recurrent network training objectives without the need for sophisticated second-order methods.},
+author = {Sutskever, Ilya and Martens, James and Dahl, George and Hinton, Geoffrey},
+booktitle = {30th International Conference on Machine Learning, ICML 2013},
+file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Sutskever et al. - 2013 - On the importance of initialization and momentum in deep learning.pdf:pdf},
+mendeley-groups = {Individual Project},
+number = {PART 3},
+pages = {2176--2184},
+title = {{On the importance of initialization and momentum in deep learning}},
+url = {https://www.cs.toronto.edu/{~}fritz/absps/momentum.pdf},
+year = {2013}
+}
+@inproceedings{Kingma2015-adam,
+author = {Kingma, Diederik P and Ba, Jimmy},
+booktitle = {3rd International Conference on Learning Representations, ICLR 2015, San Diego, CA, USA, May 7-9, 2015, Conference Track Proceedings},
+editor = {Bengio, Yoshua and LeCun, Yann},
+mendeley-groups = {Individual Project},
+title = {{Adam: A Method for Stochastic Optimization}},
+url = {http://arxiv.org/abs/1412.6980},
+year = {2015}
 }
