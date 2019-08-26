@@ -7,19 +7,19 @@ Neural networks are a type of mapping known as a \textit{parametric} model.
 I will outline here the general procedure for training such a model before detailing the specifics of neural networks themselves.
 
 To first step to learning this mapping is to obtain some \(\{x_i \in \R^n, \ y_i \in \R^m\}_{i=1}^N\) data points to learn from, called the training data.
-Then, we pick some functional representation, for example \(y = wx + b\), where \(w \in \R^{m \times n}, b \in \R^m\); meaning we approximate the true mapping as a linear function.
-We will attempt to learn from the data the parameters \(w, b\) that specify that best model the training data.
+Then, we pick some functional representation, for example \(y = xw + b\), where \(w \in \R^{m \times n}, b \in \R^m\); meaning we approximate the true mapping as a linear function.
+We will attempt to learn from the data the parameters \(w, b\) that best model the training data.
 Note, \(\theta\) is often used as a single variable to denote all the parameters.
 We will call our linear function given those parameters \(f_\theta : R^n \rightarrow R^m\).
 It is often referred to as the hypothesis, model, or the network in the case of neural networks. The space of all possible \(\theta\) is known as the hypothesis space, weight space, or parameter space.
 
-To conduct learning, we need a performance metric for our function and a method to optimise the parameters with respect to that metric. The performance metric is often referred to as a loss function, cost function, or error function; and evaluates how 'good' the parameters are using the training data. We denote this loss function, \(L_\mathrm{D} : \Theta \rightarrow \R^+\), where \(\Theta\) is the set of all possible parameters and \(\mathrm{D}\) is the training data. Typically, the loss averages over data points as follows:
+To conduct learning, we need a performance metric for our function and a method to optimise the parameters with respect to that metric. The performance metric is often referred to as a loss function, cost function, or error function; and evaluates how `good' the parameters are using the training data. We denote this loss function, \(L_\mathrm{D} : \Theta \rightarrow \R^+\), where \(\Theta\) is the set of all possible parameters and \(\mathrm{D}\) is the training data. Typically, the loss averages over data points as follows:
 
 \begin{equation*}
     L_\mathrm{D}(\theta) = \frac{1}{N}\sum_{i=1}^N l(f_\theta(x_i),\, y_i)
 \end{equation*}
 
-where \(l : \R^m\times\R^m \rightarrow \R^+\) measures the `loss' between the training data outputs, known as the targets, and what \(f_{\theta}\) produced, for that specific data point. This could be the square-error loss \(l(o, t) = (o-t)^2\), for example.
+where \(l : \R^m\times\R^m \rightarrow \R^+\) measures the `loss' between the training data outputs, known as the targets, and what \(f_{\theta}\) produced, for that specific data point. This could be the square-error loss \(l(o,\, t) = (o\,-\,t)^2\), for example.
 
 Thus, the original problem has been reduced into an optimisation problem. Specifically, the objective is to minimise \(L_D\) with respect to \(\theta\).
 
@@ -55,7 +55,7 @@ None of these methods significantly affect the nature of the memory optimisation
 \subsection{Artificial Neural Networks}
 The problems being solved today, such as computer vision tasks, are extremely difficult.
 A simple linear function will not be able to sufficiently express the intricacies of the real underlying mapping being approximated.
-We need a model that (i) can express complex non-linearities, (ii) has a continuous hypothesis space, and (iii) the hypothesis space is differentitable with respect to its parameters.
+We need a model that (i) can express complex non-linearities, (ii) has a continuous hypothesis space, and (iii) the hypothesis space is differentiable with respect to its parameters.
 Neural networks satisfy these conditions and have been found to work very well.
 They are the composition of many elementary non-linear operators, called \textit{neurons}.
 An example of such a network is given in Figure \ref{fig:2-example-net}, repeated from the introduction.
@@ -89,7 +89,8 @@ Examples include the Rectified Linear Unit (ReLU), \(\sigma(y) \,=\, \mathrm{max
 and the sigmoid/logistic function, \(\sigma(y)\, =\, 1 / (1+e^{-y})\).
 
 This is all it takes to describe a neural network, but they are incredibly powerful -
-the Universal Approximation Theorom \cite{Cybenkot1989, Hornik1989}\cite[p.~105]{Mitchell1997-ML} states that any bounded continuous function can be approximated with arbitrarily small error (under a finite norm) by a network of just \textit{two} layers.
+the Universal Approximation Theorom \cite{Cybenkot1989, Hornik1989}\cite[p.~105]{Mitchell1997-ML} states that any bounded continuous function can be approximated with arbitrarily small error (under a finite norm) by a network of just \textit{two} layers
+\footnote{This does not say anything about the \textit{learnability} of the parameters of such networks though.}.
 
 \subsection{Backpropagation}
 How, then, do we train such a network?
@@ -111,7 +112,7 @@ Then, we use the chain rule to obtain the desired derivates:
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.9\linewidth]{chain_rule_forward_graph_only.jpg}
-    \caption{An example neural network.}
+    \caption{An example network.}
     \label{fig:2-nn-chain-rule-forward}
 \end{figure}
 
@@ -120,12 +121,12 @@ we use \(\delta_{j+1}\) to work out \(\delta_j\) and \(\sfrac{\partial L}{\parti
 then use \(\delta_j\) to work out \(\delta_{j-1}\) and \(\sfrac{\partial L}{\partial \theta_{j-1}}\); and so on.
 Thus, the \textit{deltas} are being propagated backwards, and so the process is known as \textit{backpropagation}.
 Figure \ref{fig:2-nn-chain-rule-backward} shows the computational graph for this.
-The `forward graph' now has a corresponding `backward graph' for computing the derivates using the chain rule.
+The `forward graph' is shown with the corresponding `backward graph' for computing the derivates using the chain rule.
 
 \begin{figure}[htb]
     \centering
     \includegraphics[width=0.9\linewidth]{chain_rule_backward_graph.png}
-    \caption{Backpropagation in a neural network.}
+    \caption{Backpropagation on a simple network.}
     \label{fig:2-nn-chain-rule-backward}
 \end{figure}
 
@@ -136,7 +137,7 @@ The `forward graph' now has a corresponding `backward graph' for computing the d
 % Give update rules for one step of SGD
 % Give full comp graph
 
-Figure \ref{fig:2-nn-chain-rule-backward} merely shows that the deltas get propagated backwards.
+Figure \ref{fig:2-nn-chain-rule-backward} merely shows how to backpropagate deltas.
 It does not fully describe one step of training a neural network, for example it does not show the weight updates.
 
 To derive the full graph, we must fully specify the update rule for gradient descent for a specific neural network. \todo{do we? use arbitrary actv}
@@ -144,13 +145,13 @@ We will assume a feedforward network of fully-connected layers with sigmoid acti
 The final layer that directly feeds the loss is unthresholded.
 
 Let \(\mathrm{B}\) be a batch of size \(\mathrm{N}\);
-\(x \in \R^n\) be an \textit{n}-dimensional inputs from the batch;
+\(x \in \R^n\) be an \textit{n}-dimensional input from the batch;
 \(t \in \R^m\) be the corresponding \textit{m}-dimensional target;
 \(\theta \in \Theta\) be the parameters of the network;
 \(f_\theta : \R^n \rightarrow \R^m\) be the model with the given parameters \(\theta\); and
 \(l : \R^m \times \R^m \rightarrow \R^+\) be the square-error loss for a
-single data-point;
-then the loss \(L_{\mathrm{B}} : \Theta \rightarrow \R^+\) becomes:
+single data-point.
+Then the loss \(L_{\mathrm{B}} : \Theta \rightarrow \R^+\) becomes:
 
 \begin{align*}
     L_{\mathrm{B}}(\theta) \;&=\; \frac{1}{N}\sum_{(x,\; t) \;\in\; \mathrm{B}} l(f_\theta(x),\, t) \\[0.5em]
@@ -195,11 +196,11 @@ Notice that to update \(\theta_j\), we must:
 Also, as the forward passes for each input in a batch are independent, we collate the inputs into one tensor and perform the forward pass at once element-wise.
 Similarly, once the loss has been computed, we collate and backpropagate the deltas.
 At each layer, we sum over all the derivatives from the batch to compute one weight update.
-However, the weight updates cannot be performed immediately in-place, as the old weights are required for the next layer's weight update, so control dependencies are required.
+However, the weight updates cannot be performed immediately in-place, as the old weights are required to compute the next layer's delta, so control dependencies are required.
 
 Finally, we arrive at the computational graph given in Figure \ref{fig:2-nn-comp-graph}.
 I omit the control dependencies for clarity.
-The nodes are operators and the arcs are data.
+The nodes are operators and the arcs are the data they output.
 The double-circled nodes are nullary operators representing variables.
 The dashed arcs represent updates to variables. 
 
