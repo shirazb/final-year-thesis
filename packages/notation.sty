@@ -46,27 +46,3 @@
 \end{matrix}
 \right|
 }
-
-
-
-%%% various color definitions
-\definecolor{darkgreen}{rgb}{0,0.6,0}
-
-\newcommand{\blue}[1]{{\color{blue}#1}}
-\newcommand{\red}[1]{{\color{red}#1}}
-\newcommand{\green}[1]{{\color{darkgreen}#1}}
-\newcommand{\orange}[1]{{\color{orange}#1}}
-\newcommand{\magenta}[1]{{\color{magenta}#1}}
-\newcommand{\cyan}[1]{{\color{cyan}#1}}
-
-
-% ffs why is this here
-% redefine emph
-% \renewcommand{\emph}[1]{\blue{\bf{#1}}} 
-
-% place a colored box around a character
-\gdef\colchar#1#2{%
-  \tikz[baseline]{%
-  \node[anchor=base,inner sep=2pt,outer sep=0pt,fill = #2!20] {#1};
-    }%
-}%
