@@ -1,1 +1,62 @@
-\section{PyTorch and Autograd}
+\section{PyTorch}
+\subsection{Overview}
+PyTorch \cite{Paszke2017} is a popular ML framework with a Python frontend (as well as others).
+Its key features include:
+\begin{itemize}[topsep=0.2em]
+    \item Easily execute tensor computations in Python, with an API similar to the Numpy library \cite{VanDerWalt2011}.
+    \item Easily transfer between PyTorch tensors and Numpy nd-arrays.
+    \item Easily accelerate these computations on a GPU.
+    \item Easily evaluate derivates of the computation with respect to the tensors involved.
+    The user simply tells PyTorch to track the gradients when constructing a tensor.
+    \item \textit{Define-by-run} execution: The user does not need to statically define a computation graph like in TensorFlow \cite{tensorflow2015-whitepaper}, even when taking derivates.
+    They can execute any computation using native Python constructs such as control flow.
+    \item Provides a rich API for constructing common ML operators, such as convolutions or ReLU
+    \item Allows the user to extend the API with their own operators.
+    Can easily interleave pre-defined and custom operators in one computation.
+    \item Provides distribution strategies for further scaling out ML training and inference.
+\end{itemize}
+
+An example PyTorch program that demonstrates some of these features is given in Figure [].
+
+\subsection{Autograd}
+PyTorch's Autograd module is responsible for the evaluation of derivates of dynamically defined computations.
+It uses true reverse-mode automatic differentation.
+That is, the user runs their computation normally and it is automatically augmented with a backwards graph.
+As stated above, this means there is no need to define a static graph, and native Python control flow can be used.
+I will now give a high-level, simplified overview of how this works.
+
+Consider the following code in Figure [].
+The backwards graph this constructs is visualised in Figure [].
+It is very important to point out that this graph, nor the following explanation of how it is constructed, do not exactly correspond to how Autograd is implemented; only to help convey the ideas at a high level.
+
+First, \texttt{x} and \texttt{y} are constructed with \texttt{requires\_grad=True}, telling Autograd to build a backward graph on computations that use them.
+They will also have \texttt{is\_leaf=True} as they were explicitly set to a value by the user, rather than being constructed from existing tensors.
+When \texttt{z} is constructed by applying the operator \texttt{f} to \texttt{x} and \texttt{y}, Autograd sees that \texttt{x} and \texttt{y} require gradient.
+This results in a number of steps occuring:
+\begin{enumerate}[topsep=0.1em]
+    \item \texttt{z} will require gradient.
+    \item \texttt{z.grad\_fn} will be set to the corresponding backward operator of \texttt{f}, which will be denoted \texttt{f'}.
+    \item \texttt{f} will save handles to any tensors it requires for the backwards pass, such as its output.
+    \item \texttt{f'.next\_functions} will be set to point to the \texttt{.grad\_fn}s of \texttt{x} and \texttt{y}.
+    \item However, because they are leaves, actually \texttt{AccumulateGrad} backward functions will be constructed for each of them instead.
+    These accumulate all incoming upstream gradients into \texttt{.grad} of their tensor so the user can access it after the backwards pass is complete.
+\end{enumerate}
+Because \texttt{z} requires gradient and has its \texttt{.grad\_fn} set, when subsequent operators are applied to it, the exact same process will occur, extending the backward graph.
+Thus, any time an operation is performed, the backward graph is being dynamically constructed alongside.
+This is why no static graph is required beforehand.
+
+Finally, when the user calls \texttt{.backward()} on the output tensor, the backward graph already in place will be traversed.
+An Autograd backward function takes upstream gradients for each of its outputs and produces downstream gradients for each of its inputs, possibly using outputs saved from the forward pass.
+These gradients are then propagated downstream using the backward function's \texttt{.next\_functions}.
+The process bottoms-out when this field is empty, normally when an \texttt{AccumulateGrad} for a leaf tensor has been reached.
+These accumulate the incoming upstream gradients into the tensor in their \texttt{.variable} field.
+
+One thing to consider is mutations to the tensors.
+If a tensor is mutated after a computation is run and the backward graph defined, the backward function no longer has access to the tensor originally involved in the forward; because it only stored a handle to the tensor object, it did not make a copy of the data. 
+Thus, though tensors are mutable in PyTorch, they will invalidate existing backward graphs involving that tensor, causing an error to be thrown if the user attempts to traverse that graph.
+
+TODO: detaching.
+TODO: Recommend video
+TODO: Define an autograd function in code.
+TODO: Defining a module using function
+TODO: Possibly show a standard training loop, if can be made terse enough.
