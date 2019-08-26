@@ -139,7 +139,7 @@ The `forward graph' now has a corresponding `backward graph' for computing the d
 Figure \ref{fig:2-nn-chain-rule-backward} merely shows that the deltas get propagated backwards.
 It does not fully describe one step of training a neural network, for example it does not show the weight updates.
 
-To derive the full graph, we must fully specify the update rule for gradient descent for a specific neural network.
+To derive the full graph, we must fully specify the update rule for gradient descent for a specific neural network. \todo{do we? use arbitrary actv}
 We will assume a feedforward network of fully-connected layers with sigmoid activations and a mean-square-error loss.
 The final layer that directly feeds the loss is unthresholded.
 
@@ -163,7 +163,7 @@ Recall, to perform one step of gradient descent, we apply the following update r
 \end{equation*}
 where \(\nabla L_\mathrm{B}\) is the Jacobian matrix of the loss with respect to the parameters and \(\eta\in\R\) is the learning rate. Using backpropagation on our network, we can now state the exact rules.
 
-TODO: State rules.
+TODO \todo{State notation and rules}
 
 \begin{align*}
     \frac{\partial L_\mathrm{B}(\theta)}{\partial l} \;&=\; \frac{1}{N}\sum_{(x,\, t) \;\in\; \mathrm{B}} l^\prime(f_\theta(x),\; t) \\[0.5em]
@@ -183,7 +183,7 @@ Mitchell's book \cite[ch.~4]{Mitchell1997-ML} has a similar derivation at the ne
 
 From this, the \textit{backpropagation algorithm} for training a neural network emerges.
 It can be seen from the rules that, in order to perform one step of gradient descent, we need to evaluate the network to get the intermediate forwards, then plug them in to the above rules.
-The full algorithm is given in [].
+The full algorithm is given in \todo{backprop algo} [TODO].
 
 By further inspection, we can derive the full computational graph for this algorithm.
 Notice that to update \(\theta_j\), we must:
