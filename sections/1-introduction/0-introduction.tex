@@ -30,7 +30,7 @@ Training a neural network has a large memory requirement. To see how this arises
     \label{fig:1-backprop-peak-mem}
 \end{figure}
 
-This is not good enough for large networks - as most of the layers are performing operations like multiplication on large tensors, Deep Learning can be massively sped up by exploiting the parallelism of GPUs [?]; however, state-of-the-art models have far surpassed the memory available on even top-tier GPUs [?], and continue to get larger [?]. \todo{examples}.
+This is not good enough for large networks - as most of the layers are performing operations like multiplication on large tensors, Deep Learning can be massively sped up by exploiting the parallelism of GPUs \cite{Kayid2018, Scanzio2010, Dogaru2017}; however, state-of-the-art models have far surpassed the memory available on even top-tier GPUs and continue to get larger [?]. \todo{examples}.
 
 This forces researchers to employ highly cumbersome and highly expensive alternatives, such as distributing the workload or developing custom hardware accelerators \todo{needs refs?}. Ideally, as the networks of tomorrow grow unabatedly, researchers should be able to focus on their experiments, rather than the complex systems problems this causes. Thus, finding a solution that can be readily implemented in existing ML software and that is transparent to the user is highly desirable, as well as orthogonal to the other approaches which have other benefits too.
 
