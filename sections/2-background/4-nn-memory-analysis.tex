@@ -169,7 +169,8 @@ As a result, peak memory occurs at the end of the forward pass, just before we s
     \label{fig:2-nn-peak-mem}
 \end{figure}
 
-However, we are being more precise than this;
+This is the result found in the literature, where per-layer uniform costs are assumed.
+However, I am going to be more precise than this;
 because the sizes of the tensors vary, peak memory could occur in say the third layer instead of the fourth, if the size of the newly allocated backward is greater than the size of the freed forward and backward together.
 
 Thus, if \(\beta : \{f, b\}\times[0, N] \rightarrow \Z^+\) denotes the memory requirement of the \(i^{\mathrm{th}}\) forward or backward tensor, the peak memory of an N layer network becomes:
