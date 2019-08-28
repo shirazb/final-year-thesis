@@ -34,10 +34,17 @@ Thank you person.
 \clearpage{\pagestyle{empty}\cleardoublepage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%--- table of contents
+%--- table of contents, figures, algos
 \fancyhead[RE,LO]{\hdrfamily {Table of Contents}}
-\tableofcontents 
+\tableofcontents
+\clearpage{\pagestyle{empty}}
 
+\fancyhead[RE,LO]{\hdrfamily {List of Figures}}
+\listoffigures
+\clearpage{\pagestyle{empty}}
+
+\fancyhead[RE,LO]{\hdrfamily {List of Listings}}
+\listoflistings
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
 \pagenumbering{arabic}
