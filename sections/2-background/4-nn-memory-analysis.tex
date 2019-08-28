@@ -45,7 +45,7 @@ However, if we instead place pebbles as late as possible, like in Figure \ref{fi
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Liveness Analysis}
-In general, finding an optimal strategy is hard, even in this simplified game where we assume all the nodes have a uniform memory cost.
+In general, finding an optimal strategy is hard \cite{Austrin2011}, even in this simplified game where we assume all the nodes have a uniform memory cost.
 An example use case is register allocation in compilers \cite{Chaitin1982}.
 The first step of register allocation is to determine the lifetimes of each node relative to each other, and thus how their lifetimes overlap.
 Variables with overlapping lifetimes cannot be allocated to the same register.
