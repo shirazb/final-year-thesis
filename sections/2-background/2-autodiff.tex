@@ -5,12 +5,13 @@ There are three main approaches: numerical differentiation, symbolic differentia
 In this section, I will show how automatic differentiation is used in machine learning.
 
 Baydin et al. \cite{Baydin2015} have an excellent survey paper on the intersection of AD and ML;
-covering in more depth the pitfalls of the other techniques, both forward and reverse mode AD, how to implement AD, and the adoption of AD in ML libraries.
-I will merely give a brief motivation of AD over the other techniques and show how backpropagation is an instance of \textit{reverse mode} AD. I will borrow heavily from their paper.
+covering in more depth the pitfalls of the other techniques, both forward and reverse mode AD, how to implement AD, and the varying adoption of AD in ML libraries.
+I will merely give a brief motivation of AD over the other techniques and show how backpropagation is an instance of \textit{reverse mode} AD.
+I will borrow heavily from their paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Motivation and Overview}
-Numerical differentiation refers to finite-difference methods, which evaluate the original function at two sample points and plug this into the limit definition of a derivative.
+Numerical differentiation refers to finite-difference methods, which evaluate the original function at two sample points and plug that into the limit definition of a derivative.
 This is can be highly inaccurate due to round-off and truncation errors \cite{Jerrell1997}.
 It also requires sampling the function for each partial derivative required, so does not scale to the millions of parameters in a neural network.
 
@@ -45,4 +46,45 @@ Thus, backpropagation is best implemented using reverse mode.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Reverse Mode AD}
+In reverse mode automatic differentiation, a forward and backward pass occurs.
+In the forward pass, as each operator is applied, the reverse dependencies are recorded.
+Then, in the backward pass, the derivatives of the final output with respect to each operator output are calculated by propagating derivatives back from the output to the input using the chain rule.
 
+In the AD literature, the forward outputs are known as the primals, and the backwards as the adjoints.
+A specific forward pass on some data is a primal trace, and the backward an adjoint trace.
+
+\begin{figure}[tb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{rv-ad-trace.png}
+    \caption{Reverse mode AD example, with \(f(x_1, x_2) = \ln(x_1) + x_1x_2 + \sin(x_2)\) at \(x_1, x_2) = (2, 5)\). After running the original forward run on the left, the augmented AD operations on the right are run in reverse. \cite[Table~3]{Baydin2015}}
+    \label{fig:2-rv-ad-trace}
+\end{figure}
+
+Consider \(f(x_1, x_2) = \ln(x_1) + x_1x_2 + \sin(x_2)\).
+The computational graph for this is given in Figure \ref{fig:2-rv-ad-comp-graph}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\linewidth]{rv-ad-comp-graph.png}
+    \caption{Computational graph of the example \(f(x_1, x_2) = \ln(x_1) + x_1x_2 + \sin(x_2)\). See Figure \ref{fig:2-rv-ad-comp-graph} for the definitions of the intermediate variables \(\nu_{-1}\ldots\nu{5}\). \cite[Figure~3]{Baydin2015}}
+    \label{fig:2-rv-ad-comp-graph}
+\end{figure}
+The \(\nu_i\) denote the intermediate outputs.
+As the forward pass occurs, the intermediate outputs are stored for use in the adjoint trace, and the reverse dependencies are stored.
+The backward pass is initialised by setting the partial derivative of the output with itself to \(1\).
+Then, we can work backwards using the chain rule.
+For example, the subset of the trace computing the derivative for \(\nu_0\) will use the following rules:
+\begin{align*}
+    \bar{\nu_5} \;&=\; \frac{\partial \nu_5}{\partial \nu_5} \;&&=\; 1 \\[0.5em]
+    \bar{\nu_4} \;&=\; \frac{\partial \nu_5}{\partial \nu_4} \;&&=\; \bar{\nu_5}\frac{\partial \nu_5}{\partial \nu_4} \\[0.5em]
+    \bar{\nu_3} \;&=\; \frac{\partial \nu_5}{\partial \nu_3} \;&&=\; \bar{\nu_5}\frac{\partial \nu_5}{\partial \nu_3} \\[0.5em]
+    \bar{\nu_2} \;&=\; \frac{\partial \nu_5}{\partial \nu_2} \;&&=\; \bar{\nu_4}\frac{\partial \nu_4}{\partial \nu_2} \\[0.5em]
+    \bar{\nu_0} \;&=\; \frac{\partial \nu_5}{\partial \nu_0} \;&&=\; \bar{\nu_2}\frac{\partial \nu_2}{\partial \nu_0} \,+\, \bar{\nu_3}\frac{\partial \nu_3}{\partial \nu_0}
+\end{align*}
+An example primal and adjoint trace is given in Figure \ref{fig:2-rv-ad-trace}.
+
+This shows how backpropagation is a specific instance of the more generic reverse mode AD.
+It also shows how, in a single pass, the derivative of a single output with respect to \textit{every} intermediate variable can be calculated.
+
+Note that the intermediate outputs were all stored during the forward pass, so they could be reused in the backward pass.
+This linear space complexity (with respect to the number of operators) causes the high peak memory requirement of backpropagation.
+This will be analysed in more depth in Section \ref{sec:2-4-memory-analysis}.
