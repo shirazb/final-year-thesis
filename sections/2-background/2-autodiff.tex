@@ -1,16 +1,17 @@
 \section{Automatic Differentiation}
-Evidently, training a neural network involves taking derivates of a computation (applying the network to the batch of data to get the loss).
-How do we actually evaluate derivates on a computer?
+Evidently, training a neural network involves taking derivates of a computation - applying the network to the batch of data to get the loss -
+but how do we actually evaluate derivates on a computer?
 There are three main approaches: numerical differentiation, symbolic differentiation, and automatic differentiation (AD).
 In this section, I will show how automatic differentiation is used in machine learning.
+
 Baydin et al. \cite{Baydin2015} have an excellent survey paper on the intersection of AD and ML;
-covering the pitfalls of the other techniques, both forward- and reverse-mode AD, how to implement AD, and the adoption of AD in ML libraries.
-I will merely give a brief motivation of AD over the other techniques and show how backpropagation is an instance of \textit{reverse-mode} AD.
+covering in more depth the pitfalls of the other techniques, both forward and reverse mode AD, how to implement AD, and the adoption of AD in ML libraries.
+I will merely give a brief motivation of AD over the other techniques and show how backpropagation is an instance of \textit{reverse mode} AD. I will borrow heavily from their paper.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Overview}
+\subsection{Motivation and Overview}
 Numerical differentiation refers to finite-difference methods, which evaluate the original function at two sample points and plug this into the limit definition of a derivative.
-This is highly prone to round-off and truncation errors \cite{Jerrell1997}.
+This is can be highly inaccurate due to round-off and truncation errors \cite{Jerrell1997}.
 It also requires sampling the function for each partial derivative required, so does not scale to the millions of parameters in a neural network.
 
 Symbolic differentiation refers to the mechanistic application of symbolic differentiation rules to a symbolic expression tree.
@@ -20,30 +21,28 @@ Moreover, both these techniques require the model to be defined in a closed-form
 This is extremely difficult for neural networks, especially in the case where the model contains control flow, common in RNNs for example.
 
 Automatic differentiation, also known as algorithmic differentiation or just autodiff,
-is a family of techniques that gives evaulted numerical derivatives .
+is a powerful family of techniques that gives evaluated derivatives, not a symbolic expression, by using pre-programmed derivatives of the individual operators applied during a computation, and the chain rule to propagate derivates between them to get the derivative of the entire computation.
+As the user code applies operators, the AD library will transparently be augmenting the values to store the derivatives too, and the operators to calculate their derivatives and propagate them to the next operators.
+That is, both forward and backward functions of operators are implemented in the AD library manually.
+The user runs a computation using the forward functions as usual, and the derivatives will automatically be evaluated by the AD library using the backwards functions.
+The chain rule is used to compute the derivate of a composition of operators with respect to the data at an individual operator.
 
-% Clearly, backprop algo requires evaluating derivatives
-% How to take derivatives of a programmed computation?
-% Numerical finite-difference bad
-% Symbolic bad
-% AD is a powerful family of techniques that gives evaluated numerical derivates, not a symbolic expression, by using the pre-programmed symbolic derivates of the operators applied and the chain rule to propagate derivates between them.
-% As the user code applies operators, the AD library will augment the values to store derivative values too, and the operators to calculate their derivatives and propagate them to the next operators.
-% That is, both the forward and backward functions of operators are implemented by the AD library programmer.
-% The user uses the forward functions as usual, and the derivates will automatically be evaluated.
-% If user applies y = f(g(x)), chain rule is used to propagate derivatives between the operator-wise backward functions, so the derivative of the entire computation can be computed.
+This allows the evaluation of derivatives at machine precision with only a small constant factor of overhead.
+Furthermore, the user can take derivates of arbitrary, imperatively defined computations, including the use of control flow, with zero extra effort; rather than deriving complicated closed-form expressions.
+This flexibility has made AD a popular tool in many fields, from machine learning to structural mechanics \cite{Haase2002}.
 
-% accurate evaluation at machine precision, small constant factor overhead and idelal asymptotic efficiency
-% No need for the user to derive closed-form symbolic expressions or for the library to symbolically differentiate them, both arduous tasks.
-% Any computation can be run imperatively, using native control flow etc, the backward operations will automatically occur
+AD should sound a lot like backpropagation.
+We run a series of forward operations, and need to compute derivative of the output of the entire computation with respect to the data at each operator. We know the derivate functions of each operator, and take the overall derivative by using the chain rule. Backpropagation, then, is a specific instance of AD.
 
-% AD should sound a lot like what happens in backprop.
-% We run a series of forward operations and need to take the derivate of the entire computation.
-% We know the derivates of each operator, so we take the overall derivate by using the chain rule.
-% => backprop is specific case of AD
+Specifically, backpropagation works best with what is known as \textit{reverse mode} AD, as opposed to \textit{forward mode}.
+Though I will not cover the latter here, suffice it to say that forward mode allows you to take the derivative of any number of outputs with respect to a single input in only one pass.
+However, it requires a separate pass for each input.
+Reverse mode is the other way around -
+it can take the derivative of a single output with respect to any number of inputs in one pass.
+This is what happens in backpropagation -
+we take the derivative of the loss with respect to a large number of parameters.
+Thus, backpropagation is best implemented using reverse mode.
 
-% Backprop is best suited to rv-mode AD, as opposed to fwd-mode.
-% Though we will not cover, suffice to say forward mode, in one pass, computes any number outputs wrt to one input
-% rv-mode can handle one output wrt to any number of inputs.
-% Backprop algo has one output (loss) and possibly millions of inputs (params)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reverse Mode AD}
 
-% rv autodiff.
