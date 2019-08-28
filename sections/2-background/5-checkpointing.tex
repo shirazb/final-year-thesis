@@ -4,7 +4,8 @@ In this section, I will show how to reduce the peak memory established in the pr
 % Thus, even though training may take days or even weeks [?], we only have to optimise a relatively small computational graph.
 % Compared to the time taken for a single training step, we can spend a huge amount of time solving for the best optimisation strategies; it only has to be fast relative to the entire training process.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\texorpdfstring{\(\Theta(\sqrt{N})\)}{\textit{O(sqrt(N))}} Checkpointing}
 
 % need previous section on pebbling, in-place and sharing optimisations, state pytorch applies them aggressively
 % in this section show how peak memory comes about (assuming pebbling)
