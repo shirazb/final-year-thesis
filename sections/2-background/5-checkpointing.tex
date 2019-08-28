@@ -1,0 +1,14 @@
+\section{Checkpointing} \label{sec:bg-checkpointing}
+In this section, I will show how to reduce the peak memory established in the previous section using checkpointing.
+% The first key behind all memory optimisations using this graph is that the entire training process is this exact same step repeated many times.
+% Thus, even though training may take days or even weeks [?], we only have to optimise a relatively small computational graph.
+% Compared to the time taken for a single training step, we can spend a huge amount of time solving for the best optimisation strategies; it only has to be fast relative to the entire training process.
+
+
+
+% need previous section on pebbling, in-place and sharing optimisations, state pytorch applies them aggressively
+% in this section show how peak memory comes about (assuming pebbling)
+% show how checkpointing gives O(2sqrt(n)) memory
+% but no multiple recomps, no per-layer costs, and is arbitrary point on C-M curve
+% show how to solve for this with uniform costs using DP
+% give eqns, algo to solve.

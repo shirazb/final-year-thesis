@@ -73,7 +73,7 @@ This results in a number of steps occuring:
 \begin{enumerate}[topsep=0.1em]
     \item \texttt{z} will require gradient.
     \item \texttt{z.grad\_fn} will be set to the corresponding backward operator of \texttt{f}, which will be denoted \texttt{f'}.
-    \item \texttt{f} will save handles to any tensors it requires for the backwards pass, such as its inputs in the case of multiplication.
+    \item \texttt{f} will save handles to any tensors \texttt{f'} requires for the backwards pass, such as its inputs in the case of multiplication.
     \item \texttt{f'.next\_functions} will be set to point to the \texttt{.grad\_fn}s of \texttt{x} and \texttt{y}.
     \item However, because they are leaves, actually \texttt{AccumulateGrad} backward functions will be constructed for each of them instead.
     These accumulate all incoming upstream gradients into \texttt{.grad} of their tensor so the user can access it after the backwards pass is complete.
@@ -99,7 +99,7 @@ It can also be useful to detach tensors from the backward graph. Calling \texttt
 The new tensor will be a leaf and does not require gradient.
 When the original backward graph is traversed, the new tensor will not have a \texttt{.grad\_fn} that is invoked.
 
-Detaching is often used to ensure the backward graph is cleared from memory when the backward pass has been done and the gradients no longer required, but we would like to keep a forward tensor.
+Detaching is often used to ensure the backward graph is cleared from memory when the backward pass has been done and the gradients are no longer required, but we would like to keep a forward tensor.
 I will use detaching in my implementation of checkpointing with multiple recomputations to manually control how execution moves forward and backward along a sequence.
 More on this in \todo{[sec]}.
 
