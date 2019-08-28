@@ -23,23 +23,25 @@ Consider the following graph in Figure \ref{fig:2-chain-to-pebble}.
     \label{fig:2-chain-to-pebble}
 \end{figure}
 
-One strategy would be to allocate all the inputs immediately, as in Figure \ref{fig:2-pebble-chain-bad}.
+One strategy for this graph would be to allocate all the inputs immediately.
+This is shown in Figure \ref{fig:2-pebble-chain-bad}.
+Coloured nodes are `pebbled' - allocated in memory.
 
 \begin{figure}[hp]
     \centering
-    \includegraphics[width=0.97\linewidth]{pebble_chain_2_bad_strat.pdf}
-    \caption{A poor pebbling strategy. Peak memory is 5 pebbles, occuring in step 2.}
+    \includegraphics[width=0.95\linewidth]{pebble_chain_2_bad_strat.pdf}
+    \caption{A poor pebbling strategy that allocates all leaves immediately. Peak memory is 5 pebbles, occuring in step 2.}
     \label{fig:2-pebble-chain-bad}
 \end{figure}
 
-The peak memory is 5 pebbles in the second step.
+By inspection, we can see the most pebbles (5) are allocated in the second step.
 Generalising, for a sequence of size \(n\), \(\Theta(n)\) memory is required.
-However, if we instead place pebbles as late as possible, like in Figure \ref{fig:2-pebble-chain-good}, we get an \(\Theta(1)\) strategy.
+However, if we instead place pebbles as late as possible, like in Figure \ref{fig:2-pebble-chain-good}, we get a \(\Theta(1)\) strategy.
 
 \begin{figure}[hp]
     \centering
-    \includegraphics[width=0.97\linewidth]{pebble_chain_3_good_strat.pdf}
-    \caption{A good pebbling strategy. Can handle any chain length with 3 pebbles.}
+    \includegraphics[width=0.95\linewidth]{pebble_chain_3_good_strat.pdf}
+    \caption{A good pebbling strategy that allocates leaves lazily. Can handle any chain length with 3 pebbles.}
     \label{fig:2-pebble-chain-good}
 \end{figure}
 
@@ -49,7 +51,7 @@ In general, finding an optimal strategy is hard \cite{Austrin2011}, even in this
 An example use case is register allocation in compilers \cite{Chaitin1982}.
 The first step of register allocation is to determine the lifetimes of each node relative to each other, and thus how their lifetimes overlap.
 Variables with overlapping lifetimes cannot be allocated to the same register.
-Next, from the liveness analysis, an interference graph is constructed.
+Next, from the liveness analysis, an \textit{interference graph} is constructed.
 The nodes of this graph are the variables and they have arcs between them if their lifetimes overlap.
 Then, graph colouring is performed.
 The colours represent the registers, so this gives an assigment of registers to variables such that no overlapping variables have the same register, using the least amount of registers.
@@ -72,7 +74,7 @@ An example of applying these optimisations is shown in Figure \ref{fig:2-chen-LA
     \label{fig:2-chen-LA}
 \end{figure}
 
-For the examples shown previously, this will find the \(\Theta(1)\) strategy, in only \(\Theta(n)\) time.
+For the examples shown previously, this will find the \(\Theta(1)\) strategy from Figure \ref{fig:2-pebble-chain-good}, in only \(\Theta(n)\) time.
 
 As stated in the whitepaper, PyTorch performs these optimisations aggressively during the backward pass \cite[p.~3]{Paszke2017}.
 
