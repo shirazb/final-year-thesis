@@ -27,13 +27,14 @@
 \usepackage{mathtools}
 \usepackage{ifxetex}
 \usepackage[dvipsnames]{xcolor}
-
+\usepackage{minted}
 \usepackage[square, numbers]{natbib} % for bibliography
   \bibliographystyle{unsrtnat}
 \usepackage{tocbibind} % bib in contents
 
 \usepackage{textpos}
-\usepackage{tabularx,longtable,multirow,caption,subcaption}%hangcaption
+\usepackage[compatibility=false]{caption} % option for minted in minipage
+\usepackage{tabularx,longtable,multirow,subcaption}%hangcaption
 \usepackage{fncylab} %formatting of labels
 \usepackage{fancyhdr} % page layout
 \usepackage{url} % URLs
