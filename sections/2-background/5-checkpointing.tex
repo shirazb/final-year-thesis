@@ -1,5 +1,5 @@
 \section{Checkpointing} \label{sec:2-5-bg-checkpointing}
-In this section, I will show how to reduce the peak memory established in the previous section using checkpointing.
+In this section, I will show how to reduce the peak memory established in the previous section using checkpointing and motivate my extension to Gruslys et al.'s technique \cite{Gruslys2016}.
 % The first key behind all memory optimisations using this graph is that the entire training process is this exact same step repeated many times.
 % Thus, even though training may take days or even weeks [?], we only have to optimise a relatively small computational graph.
 % Compared to the time taken for a single training step, we can spend a huge amount of time solving for the best optimisation strategies; it only has to be fast relative to the entire training process.
@@ -8,7 +8,7 @@ In this section, I will show how to reduce the peak memory established in the pr
 % something about redsicovered from AD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texorpdfstring{\(\Theta(\sqrt{N})\)}{\textit{O(sqrt(N))}} Checkpointing}
-Consider the simplified computational graph of backpropagation that was derived in the previous Section, \ref{sec:2-4-memory-analysis}, or more generically for computing the adjoint of a sequence of operations.
+Consider the simplified computational graph of backpropagation that was derived in the previous Section \ref{sec:2-4-memory-analysis}, or more generically, the graph for computing the adjoint of a sequence of operations.
 I have shown this to have linear space complexity in Section \ref{sec:2-4-memory-analysis}, due to the forwards being stored for use in the backwards pass.
 We can elide this restriction by trading off compute for memory, using what is known as \textit{checkpointing}.
 
