@@ -69,7 +69,8 @@ Griewank first proposed all of these techniques for sequential adjoint computati
 Given a fixed number of checkpoints and the sequence length, it solves for a strategy that uses the least recursion depth (the max number of times any forward is recomputed).
 However, it assumes uniform per-operator costs, which is not an asummption that holds for neural networks.
 
-Chen brought the (uniform costs) \(\sqrt{n}\) technique to neural networks in 2016 \cite{Chen2016}, implemented in MxNet \cite{mxnet-memonger}.
+Martens and Sutskever \cite{Martens2012} briefly outline the (uniform costs) \(\sqrt(n)\) technique for neural networks in 2012.
+Chen made the technique more widely known with his \cite{Chen2016} paper and corresponding implementation in MxNet \cite{mxnet-memonger}.
 It has since been implemented in PyTorch \cite{torch-memonger} and TensorFlow \cite{openai-checkpointing}.
 Chen also presented the asymptotic analysis for the recursive scheme and gave an algorithm that, given the original (arbitrary) computational graph and the number of times to recompute each individual forward, will construct a new graph that performs the adjoint computation according to this policy, using `node mirroring'.
 
@@ -117,7 +118,7 @@ Also, though non-linear architectures are now prevalent in neural networks, they
 % Base cases: do in-place, do drop everything
 % rec case: forwards to k, right storing k, left
 % Policy can then be `traversed'
-Gruslys et al. solve for the checkpointing policy that gives the least computational cost, subject to a memory budget.
+Gruslys et al. solve for the checkpointing policy that gives the least computational cost, subject to a memory budget \cite{Gruslys2016}.
 They formulate this as a dynamic programming (DP) problem where the subproblems are over the sub-sequences and the size of the memory budget.
 The solution is defined for RNNs, where every layer in the sequence is an identitical RNN \textit{cell}, leading to uniform per-layer costs.
 The first implication of this is that they can talk about memory in terms of `memory slots' instead of precisely-sized buffers, where one slot is a workspace for everything needed to compute the forwards and backwards of one cell.
@@ -151,12 +152,12 @@ For \(C(t, m)\) where \(m \geq t\), there is enough memory to not do any checkpo
 
 \begin{figure}[thb]
     \centering
-    \includegraphics[width=0.9\linewidth]{dp-checkpointing-recursive-case.png}
-    \caption{The recursive case \(Q(t, m, y)\), showing the forwards to \(y\), recursing on the right whilst storing \(y\), and recursing on the left with all the slots \cite[Figure~1]{Gruslys2016}.}
+    \includegraphics[width=0.97\linewidth]{dp-checkpointing-recursive-case.png}
+    \caption{The recursive case \(Q(t, m, y)\): computing the forwards to \(y\), recursing on the right whilst storing \(y\), and recursing on the left with all the slots \cite[Figure~1]{Gruslys2016}. `hidden states' refer to the forwards.}
     \label{fig:2-dp-checkpointing-rec}
 \end{figure}
 
-The recursive case can be formulated as shown in Figure \ref{fig:2-dp-checkpointing-rec}, taken from the original paper\footnote{This is spcifically for BPTT-HSM where the hidden states are checkpointed. See the paper for more details.}.
+The recursive case can be formulated as shown in Figure \ref{fig:2-dp-checkpointing-rec}, taken from the original paper\footnote{This is spcifically for BPTT-HSM, where the hidden states are checkpointed. See the paper for more details.}.
 For \(Q(t, m, y)\), we first compute the forwards up to \(y\) without storing them, incurring a compute cost of \(y\).
 Then, we recurse on the right hand side holding \(y\) in a memory slot.
 That means we are recursing on a sequence of length \(t-y\) with \(m-1\) slots.
@@ -168,6 +169,45 @@ Thus, the cost-action function is defined as:
     Q(t,\, m,\, y) \;=\; y \,+\, C(t\,-\,y,\, m\,-\,1) + C(y,\, m)
 \end{equation*}
 
-The algorithm for solving these equations is given in [].
+The algorithm for solving these equations is given in Algorithm \ref{alg:2-policy-solver}.
 I do not explicity define the linear cost base case as it depends on whether you are storing the full internal state of an RNN cell or just the hidden state and recomputing the internal state.
-I do not dwell on this further as I will extending the technique for general feedforward networks where this is not a consideration.
+I do not dwell on this further as I will be extending the technique for general feedforward networks where this is not a consideration.
+
+The algorithm is bottom-up:
+It first sets the base cases, before moving `up' through the search space, solving for longer sequences and more memory slots recursively.
+The recursive case chooses the \(y\) that gives the least \(Q(t,\, m,\, y)\).
+It sets \(C(t,\, m)\) to that cost and \(D(t,\,m)\) to \(y\).
+
+\begin{algorithm}[h]
+\DontPrintSemicolon
+\KwIn{\(t_{max}\) the maximum sequence length}
+\KwIn{\(m_{max}\) the maximum memory capacity}
+\BlankLine
+
+Let \(C\), \(D\) be 2D arrays of size \(t_{max}\times m_{max}\)\;
+\For{\(t \,\in\, \{1,\,\ldots,\,t_{max}\}\)}{
+    \(C[t][1] \;\leftarrow\; \frac{t(t+1)}{2}\)\;
+    \For{\(m \,\in\, \{t,\,\ldots,\, m_{max}\}\)}{
+        \(C[t][m] \;\leftarrow\;\) \textit{linear cost}\;
+        \(D[t][m] \;\leftarrow\; 1\)\;
+    }
+}
+\BlankLine
+\For{\(m \,\in\, \{2,\,\ldots,\, m_{max}\}\)}{
+    \For{\(t \,\in\, \{m+1,\,\ldots,\,m_{max}\}\)}{
+        \(C_{min} \;\leftarrow\; \infty\)\;
+        \For{\(y \;\in\; \{1,\,\ldots,\,t-1\}\)}{
+            \(c \;\leftarrow\; y + C[y][m] + C[t\,-\,y][m\,-\,1]\)\;
+            \If{\(c \,<\, C_{min}\)}{
+                \(C_{min} \;\leftarrow\; c\)\;
+                \(D[t][m] \;\leftarrow\; y\)\;
+            }
+        }
+        \(C[t][m] \;\leftarrow\; C_{min}\)\;
+    }
+}
+\Return{\((C,\, D)\)}
+
+\caption{Optimal policy solver using dynamic programming \cite[Algorithm~1]{Gruslys2016}}
+\label{alg:2-policy-solver}
+\end{algorithm}
