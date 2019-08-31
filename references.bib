@@ -384,10 +384,9 @@ volume = {60},
 year = {2018}
 }
 @inproceedings{Ng2004,
-abstract = {We consider supervised learning in the presence of very many irrelevant features, and study two different regularization methods for preventing overfitting. Focusing on logistic regression, we show that using L 1 regu-larization of the parameters, the sample complexity (i.e., the number of training examples required to learn "well,") grows only logarithmically in the number of irrelevant features. This logarithmic rate matches the best known bounds for feature selection, and indicates that L 1 regularized logistic regression can be effective even if there are exponentially many irrelevant features as there are training examples. We also give a lower-bound showing that any rotationally invariant algorithm-including logistic regression with L 2 regularization, SVMs, and neural networks trained by backpropagation-has a worst case sample complexity that grows at least linearly in the number of irrelevant features .},
+abstract = {We consider supervised learning in the presence of very many irrelevant features, and study two different regularization methods for preventing overfitting. Focusing on logistic regression, we show that using L 1 regu-larization of the parameters, the sample complexity (i.e., the number of training examples required to learn "well,") grows only logarithmically in the number of irrelevant features. This logarithmic rate matches the best known bounds for feature selection, and indicates that L 1 regularized logistic regression can be effective even if there are exponentially many irrelevant features as there are training examples. We also give a lower-bound showing that any rotationally invariant algorithm-including logistic regression with L 2 regularization, SVMs, and neural networks trained by backpropagation-has a worst case sample complexity that grows at least linearly in the number of irrelevant features. },
 author = {Ng, Andrew Y},
 booktitle = {Proceedings of the twenty-first international conference on Machine learning},
-file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Ng - 2004 - Feature selection, L 1 vs. L 2 regularization, and rotational invariance BT - Proceedings of the twenty-first international.pdf:pdf},
 mendeley-groups = {Individual Project},
 pages = {379--387},
 title = {{Feature selection, L1 vs. L2 regularization, and rotational invariance}},
@@ -618,4 +617,56 @@ pages = {181--188},
 publisher = {Springer New York},
 title = {{Optimal Sizing of Industrial Structural Mechanics Problems Using AD}},
 year = {2002}
+}
+@article{Griewank1992,
+abstract = { In its basic form the reverse mode of automatic differentiation yields gradient vectors at a small multiple of the computational work needed to evaluate the underlying scalar function. The practical applicability of this temporal complexity result, due originally to Linnainmaa, seemed to be severely limited by the fact that the memory requirement of the basic implementation is proportional to the run timeT, of the original evaluation program. It is shown here that, by a recursive scheme related to the multilevel differentiation approach of Volin and Ostrovskii, the growth in both temporal and spatial complexity can be limited to a fixed multiple of log(T). Other compromises between the run time and memory requirement are possible, so that the reverse mode becomes applicable to computational problems of virtually any size. },
+author = {Griewank, Andreas},
+doi = {10.1080/10556789208805505},
+journal = {Optimization Methods and Software},
+mendeley-groups = {Individual Project},
+number = {1},
+pages = {35--54},
+publisher = {Taylor {\&} Francis},
+title = {{Achieving logarithmic growth of temporal and spatial complexity in reverse automatic differentiation}},
+url = {https://doi.org/10.1080/10556789208805505},
+volume = {1},
+year = {1992}
+}
+@online{mxnet-memonger,
+  author = {Chen, Tianqi},
+  title = {MxNet Memory Monger},
+  year = 2016,
+  url = {https://github.com/dmlc/mxnet-memonger},
+  urldate = {2019-28-08}
+}
+@online{torch-memonger,
+  author = {Goyal, Priya and other PyTorch contributors (see PyTorch GitHub)},
+  title = {torch.utils.checkpoint module of PyTorch v1.2.0},
+  year = 2018,
+  url = {https://github.com/pytorch/pytorch/blob/v1.2.0/torch/utils/checkpoint.py},
+  urldate = {2019-28-08}
+}
+@online{openai-checkpointing,
+  author = {Salimans, Tim and Bulatov, Yaroslav},
+  title = {Gradient Checkpointing in TensorFlow},
+  year = 2018,
+  url = {https://github.com/cybertronai/gradient-checkpointing},
+  urldate = {2019-28-08}
+}
+@article{Revolve2000,
+address = {New York, NY, USA},
+author = {Griewank, Andreas and Walther, Andrea},
+doi = {10.1145/347837.347846},
+issn = {0098-3500},
+journal = {ACM Trans. Math. Softw.},
+keywords = { checkpointing, computational differentiation, reverse mode,adjoint mode},
+mendeley-groups = {Individual Project},
+month = {mar},
+number = {1},
+pages = {19--45},
+publisher = {ACM},
+title = {{Algorithm 799: Revolve: An Implementation of Checkpointing for the Reverse or Adjoint Mode of Computational Differentiation}},
+url = {http://doi.acm.org/10.1145/347837.347846},
+volume = {26},
+year = {2000}
 }

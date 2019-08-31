@@ -1,15 +1,142 @@
-\section{Checkpointing} \label{sec:bg-checkpointing}
+\section{Checkpointing} \label{sec:2-5-bg-checkpointing}
 In this section, I will show how to reduce the peak memory established in the previous section using checkpointing.
 % The first key behind all memory optimisations using this graph is that the entire training process is this exact same step repeated many times.
 % Thus, even though training may take days or even weeks [?], we only have to optimise a relatively small computational graph.
 % Compared to the time taken for a single training step, we can spend a huge amount of time solving for the best optimisation strategies; it only has to be fast relative to the entire training process.
 
+
+% something about redsicovered from AD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texorpdfstring{\(\Theta(\sqrt{N})\)}{\textit{O(sqrt(N))}} Checkpointing}
+Consider the computational graph of an adjoint computation given in Figure \ref{}.
+I have shown this to have linear space complexity, in Section \ref{sec:2-4-memory-anlaysis}, due to the forwards being stored for use in the backwards pass.
+We can elide this restriction by trading off compute for memory, using what is known as \textit{checkpointing}.
 
-% need previous section on pebbling, in-place and sharing optimisations, state pytorch applies them aggressively
-% in this section show how peak memory comes about (assuming pebbling)
-% show how checkpointing gives O(2sqrt(n)) memory
-% but no multiple recomps, no per-layer costs, and is arbitrary point on C-M curve
-% show how to solve for this with uniform costs using DP
-% give eqns, algo to solve.
+In checkpointing, only some of the forwards are stored in memory, known as the checkpoints, or snapshots.
+Then, during the backwards pass, forwards are recomputed from the last checkpoint in the chain, this time keeping them in memory so the backwards pass can proceed.
+Thus, the checkpoints have split the sequence into segments, and
+to \textit{compute the adjoint of the entire sequence}, we first run the forward pass only storing the checkpoints (which demaracte the segments),
+then proceed backwards by \textit{computing the adjoints segment-by-segment},
+where computing the adjoint of a segment involves recomputing the forwards from the last checkpoint and this time storing them in memory so the adjoint can proceed.
+This segmented backwards pass is visualised in Figure \ref{}.
+
+Assuming uniform per-operator costs, the new peak memory requirement still occurs at the end of the chain, but is now lowered to only the cost of the checkpoints, rather than the entire forward sequence, plus the cost of computing the adjoint of the final segment.
+Assuming \(k-1\) checkpoints that split the sequence of length \(n\) into \(k\) evenly-sized segments, the peak memory cost is approximately:
+\begin{equation*}
+    g(n) \;=\; \Theta(\sfrac{n}{k}) + \Theta(k)
+\end{equation*}
+With basic calculus, it can be found that \(k = \sqrt{n}\) minimises this, with a sublinear cost of \(2\sqrt{n}\).
+As every forward is recomputed at most once, the computational overhead is no more than the cost of a single extra forward pass.
+According to Chen \cite{Chen2016}, the forward pass is about twice as fast as the backward pass, resulting in the actual overhead being around 30\%.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Multiple Recomputations}
+The peak memory cost can be reduced even further by introducing \textit{multiple recomputations}.
+The above technique split the adjoint computation of a sequence into the adjoint computations of segments of this sequence.
+There is no reason that, during the adjoint computation of a segment, we cannot recursively apply the technique by splitting the segment into sub-segments.
+
+That is, consider the scenario where the forward pass of the sequence has been computed and we are now processing a segment.
+We compute the forwards of the segment (their first recomputation), storing only some checkpoints. Then we perform the adjoint computation on each sub-segment, resulting in the dropped forwards being recomputed a second time. We could keep recursively applying the technique on the sub-segments resulting in many recomputations.
+
+In fact, applying this recursive scheme, always storing \(k\) evenly-spaced checkpoints per segment, the peak memory cost becomes the cost of the \(k\) checkpoints plus the (recursive) cost of one segment:
+\begin{equation*}
+    g(n) \;=\; k + g(\sfrac{n}{k+1})
+\end{equation*}
+Solving this gives:
+\begin{equation*}
+    g(n) \;=\; k\log_{k+1}(n)
+\end{equation*}
+Setting \(k\,=\,1\) minimises this to \(\log_2(n)\). \todo{EXPLAIN COMP COMPLEXITY}
+This demonstrates how, through multiple recomputations, we have further trade compute for memory.
+
+Going beyond this recursive formulation, the extreme case of simply `recomputing everything' gives \(\Theta(\mathrm{1})\) memory at \(\Theta(n^2)\) computational cost.
+Say we have the forward at the start of the chain \(f_0\) and the backward at the end \(b_n\).
+We compute the forwards in-place, from \(f_0\) to \(f_{n-1}\), then use that and \(b_n\) to compute \(b_{n-1}\).
+Thus, we have done one step of the backwards pass in \(\Theta(\mathrm{1})\) space.
+We simply repeat this process, computing \(f_0\) to \(f_{n-2}\) and using \(b_{n-1}\) to get \(b_{n-2}\), and so on until we have \(b_0\), still only using \(\Theta(\mathrm{1})\) space. The computational overhead is quadratic because the first forward pass is over \(n\) steps, then the second \(n-1\) steps, then \(n-2\), and so on. Summing these gives \(\Theta(n^2)\).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Limitations of Checkpointing Techniques and their Implementations}
+Griewank first proposed all of these techniques for sequential adjoint computations in 1992 \cite{Griewank1992}, later developed into the \texttt{REVOLVE} algorithm with Walther \cite{Revolve2000}.
+Given a fixed number of checkpoints and the sequence length, it solves for a strategy that uses the least recursion depth (the max number of times any forward is recomputed).
+However, it assumes uniform per-operator costs, which is not an asummption that holds for neural networks.
+
+Chen brought the (uniform costs) \(\sqrt{n}\) technique to neural networks in 2016 \cite{Chen2016}, implemented in MxNet \cite{mxnet-memonger}.
+It has since been implemented in PyTorch \cite{torch-memonger} and TensorFlow \cite{openai-checkpointing}.
+Chen also presented the asymptotic analysis for the recursive scheme and gave an algorithm that, given the original (arbitrary) computational graph and the number of times to recompute each individual forward, will construct a new graph that performs the adjoint computation according to this policy, using `node mirroring'.
+
+Though these techniques greatly reduce the memory cost by trading off computation, they pick an arbitrary point on the compute-memory trade-off curve.
+That is, given infinite memory, we could of course do any computation with no overhead, as we would simply not use checkpointing.
+However, as the memory budget is tightened, we are forced to checkpoint, incurring compute overhead.
+Ideally, the user should specify their memory budget and the system should find the checkpointing strategy that satisfies this budget with the least computational cost, rather than having the user specify arbitrary parameters like the number of checkpoints;
+they should not even have to know what checkpointing is.
+
+Chen proposed a heuristic algorithm that, given the memory budget and per-operator memory costs, traverses the sequence and greedily chooses to drop nodes until the cost of that segment exceeds the budget, at which point the current node is instead checkpointed, starting a new segment.
+To approximate \(\sqrt{n}\) checkpointing for sequences with abitrary per-operator costs, another heuristic is used for guiding a grid search over the memory budget to find the plan that gives the least memory cost.
+Though this does not give the provably optimal memory cost, they do report good results.
+However, the more important limitations are that this is restricted to one recomputation and that it makes no attempt to optimise for computational cost, only to minimise the memory cost.
+
+Again, ideally, we want to solve for the optimal checkpointing policy that minimises computational cost according to the precise per-operator compute and memory costs. 
+
+Before detailing Gruslys et al.'s \cite{Gruslys2016} work on memory-efficient RNN training, which achieves the former goal but not the latter, I will briefly discuss some related work on checkpointing.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Related Work}
+\todo{TODO} This section should either be much more in-depth or removed.
+
+\texttt{REVOLVE} gives the optimal recursion depth for sequences of known length.
+Work has also been done for sequences of unknown length.
+\texttt{REVOLVE}'s optimality has been matched for sequences that do not exceed a length that has a certain bound with respect to the number of checkpoints per segment.
+Some deep learning models, like \texttt{seq2seq} RNNs, do have unknown sequence length, so there could be some opportunity here.
+However, I only consider sequential neural networks where the sequence length is known.
+
+Dauvergne and Hascoet reframe checkpointing in terms of the data-flow equations used in compilers \cite{Dauvergne2006}.
+They also formalise what other data-flow techniques from compilers look like for automatic differentiation, such as liveness analysis and \textit{to be recorderd analysis} and seek to combine them with checkpointing in their \texttt{TAPENADE} platform.
+
+Siskind and Pearlmutter \cite{Siskind2018} generalised \texttt{REVOLVE} to arbitrary computation \textit{trees}, rather than just sequences.
+However, their implementation does not take into account precise per-operator costs and does not solve for the least computational cost given a memory budget.
+Though non-linear architectures are now prevalent in neural networks, they tend to not be trees either.
+
+\todo{others} H-revolve? Imperial one? Those two new papers that generalise to arbitrary graphs?
+
+\subsection{Optimal Checkpointing Through Dynamic Programming}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1. checkpointing 
+%
+% trade off compute for memory. Drop forwards recompute in backwards.
+% in-between? 
+% segmented adjoint. explain.
+% show segmentated graph
+% give eqn show how sqrt(n) solves this
+% 
+% 2. Multiple Recomps
+% 
+% explain multiple recomps. Derive logarithmic bounds
+% Griewank found this and Chen reshowed this too
+% Griewank went further and showed O(1) space with recompute-everything approach
+%
+% 3. Eval of impls
+% However, all arbitrary point C-M tradeoff. User should pick M and get optimal C.
+% all uniform costs
+% Revolve optimal for fixed num checkpoints per recompute depth
+% Chen implemented sqrt(n) in MxNet
+% optimised gradient graph construction (node mirroing) for arbitrary recompute policies
+% memory planning for budget B is greedy heuristic and only 1 recomputation. 
+% Try to approximate sqrt(n) for arbitrary costs by using B = sqrt(xy) and doing grid search on B that minimises memory.
+% however, again is not what we want - is minimising B, rather than minimising C given B
+%
+% 4. Related
+% optimal checkpointing for unknown time steps: arbitrary C-M (assumes uniform comp costs) and we do not have to support this.
+% divide-and-conquer checkpointing for arbitrary comp trees: do not have to support this. Actually, common NN linearities are graphs :'(. Arbitrary C-M, user must choose between constant space or logarithmic space+time
+
+% heirarchical checkpointing: async and sync? num levels of memory? Assumptions on comp costs, memory costs, transfer costs, allocation costs?
+
+% 5. DeepMind
+% Finally something that gives optimal C for bounded B
+% Only for uniform cost RNNs
+% explain RNN cell and how they interpret `memory slots'
+% DP eqns and algo
+% Base cases: do in-place, do drop everything
+% rec case: forwards to k, right storing k, left
+% Policy can then be `traversed'
+% 

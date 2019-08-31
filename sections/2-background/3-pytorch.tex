@@ -9,7 +9,7 @@ Its key features include:
     \item Easily accelerate these computations on a GPU.
     \item Easily evaluate derivates of the computation with respect to the tensors involved.
     The user simply tells PyTorch to track the gradients when constructing a tensor.
-    \item \textit{Define-by-run} execution: The user does not need to statically define a computation graph like in TensorFlow \cite{tensorflow2015-whitepaper}, even when taking derivates.
+    \item \textit{Define-by-run} execution: The user does not need to statically define a computation graph like in TensorFlow \cite{tensorflow2015-whitepaper}, even when taking derivatives.
     They can execute any computation using native Python constructs such as control flow.
     \item Provides a rich API for constructing common ML operators, such as convolutions or ReLU
     \item Allows the user to extend the API with their own operators.
@@ -103,7 +103,7 @@ Detaching is often used to ensure the backward graph is cleared from memory when
 I will use detaching in my implementation of checkpointing with multiple recomputations to manually control how execution moves forward and backward along a sequence.
 More on this in \todo{[sec]}.
 
-For a more in-depth look at on Autograd internals, I recommend starting with Elliot Waite's excellent tutorial on Youtube \footnote{\url{https://youtu.be/MswxJw-8PvE}, accessed 26/08/19}.
+For a more in-depth look on Autograd internals, I recommend starting with Elliot Waite's excellent tutorial on Youtube \footnote{\url{https://youtu.be/MswxJw-8PvE}, accessed 26/08/19}.
 
 \todo{add extra stuff if required}
 %TODO: Define an autograd function in code.

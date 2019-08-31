@@ -119,7 +119,7 @@ The reason is that modern deep networks hardly use fully-connected layers,
 which cause an exponential growth in the number of weights.
 Instead, we mostly see layers such as the convolutional layer \todo{put in bg}.
 These typically apply a small filter, such as of size 3x3, to many large images. \todo{refs?}
-The image is the forward tensor and the filter weights are the learnable parameters.
+The image is the layer output and the filter weights are the learnable parameters.
 Thus the parameters are very small compared to the forward and backward tensors.
 As the optimiser memory is usually equivalent to one or two extra values \textit{per parameter},
 they are omitted from the optimisations too.
