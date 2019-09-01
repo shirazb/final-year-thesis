@@ -45,7 +45,16 @@ There is no reason that, during the adjoint computation of a segment, we cannot 
 That is, consider the scenario where the forward pass of the sequence has been computed and we are now processing a segment.
 We compute the forwards of the segment (their first recomputation), storing only some checkpoints. Then we perform the adjoint computation on each sub-segment, resulting in the dropped forwards being recomputed a second time. We could keep recursively applying the technique on the sub-segments resulting in many recomputations.
 
-In fact, applying this recursive scheme, always storing \(k\) evenly-spaced checkpoints per segment, the peak memory cost becomes the cost of the \(k\) checkpoints plus the (recursive) cost of one segment:
+A visualisation of how we move forwards and backwards along a sequential computation during multiple recomputations is shown in Figure \ref{fig:2-multiple-recomps-vis}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{multiple_recomps_vis.png}
+    \caption{Execution of multiple recomputations on a sequence. Blue arrows represent forward computation. Red arrows represent backward computation. Red circles denote a forward being checkpointed. Moving vertically down represents the next recursion depth - blue arrows on the \(i^{\mathrm{th}}\) line are being computed for the \(i^{\mathrm{th}}\) time, or recomputed for the \({i-1}^{\mathrm{th}}\) time.}
+    \label{fig:2-multiple-recomps-vis}
+\end{figure}
+
+When applying this recursive scheme, always storing \(k\) evenly-spaced checkpoints per segment, the peak memory cost becomes the cost of the \(k\) checkpoints plus the (recursive) cost of one segment:
 \begin{equation*}
     g(n) \;=\; k + g(\sfrac{n}{k+1})
 \end{equation*}
@@ -66,11 +75,13 @@ To perform the next step, we simply repeat this process, computing in-place \(f_
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Limitations of Checkpointing Techniques and their Implementations}
 Griewank first proposed all of these techniques for sequential adjoint computations in 1992 \cite{Griewank1992}, later developed into the \texttt{REVOLVE} algorithm with Walther \cite{Revolve2000}.
-Given a fixed number of checkpoints and the sequence length, it solves for a strategy that uses the least recursion depth (the max number of times any forward is recomputed).
-However, it assumes uniform per-operator costs, which is not an asummption that holds for neural networks.
+Given a fixed number of checkpoints per recomputation pass and the sequence length, it solves for a strategy that uses the least recursion depth (the max number of recomputation passes).
+For a recursion depth of \(r\) and number of checkpoints \(s\), a sequence of length \(\binom{s+r}{r}\) can be executed in logarithmic space, where \(\binom{\cdot}{\cdot}\) is the binomial coefficient.
+However, their work assumes uniform per-operator costs.
+A lot of AD literatature is in the domain of differential equations on time, where such assumptions may hold, but it is not the case for most neural networks.
 
-Martens and Sutskever \cite{Martens2012} briefly outline the (uniform costs) \(\sqrt(n)\) technique for neural networks in 2012.
-Chen made the technique more widely known with his \cite{Chen2016} paper and corresponding implementation in MxNet \cite{mxnet-memonger}.
+Martens and Sutskever \cite{Martens2012} briefly outlined the (uniform costs) \(\sqrt(n)\) technique for neural networks in 2012.
+Chen made the technique more widely known with his 2016 paper \cite{Chen2016} and corresponding implementation in MxNet \cite{mxnet-memonger}.
 It has since been implemented in PyTorch \cite{torch-memonger} and TensorFlow \cite{openai-checkpointing}.
 Chen also presented the asymptotic analysis for the recursive scheme and gave an algorithm that, given the original (arbitrary) computational graph and the number of times to recompute each individual forward, will construct a new graph that performs the adjoint computation according to this policy, using `node mirroring'.
 
@@ -81,7 +92,7 @@ Ideally, the user should specify their memory budget and the system should find 
 They should not even have to know what checkpointing is.
 
 Chen proposed a heuristic algorithm that, given the memory budget and per-operator memory costs, traverses the sequence and greedily chooses to drop nodes until the cost of that segment exceeds the budget, at which point the current node is instead checkpointed, starting a new segment.
-To try to reach \(\sqrt{n}\) checkpointing savings for sequences with abitrary per-operator costs, another heuristic is used for guiding a grid search over the memory budget to find the plan returned by the algorithm that gives the least memory cost.
+To try to match the memory savings of \(\sqrt{n}\) checkpointing for sequences with abitrary per-operator costs, another heuristic is used for guiding a grid search over the memory budget to find the plan returned by the algorithm that gives the least memory cost.
 Though this does not give the provably optimal memory cost, they do report good results.
 However, the more important limitations are that this is restricted to one recomputation and that it makes no attempt to optimise for computational cost, only to minimise the memory cost.
 
@@ -211,3 +222,11 @@ Let \(C\), \(D\) be 2D arrays of size \(t_{max}\times m_{max}\)\;
 \caption{Optimal policy solver using dynamic programming \cite[Algorithm~1]{Gruslys2016}}
 \label{alg:2-policy-solver}
 \end{algorithm}
+
+Once we have the optimal policy, we can `traverse' it to perform backpropagation according to the policy.
+Say we are given \(f_i\) and \(b_j\), initialised to the inputs and targets, to perform backpropagation on this segment to compute \(b_i\) within \(m\) memory slots, we do the following:
+\begin{enumerate}
+    \item If the sequence length \(t = j-i\) is 1, we simply perform the backward operation.
+    \item If \(m\) is 1, we use the constant-space, quadratic-cost strategy.
+    \item Else, letting \(k = D[t][m]\), we run the forwards to \(f_k\), checkpoint it, recurse on the right to get \(b_k\), release \(f_k\), then recurse on the left to get \(b_i\).
+\end{enumerate}
