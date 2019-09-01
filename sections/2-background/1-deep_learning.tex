@@ -216,7 +216,56 @@ then in Section \ref{sec:2-5-bg-checkpointing} show how to reduce this requireme
 \end{figure}
 
 \subsection{Beyond Feedforwad Networks}
-% do this section after impl/eval
-% (briefly) motivate CNN and RNN?
-% common CNN non-linearities: skip, split-merge, dense
-todo
+In recent years, thanks to a number of breakthrough papers, certain non-linear architectures have become extremely popular, especially in vision-related tasks.
+In particular, Inception modules use a split-merge architecture \cite{Szegedy2015-inception, Szegedy2016-inception-res}; and residual blocks \cite{He2016-resnet, Xie2017-resnext, Szegedy2016-inception-res} and dense blocks \cite{Huang2017-densenet} use skip connections.
+These non-linearities are visualised in Figure \ref{fig:2-non-linearities}.
+\begin{figure}[hbtp]
+    \centering
+    \hspace{0.2cm}
+    \begin{subfigure}[]{0.33\textwidth}
+        \centering
+        \includegraphics[height=5cm]{split-merge.jpg}
+        \caption{A split-merge unit \cite{Szegedy2015-inception, Szegedy2016-inception-res}.}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[]{0.30\textwidth}
+        \centering
+        \includegraphics[height=5cm]{residual_unit.jpg}
+        \caption{A residual unit \cite{He2016-resnet, Xie2017-resnext, Szegedy2016-inception-res}.}
+    \end{subfigure}%
+    \hfill
+    \begin{subfigure}[]{0.33\textwidth}
+        \centering
+        \includegraphics[height=5cm]{dense_block.jpg}
+        \caption{A dense unit \cite{Huang2017-densenet}.}
+    \end{subfigure}%
+    \hspace{0.2cm}
+    \caption{Common non-linearities in neural networks.}
+    \label{fig:2-non-linearities}
+\end{figure}
+
+Recurrent Neural Networks (RNNs) also see wide use.
+RNNs are networks whose output feed back into their input.
+The part of the output that that feeds back to the cell is known as the \textit{hidden state}.
+The cell can then be unrolled over many time steps, creating a feedforward network of RNN cells, where each cell propagates a hidden state to the next.
+Such networks are trained through the Backpropagation Through Time (BPTT) algorithm \cite{Robinson1987-rnn, Mozer1989-bptt, Werbos1990-bptt}.
+An example RNN cell is visualised in Figure \ref{fig:2-rnn-cell}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.22\linewidth]{rnn_cell.png}
+    \caption{An RNN cell \cite[p.~22]{cs231n-rnns}.}
+    \label{fig:2-rnn-cell}
+\end{figure}
+
+Unfolding this for \(t\) time steps can be visualised as in Figure \ref{fig:2-rnn-unfolded}.
+Note that the same cell \(f_W\) with the same parameters \(W\) are used at each time step.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{rnn_unrolled.png}
+    \caption{An RNN cell unrolled for \(T\) time steps \cite[p.~29]{cs231n-rnns}.}
+    \label{fig:2-rnn-unfolded}
+\end{figure}
+In this example, we are using a \texttt{seq2seq} model.
+These map a variable-sized input sequence to a variable-sized output sequence.
+An example use case is natural language translation \cite{GoogleAI-mt}.

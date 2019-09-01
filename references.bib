@@ -297,11 +297,11 @@ year = {2015}
 abstract = {Derivatives, mostly in the form of gradients and Hessians, are ubiquitous in machine learning. Automatic differentiation (AD), also called algorithmic differentiation or simply "autodiff", is a family of techniques similar to but more general than backpropagation for efficiently and accurately evaluating derivatives of numeric functions expressed as computer programs. AD is a small but established field with applications in areas including computational fluid dynamics, atmospheric sciences, and engineering design optimization. Until very recently, the fields of machine learning and AD have largely been unaware of each other and, in some cases, have independently discovered each other's results. Despite its relevance, general-purpose AD has been missing from the machine learning toolbox, a situation slowly changing with its ongoing adoption under the names "dynamic computational graphs" and "differentiable programming". We survey the intersection of AD and machine learning, cover applications where AD has direct relevance, and address the main implementation techniques. By precisely defining the main differentiation techniques and their interrelationships, we aim to bring clarity to the usage of the terms "autodiff", "automatic differentiation", and "symbolic differentiation" as these are encountered more and more in machine learning settings.},
 archivePrefix = {arXiv},
 arxivId = {1502.05767},
-author = {Baydin, Atilim G$\backslash$"unes and Pearlmutter, Barak A. and Radul, Alexey Andreyevich and Siskind, Jeffrey Mark},
+author = {Baydin, Atilim G{\"u}nes and Pearlmutter, Barak A. and Radul, Alexey Andreyevich and Siskind, Jeffrey Mark},
 doi = {10.1016/j.advwatres.2018.01.009},
 eprint = {1502.05767},
 file = {:Users/shiraz/Library/Application Support/Mendeley Desktop/Downloaded/Baydin et al. - 2015 - Automatic differentiation in machine learning a survey.pdf:pdf},
-isbn = {0002-9645 (Print)$\backslash$r0002-9645 (Linking)},
+%isbn = {0002-9645 (Print)$\backslash$r0002-9645 (Linking)},
 issn = {03091708},
 journal = {Journal of Machine Learning},
 mendeley-groups = {Individual Project},
@@ -691,4 +691,132 @@ year = "1954"
  edition = {1st},
  publisher = {MIT Press},
  address = {Cambridge, MA, USA},
+}
+@inproceedings{Xie2017-resnext,
+abstract = {We present a simple, highly modularized network architecture for image classification. Our network is constructed by repeating a building block that aggregates a set of transformations with the same topology. Our simple design results in a homogeneous, multi-branch architecture that has only a few hyper-parameters to set. This strategy exposes a new dimension, which we call "cardinality" (the size of the set of transformations), as an essential factor in addition to the dimensions of depth and width. On the ImageNet-1K dataset, we empirically show that even under the restricted condition of maintaining complexity, increasing cardinality is able to improve classification accuracy. Moreover, increasing cardinality is more effective than going deeper or wider when we increase the capacity. Our models, named ResNeXt, are the foundations of our entry to the ILSVRC 2016 classification task in which we secured 2nd place. We further investigate ResNeXt on an ImageNet-5K set and the COCO detection set, also showing better results than its ResNet counterpart. The code and models are publicly available online.},
+archivePrefix = {arXiv},
+arxivId = {1611.05431},
+author = {Xie, Saining and Girshick, Ross and Doll{\'{a}}r, Piotr and Tu, Zhuowen and He, Kaiming},
+booktitle = {Proceedings - 30th IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2017},
+doi = {10.1109/CVPR.2017.634},
+eprint = {1611.05431},
+isbn = {9781538604571},
+mendeley-groups = {Individual Project},
+pages = {5987--5995},
+title = {{Aggregated residual transformations for deep neural networks}},
+volume = {2017-Janua},
+year = {2017}
+}
+@inproceedings{Szegedy2015-inception,
+title	= {Going Deeper with Convolutions},
+author	= {Christian Szegedy and Wei Liu and Yangqing Jia and Pierre Sermanet and Scott Reed and Dragomir Anguelov and Dumitru Erhan and Vincent Vanhoucke and Andrew Rabinovich},
+year	= {2015},
+URL	= {http://arxiv.org/abs/1409.4842},
+booktitle	= {Computer Vision and Pattern Recognition (CVPR)}
+}
+@inproceedings{He2016-resnet, 
+author={K. {He} and X. {Zhang} and S. {Ren} and J. {Sun}}, 
+booktitle={2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 
+title={Deep Residual Learning for Image Recognition}, 
+year={2016}, 
+volume={}, 
+number={}, 
+pages={770-778}, 
+abstract={Deeper neural networks are more difficult to train. We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual networks are easier to optimize, and can gain accuracy from considerably increased depth. On the ImageNet dataset we evaluate residual nets with a depth of up to 152 layers - 8× deeper than VGG nets [40] but still having lower complexity. An ensemble of these residual nets achieves 3.57% error on the ImageNet test set. This result won the 1st place on the ILSVRC 2015 classification task. We also present analysis on CIFAR-10 with 100 and 1000 layers. The depth of representations is of central importance for many visual recognition tasks. Solely due to our extremely deep representations, we obtain a 28% relative improvement on the COCO object detection dataset. Deep residual nets are foundations of our submissions to ILSVRC & COCO 2015 competitions1, where we also won the 1st places on the tasks of ImageNet detection, ImageNet localization, COCO detection, and COCO segmentation.}, 
+keywords={image classification;learning (artificial intelligence);neural nets;object detection;COCO segmentation;ImageNet localization;ILSVRC & COCO 2015 competitions;deep residual nets;COCO object detection dataset;visual recognition tasks;CIFAR-10;ILSVRC 2015 classification task;ImageNet test set;VGG nets;residual nets;ImageNet dataset;residual function learning;deeper neural network training;image recognition;deep residual learning;Training;Degradation;Complexity theory;Image recognition;Neural networks;Visualization;Image segmentation}, 
+doi={10.1109/CVPR.2016.90}, 
+ISSN={1063-6919}, 
+month={June},
+}
+@INPROCEEDINGS{Huang2017-densenet, 
+author={G. {Huang} and Z. {Liu} and L. v. d. {Maaten} and K. Q. {Weinberger}}, 
+booktitle={2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, 
+title={Densely Connected Convolutional Networks}, 
+year={2017}, 
+volume={}, 
+number={}, 
+pages={2261-2269}, 
+abstract={Recent work has shown that convolutional networks can be substantially deeper, more accurate, and efficient to train if they contain shorter connections between layers close to the input and those close to the output. In this paper, we embrace this observation and introduce the Dense Convolutional Network (DenseNet), which connects each layer to every other layer in a feed-forward fashion. Whereas traditional convolutional networks with L layers have L connections-one between each layer and its subsequent layer-our network has L(L+1)/2 direct connections. For each layer, the feature-maps of all preceding layers are used as inputs, and its own feature-maps are used as inputs into all subsequent layers. DenseNets have several compelling advantages: they alleviate the vanishing-gradient problem, strengthen feature propagation, encourage feature reuse, and substantially reduce the number of parameters. We evaluate our proposed architecture on four highly competitive object recognition benchmark tasks (CIFAR-10, CIFAR-100, SVHN, and ImageNet). DenseNets obtain significant improvements over the state-of-the-art on most of them, whilst requiring less memory and computation to achieve high performance. Code and pre-trained models are available at https://github.com/liuzhuang13/DenseNet.}, 
+keywords={convolution;feedforward neural nets;learning (artificial intelligence);DenseNet;traditional convolutional networks;feature propagation;feature reuse;object recognition benchmark tasks;dense convolutional network;vanishing-gradient problem;Training;Convolution;Network architecture;Convolutional codes;Neural networks;Road transportation},
+doi={10.1109/CVPR.2017.243}, 
+ISSN={1063-6919}, 
+month={July}
+}
+@article{Szegedy2016-inception-res,
+author = {Szegedy, Christian and Ioffe, Sergey and Vanhoucke, Vincent},
+year = {2016},
+month = {02},
+pages = {},
+title = {Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning},
+journal = {AAAI Conference on Artificial Intelligence}
+}
+@article{Mozer1989-bptt,
+title={A Focused Backpropagation Algorithm for Temporal Pattern Recognition},
+author={Michael C. Mozer},
+journal={Complex Systems},
+year={1989},
+volume={3}
+}
+@techreport{Robinson1987-rnn,
+added-at = {2008-03-11T14:52:34.000+0100},
+address = {Cambridge, UK},
+author = {Robinson, A. J. and Fallside, Frank},
+biburl = {https://www.bibsonomy.org/bibtex/269a88ecbac9a51cbf0b4be189c412820/idsia},
+citeulike-article-id = {2378809},
+institution = {Engineering Department, Cambridge University},
+interhash = {3c632364df265d7af795e2defe65894d},
+intrahash = {69a88ecbac9a51cbf0b4be189c412820},
+keywords = {nn},
+number = {CUED/F-INFENG/TR.1},
+priority = {2},
+timestamp = {2008-03-11T14:59:56.000+0100},
+title = {The Utility Driven Dynamic Error Propagation Network},
+year = 1987
+}
+@article{Werbos1990-bptt, 
+author={P. J. {Werbos}}, 
+journal={Proceedings of the IEEE}, 
+title={Backpropagation through time: what it does and how to do it}, 
+year={1990}, 
+volume={78}, 
+number={10}, 
+pages={1550-1560}, 
+abstract={Basic backpropagation, which is a simple method now being widely used in areas like pattern recognition and fault diagnosis, is reviewed. The basic equations for backpropagation through time, and applications to areas like pattern recognition involving dynamic systems, systems identification, and control are discussed. Further extensions of this method, to deal with systems other than neural networks, systems involving simultaneous equations, or true recurrent networks, and other practical issues arising with the method are described. Pseudocode is provided to clarify the algorithms. The chain rule for ordered derivatives-the theorem which underlies backpropagation-is briefly discussed. The focus is on designing a simpler version of backpropagation which can be translated into computer code and applied directly by neutral network users.<>}, 
+keywords={identification;neural nets;pattern recognition;pseudocode;pattern recognition;fault diagnosis;backpropagation;systems identification;neural networks;Backpropagation;Artificial neural networks;Supervised learning;Pattern recognition;Neural networks;Power system modeling;Equations;Control systems;Fluid dynamics;Books}, 
+doi={10.1109/5.58337}, 
+ISSN={0018-9219}, 
+month={Oct}
+}
+@article{GoogleAI-mt,
+author    = {Mia Xu Chen and
+              Orhan Firat and
+              Ankur Bapna and
+              Melvin Johnson and
+              Wolfgang Macherey and
+              George Foster and
+              Llion Jones and
+              Niki Parmar and
+              Mike Schuster and
+              Zhifeng Chen and
+              Yonghui Wu and
+              Macduff Hughes},
+title     = {The Best of Both Worlds: Combining Recent Advances in Neural Machine
+              Translation},
+journal   = {CoRR},
+volume    = {abs/1804.09849},
+year      = {2018},
+url       = {http://arxiv.org/abs/1804.09849},
+archivePrefix = {arXiv},
+eprint    = {1804.09849},
+timestamp = {Mon, 13 Aug 2018 16:48:30 +0200},
+biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1804-09849},
+bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@misc{cs231n-rnns,
+author = {Li, Fei-Fei and Johnson, Justin and Yeung, Serena},
+mendeley-groups = {Individual Project},
+publisher = {Stanford University},
+title = {{cs231n: CNNs for Image Recognition, Lecture 10: Recurrent Neural Networks}},
+url = {http://cs231n.stanford.edu/slides/2018/cs231n{\_}2018{\_}lecture10.pdf},
+year = {2018}
 }
