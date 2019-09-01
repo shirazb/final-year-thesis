@@ -48,12 +48,13 @@
 % However, I don't think the extra effort is worth. The extra code in the j loop is so little compared to the whole loop body that it hardly affects the runtime at all, meaning extra memoisation effort will hardly give any extra effect.
 % In fact, I reckon the extra complexity may even make it overall slower.
 
-% Secondly, we can `memoise' failure, that is, propagate failure. If some i',j' fails - as in even using the constant memory strategy we cannot do that subsequence - then we definitely cannot do any i,j where i<=i', j>=j'. 
+% Secondly, we can `memoise' failure, that is, propagate failure. If some i,j fails - as in even using the constant memory strategy we cannot do that subsequence - then we definitely cannot do any i',j' where i'<=i, j'>=j. 
 % We can propagate this failure right through j easily as we just short-circuit all the j'>=j to failure then break from the j loop.
 % Propagating left through i is more complex because i is the outer loop. How would we amend the space of (i,j) iterated over by the loops to remove the (i',j_fail) forall i<=i? The extra complexity probably would in fact increase computational cost and make an already quite unreadable algorithm really unreadable.
 % To clarify, I do not mean storing the j_fail at which we failed, then for each i'<i we iterate to, we do the j's up to j_fail then set the rest to fail and break.
 % I mean actually skipping over those elements of the search space altogether, like we do by breaking out of the j loop.
-% However, we don't even bother with this approach because we would only have to run one extra iteration for j_fail+1 before we hit failure and set all the i,j', j'>=j to failure.
+% I'm sure any solution would greatly increase complextiy and maybe actually be slower.
+% we don't even bother with the stated approach because we would only have to run one extra iteration to j_fail+1 before we hit failure and set all the i,j', j'>=j_fail to failure.
 
 % Next, we still need to address the base cases (constant mem, t=1, constant time)
 
