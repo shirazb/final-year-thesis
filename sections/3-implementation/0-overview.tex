@@ -1,0 +1,81 @@
+% C(i, j, m) is given f_i, b_j, compute b_i in least computational cost, subject to m, according to the per-layer compute and memory costs.
+
+% how to precisely set costs?
+% first of all, they did not precisely distinguish between costs of forwards and backwards operations. \(y\) was used as cost of doing forward of \(y\) layers in Q, but in base cases, \(t\) referred to forwards and backwards of layers. 
+% Also, each layer was identitical, but now we must uniquely address each layer \(i\). We use alpha, beta to refer to f/b compute and memory costs of i.
+
+% As each subsequence is now unique, rather than doing DP on sequences of size t, we must do DP on all possible subsequences of the original sequence of size N.
+% e.g. (2,5) and (3,6) are now unique, they have different costs.
+% explain how to iterate over this space in solver algo
+
+% With all this, Q becomes:
+% Q(i,j,k,m) now becomes sum alphas to k + right + left
+
+% however, the fact that we are being precise about memory costs has a large impact on the solution too:
+
+% Because we are no longer using coarse-grained slots, but a specific amount of memory, the solution for some C(i,j,m) does not necessarily use all m memory.
+% we want to take advantage of that. If the optimal right and left only use much less memory than the specified m and m_r, we have less pressure to trade-off compute for memory at this `level' of the search space, so have opened up possible solutions with lower comp cost.
+% This means, as well as C, we need to track a B(i,j,m) that represents the peak memory within which C(i,j,m) was achieved.
+% What, then, is the corresponding peak memory for Q(i,j,k,m)?
+% Let us clarify that B(i,j,m) means i,j already in memory, do i,j in m.
+% First, we do forwards to k in-place, so the peak mem is the forwards pairwise (not including f_i)
+% Second, we do the right hand side in b_r whilst holding f_k, giving f_k+b_r
+% Third, we do the left hand side in b_l
+% The peak memory for us becomes the max of these three stages
+% Actually, given the fact that C(i,j,m) means b_j in memory, this doesn't quite work, but I will address after addressing the case of failure.
+
+% Again, because being precise about memory costs and not using coarse memory slots that all layers can definitely fit into, it is possible for C(i,j,m) to fail because it cannot be done in m memory. 
+% e.g. m=50 but the smallest tensor in the segment is 100, so even with constant mem strategy it cannot be done.
+% Thus, possibility of failure.
+% We encode failure into values of B, that is we check if b_r and b_l are failure before being able to evaluate Q(i,j,k,m)
+% Even before that though, we must consider we are no longer always recursing with m-1, but an arbitrary number.
+% so, we must check if m_r > 0 too
+% if none of these conditions hold for any k, the recursive case fails.
+
+% failure propagation. explain later
+
+% Now, going back to why the calculation of peak memory of Q(i,j,m,k) does not work.
+% Use diagrams to show how b_j not being freed.
+% Explain gives same problem when we transition from right to left subproblems
+% Thus, we must tweak definition of B/C: f_i is computed and already in memory, b_j is computed but must be placed within your m memory.
+% In effect, we are propagating down responsibility of placing and freeing b_j to the subcall that will eventually do f_j-1, b_j -> b_j-1
+
+% with all this, algorithm becomes:
+
+% Notice we have done memoisation in the algo we are yet to discuss.
+% First, as we go over the k loop, we need cost of f_i->f_k. Obviously, this can be acculumated over the loop so we only have to add f_k each time, not compute the whole f_i to f_k.
+% We could memoise this over i too - as in, given cost of forwards from i->k, when we come across i-1->k later, we can do i-1 + i->k.
+% However, I don't think the extra effort is worth. The extra code in the j loop is so little compared to the whole loop body that it hardly affects the runtime at all, meaning extra memoisation effort will hardly give any extra effect.
+% In fact, I reckon the extra complexity may even make it overall slower.
+
+% Secondly, we can `memoise' failure, that is, propagate failure. If some i',j' fails - as in even using the constant memory strategy we cannot do that subsequence - then we definitely cannot do any i,j where i<=i', j>=j'. 
+% We can propagate this failure right through j easily as we just short-circuit all the j'>=j to failure then break from the j loop.
+% Propagating left through i is more complex because i is the outer loop. How would we amend the space of (i,j) iterated over by the loops to remove the (i',j_fail) forall i<=i? The extra complexity probably would in fact increase computational cost and make an already quite unreadable algorithm really unreadable.
+% To clarify, I do not mean storing the j_fail at which we failed, then for each i'<i we iterate to, we do the j's up to j_fail then set the rest to fail and break.
+% I mean actually skipping over those elements of the search space altogether, like we do by breaking out of the j loop.
+% However, we don't even bother with this approach because we would only have to run one extra iteration for j_fail+1 before we hit failure and set all the i,j', j'>=j to failure.
+
+% Next, we still need to address the base cases (constant mem, t=1, constant time)
+
+% t=1 easy, just becomes i=j+1. Set c=, b=. B must *include* j due to updated definition of problem
+
+% constant time? give eqn for peak mem of sequence that does max Bf_i+Bb_i+1 + Bb_i
+% However, we need to explicit base case of this. The recursive case and t=1 base case were carefully crafted to account for this themselves: draw diagram explaining how rec case chooses i+1, then, inductively, on the right the rec case chooses i+2, and so on.
+
+% The quadratic case has peak mem of whichever specific f_i->f_k, f_k,b_k+1->b_k, has the highest peak mem. If the peak mem of quadratic > m, we fail
+% How to calculate this peak mem efficiently? That is, clearly in the already done subproblems we have already evaulated the peak mem of a lot of the computations that occur in the quadratic case.
+% As we iterate from some j-1 to j, most of the quadratic computation is the same, so we should be able to memoise this result to efficiently calculate peak mem for i,j.
+% we update a max_per_layer = max(max_per_layer, f_i to f_j, b_j)
+%
+% Theoretically, we could memoise this properly over all subsequences, not just across the j's for each i. That is, as we go left with i, we could also memoise this peak cost.
+% However, this becomes complicated due to the fact that i-1,j modelled i-1 as not in the m memory, whereas i,j models i-1 as in memory. This means we cannot `induct' over the i-1,j possiblity because, if it was the case that i-1,j causes the peak memory, and not some k, k>i-1, then we cannot directly compared the memoised value with the i-1,j case.
+% Furthermore, I believe the cost savings of this memoisation would be minimal, considering the memoisation across the j loop only adds a tiny bit of code to an already quite large loop body.
+% the extra work involved in working around the above problem may even cause it to be slower!
+
+% Anyway, as for each i, we work out peak per layer cost for quadratic case by memoising over j, the quadratic case becomes a part of the main loop, not some base case we set beforehand.
+% So, if the recursive case failed for all k, we use our memoised value to see if quadratic can be done, else we fail for this i,j.
+
+% also, the other j=i+1 base case can just be a part of the main loop too, as we iterate over all subproblems in order. At the top of the i loop, we consider i,i+1 before moving into the j loop for j=i+2...
+% Thus, no separate base case loop like in the deepmind algo
+
+% Finally we are done! Full algorithm:
