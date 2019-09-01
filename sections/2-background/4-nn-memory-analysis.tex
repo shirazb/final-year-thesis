@@ -9,7 +9,7 @@ Sethi introduced the `pebble game' as a framework for understanding how much mem
 In the game, `pebbles' are placed on the nodes, representing their allocation in memory.
 The following rules govern the placement of the pebbles:
 \begin{enumerate}[topsep=0.1em]
-    \item For any \(c = a+b\); \(c\) cannot be computed until both \(a\) and \(b\) have been allocated.
+    \item For any \(c = f(a, b)\); \(c\) cannot be computed until both \(a\) and \(b\) have been allocated.
     \item Once no computation relies on \(a\) being in memory, it can be deallocated.
 \end{enumerate}
 However, these rules allow for many allocation strategies - the order in which we place pebbles, remove them, and reuse them for other nodes.
