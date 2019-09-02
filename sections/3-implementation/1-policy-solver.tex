@@ -1,16 +1,63 @@
 \section{Optimal Policy Solver with Arbitrary Per-Layer Costs}
 % C(i, j, m) is given f_i, b_j, compute b_i in least computational cost, subject to m, according to the per-layer compute and memory costs.
 
-% how to precisely set costs?
-% first of all, they did not precisely distinguish between costs of forwards and backwards operations. \(y\) was used as cost of doing forward of \(y\) layers in Q, but in base cases, \(t\) referred to forwards and backwards of layers. 
-% Also, each layer was identitical, but now we must uniquely address each layer \(i\). We use alpha, beta to refer to f/b compute and memory costs of i.
+Let us restate the exact problem formulation for a sequence of uniform layers, as studied in Section \ref{sec:2-5-dp-checkpointing}:
 
-% As each subsequence is now unique, rather than doing DP on sequences of size t, we must do DP on all possible subsequences of the original sequence of size N.
-% e.g. (2,5) and (3,6) are now unique, they have different costs.
-% explain how to iterate over this space in solver algo
+\textit{Find the optimal cost }\(C(t,\,m)\)\textit{ for performing backpropagation on a sequence of length }\(t\)\textit{ within }\(m\){ memory slots, using checkpointing.}
+
+How do we generalise this to take into account precise per-layer compute and memory costs?
+
+Let \(\alpha : \{f,\, b\}\times[0,\, N+1] \rightarrow \R^+\) and \(\beta : \{f,\, b\}\times[0,\, N] \rightarrow \Z^+\) be the per-layer forward and backward compute costs and memory costs, respectively, denoted \(\alpha^f_i\) for the computational cost of the \(i^\mathrm{th}\) forward, for example.
+
+We can no longer talk about arbitrary sequences of length \(t\), as each individual subsequence of length \(t\) will have different costs defined by \(\alpha\) and \(\beta\).
+Thus the cost function now becomes \(C(i,\, j,\, m;\, \alpha,\, \beta)\), and similarly the policy \(D(i,\, j,\, m;\, \alpha,\, \beta)\).
+The parameters \(\alpha\) and \(\beta\) will be omitted for brevity when it is clear from the context what they are.
+
+The exact definition of \(C(i,\, j,\, m;\, \alpha,\, \beta)\) becomes:
+
+\textit{Given }\(f_i\)\textit{ and }\(b_j\)\textit{, the minimal computational cost to perform backpropagation on the segment, that is to compute }\(b_i\)\textit{, within }\(m\)\textit{ remaining memory, using checkpointing.}
+
+To recap what these tensors are, consider the simplified computational graph for backpropagation not including the weights given in Figure \ref{fig:3-comp-graph}, as derived in Section \ref{sec:2-4-2-peak-mem-training}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{simplified_comp_graph.png}
+    \caption{Computational graph for backpropagation on a sequence, not showing the parameters.}
+    \label{fig:3-comp-graph}
+\end{figure}
+
+Layer \(i\)'s forward operator takes input \(f_{i-1}\) and produces \(f_{i}\).
+Its backward takes \(f_i\) and \(b_{i+1}\) and produces \(b_i\).
+\(f_0\) is the inputs and \(b_{N+1}\) is the targets, for an \(N\) layer network.
+
+Now that we have this all defined, we can think about how it affects the solver algorithm.
+
+Iterating over the search space bottom-up no longer means for increasing sequence length \(t\), but over all possible subsequences in `subproblem order' - when we reach the subsequence \((i,\, j)\), we have already solved all \textit{its} subsequences.
+We can break this down recursively by saying that for any \(i < k < j\), we have already encountered all subsequences of \((i,\, k)\) and \((k,\, j)\).
+Note, given my formulation of the computational graph, only subsequences where \(i < j\) are defined, so \((i,\, i)\) is not a valid subsequence.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\linewidth]{subproblem-order-traversal.jpg}
+    \caption{Visualisation of traversing all subsequences in `subproblem order'. The vertical bars represent a subproblem \((i,\, j)\). Traversal order goes from top to bottom. Notice that, whenever an \((i,\, j)\) is encountered, all of its subproblems have already been done.}
+    \label{fig:3-subproblem-order-traversal}
+\end{figure}
+
+The way in which I traverse the subsequences is visualised in Figure \ref{fig:3-subproblem-order-traversal}.
+For some sequence \((s, e)\), \(i\) and \(j\) start at the end, that is \(i = e-1\) and \(j=e\).
+We cannot move \(j\) right.
+We have now solved for all subsequences that start with \(i = e-1\).
+We move \(i\) left one to \(e-2\) and initialise \(j\) to the first one to the right of \(i\), \(e-1\).
+Now, as we move \(j\) further right, we have already done (memoised) all the subproblems \((i^\prime,\, j)\), where \(i^\prime > i\).
+In this case, that means we have done all subsequences starting with \(i=e-1\), which is true.
+This means that, whenever we are considering a problem \((i,\, j)\), we have already solved all subproblems of \((i,\, i^\prime)\) and \((i^\prime,\, j)\), so never need to go `down' more than one level, but can use the memoised results.
+Once we have moved \(j\) all the way right, we have now done all subproblems for \(i \geq e-2\).
+Again, we move \(i\) left one to \(e-3\) and initialise \(j\) to \(e-2\).
+Once we have solved this case, we move \(j\) right, knowing that we have already solved all \((i,\, i^\prime)\) and \((i^\prime,\, j)\), for all \(i' \geq i\).
+We keep traversing like this until eventually we have moved \(i\) left to \(i\), and then \(j\) right to \(e\).
 
 % With all this, Q becomes:
-% Q(i,j,k,m) now becomes sum alphas to k + right + left
+% Q(i,j,k,m) = sum alphas to k + right + left
 
 % however, the fact that we are being precise about memory costs has a large impact on the solution too:
 

@@ -120,7 +120,7 @@ Also, though non-linear architectures are now prevalent in neural networks, they
 \todo{others} H-revolve? Imperial one? Those two new papers that generalise to arbitrary graphs?
 % heirarchical checkpointing: async and sync? num levels of memory? Assumptions on comp costs, memory costs, transfer costs, allocation costs?
 
-\subsection{Optimal Compute Cost Checkpointing Through Dynamic Programming}
+\subsection{Optimal Compute Cost Checkpointing Through Dynamic Programming} \label{sec:2-5-dp-checkpointing}
 % 5. DeepMind
 % Finally something that gives optimal C for bounded B
 % Only for uniform cost RNNs
@@ -148,7 +148,7 @@ Thus, to find the optimal \(C(t, m)\) we must know the optimal costs for all the
 We therefore need to co-optimise these mutually recursive functions, which are defined as follows:
 \begin{align*}
     C(t,\, m)      \;&=\; Q(t,\, m,\, D(t,\, m))\\[0.5em]
-    Q(t,\, m,\, y) \;&=\; \text{some function of } y \text{ and relevant subproblems } C(t\prime,\, m\prime)\\[0.5em]
+    Q(t,\, m,\, y) \;&=\; \text{some function of } y \text{ and relevant subproblems } C(t^\prime,\, m^\prime)\\[0.5em]
     D(t,\, m)      \;&=\; \argmin_{1\leq y < t}\, Q(t,\, m,\, y)
 \end{align*}
 This can be solved using standard DP techniques. Gruslys et al. use bottom-up value iteration.
