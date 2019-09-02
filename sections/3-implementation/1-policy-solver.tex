@@ -1,21 +1,24 @@
 \section{Optimal Policy Solver with Arbitrary Per-Layer Costs}
-% C(i, j, m) is given f_i, b_j, compute b_i in least computational cost, subject to m, according to the per-layer compute and memory costs.
+It is important to have a firm grasp of Algorithm \ref{alg:2-policy-solver} before reading this section.
 
-Let us restate the exact problem formulation for a sequence of uniform layers, as studied in Section \ref{sec:2-5-dp-checkpointing}:
+Let us restate the exact problem it is solving, which is for a sequence of uniform layers:
 
-\textit{Find the optimal cost }\(C(t,\,m)\)\textit{ for performing backpropagation on a sequence of length }\(t\)\textit{ within }\(m\){ memory slots, using checkpointing.}
+\textit{Find the optimal cost }\(C(t,\,m)\)\textit{ for performing backpropagation on a sequence of length }\(t\)\textit{ within }\(m\)\textit{ memory slots, using checkpointing.}
 
 How do we generalise this to take into account precise per-layer compute and memory costs?
+In this section, I will explain this by deriving the shortcomings of the original policy solver when tasked with handling per-layer costs, and then showing how to overcome them.
 
-Let \(\alpha : \{f,\, b\}\times[0,\, N+1] \rightarrow \R^+\) and \(\beta : \{f,\, b\}\times[0,\, N] \rightarrow \Z^+\) be the per-layer forward and backward compute costs and memory costs, respectively, denoted \(\alpha^f_i\) for the computational cost of the \(i^\mathrm{th}\) forward, for example.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Introducing Per-Layer Costs}
+Let \(\alpha : \{f,\, b\}\times[0,\, N+1] \rightarrow \R^+\) and \(\beta : \{f,\, b\}\times[0,\, N+1] \rightarrow \Z^+\) be the per-layer forward and backward compute costs and memory costs, respectively, denoted \(\alpha^f_i\) for the computational cost of the \(i^\mathrm{th}\) forward, for example.
 
-We can no longer talk about arbitrary sequences of length \(t\), as each individual subsequence of length \(t\) will have different costs defined by \(\alpha\) and \(\beta\).
+We can no longer talk about arbitrary sequences of length \(t\), as each individual subsequence of length \(t\) will have different costs as defined by \(\alpha\) and \(\beta\).
 Thus the cost function now becomes \(C(i,\, j,\, m;\, \alpha,\, \beta)\), and similarly the policy \(D(i,\, j,\, m;\, \alpha,\, \beta)\).
 The parameters \(\alpha\) and \(\beta\) will be omitted for brevity when it is clear from the context what they are.
 
 The exact definition of \(C(i,\, j,\, m;\, \alpha,\, \beta)\) becomes:
 
-\textit{Given }\(f_i\)\textit{ and }\(b_j\)\textit{, the minimal computational cost to perform backpropagation on the segment, that is to compute }\(b_i\)\textit{, within }\(m\)\textit{ remaining memory, using checkpointing.}
+\textit{Given }\(f_i\)\textit{ and }\(b_j\)\textit{, the optimal computational cost according to }\(\alpha\)\textit{ and }\(\beta\)\textit{ to perform backpropagation on the segment, that is to compute }\(b_i\)\textit{, within }\(m\)\textit{ remaining memory, using checkpointing.}
 
 To recap what these tensors are, consider the simplified computational graph for backpropagation not including the weights given in Figure \ref{fig:3-comp-graph}, as derived in Section \ref{sec:2-4-2-peak-mem-training}.
 
@@ -28,24 +31,27 @@ To recap what these tensors are, consider the simplified computational graph for
 
 Layer \(i\)'s forward operator takes input \(f_{i-1}\) and produces \(f_{i}\).
 Its backward takes \(f_i\) and \(b_{i+1}\) and produces \(b_i\).
-\(f_0\) is the inputs and \(b_{N+1}\) is the targets, for an \(N\) layer network.
+The network inputs are \(f_0\) and the targets are \(b_{N+1}\), for an \(N\) layer network.
 
 Now that we have this all defined, we can think about how it affects the solver algorithm.
 
-Iterating over the search space bottom-up no longer means for increasing sequence length \(t\), but over all possible subsequences in `subproblem order' - when we reach the subsequence \((i,\, j)\), we have already solved all \textit{its} subsequences.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Traversing the Subproblems Bottom-Up}
+Iterating over the search space bottom-up no longer means iterating over increasing sequence length \(t\), but over all possible subsequences in `subproblem order' - when we reach the subsequence \((i,\, j)\), we should have already solved all \textit{its} subproblems.
 We can break this down recursively by saying that for any \(i < k < j\), we have already encountered all subsequences of \((i,\, k)\) and \((k,\, j)\).
 Note, given my formulation of the computational graph, only subsequences where \(i < j\) are defined, so \((i,\, i)\) is not a valid subsequence.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.75\linewidth]{subproblem-order-traversal.jpg}
+    \includegraphics[width=0.8\linewidth]{subproblem-order-traversal.jpg}
     \caption{Visualisation of traversing all subsequences in `subproblem order'. The vertical bars represent a subproblem \((i,\, j)\). Traversal order goes from top to bottom. Notice that, whenever an \((i,\, j)\) is encountered, all of its subproblems have already been done.}
     \label{fig:3-subproblem-order-traversal}
 \end{figure}
 
 The way in which I traverse the subsequences is visualised in Figure \ref{fig:3-subproblem-order-traversal}.
-For some sequence \((s, e)\), \(i\) and \(j\) start at the end, that is \(i = e-1\) and \(j=e\).
-We cannot move \(j\) right.
+For some sequence \((s, e)\), we will traverse all subsequences using iterators \(i\) and \(j\).
+We start at the end, that is \(i = e-1\) and \(j=e\).
+We cannot move \(j\) further right.
 We have now solved for all subsequences that start with \(i = e-1\).
 We move \(i\) left one to \(e-2\) and initialise \(j\) to the first one to the right of \(i\), \(e-1\).
 Now, as we move \(j\) further right, we have already done (memoised) all the subproblems \((i^\prime,\, j)\), where \(i^\prime > i\).
@@ -56,39 +62,173 @@ Again, we move \(i\) left one to \(e-3\) and initialise \(j\) to \(e-2\).
 Once we have solved this case, we move \(j\) right, knowing that we have already solved all \((i,\, i^\prime)\) and \((i^\prime,\, j)\), for all \(i' \geq i\).
 We keep traversing like this until eventually we have moved \(i\) left to \(i\), and then \(j\) right to \(e\).
 
-% With all this, Q becomes:
-% Q(i,j,k,m) = sum alphas to k + right + left
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Redefining \texorpdfstring{\(Q(\cdot)\)}{\textit{Q()}} with Per-Layer Costs}
+To recap, so far we have introduced per-layer costs, redefined the problem to be on all possible subsequences, and seen how to set up the solver to traverse the subsequences bottom-up.
+Next, we give the new definition of the cost-action function that takes into account the per-layer costs:
+\begin{equation} \label{eqn:3-Q-1}
+    Q(i,\, j,\, k,\, m) \;=\; \sum_{l \;=\; i\,+\,1}^k \alpha^f_l \;+\; C(k,\, j,\, m\,-\,\beta^f_k) \;+\; C(i,\, k,\, m)
+\end{equation}
+This is the same as before, except we now incur the \textit{precise} costs of executing the forwards to \(f_k\), and recurse on the right with the \textit{precise} reduction in memory from checkpointing \(f_k\).
+Note \(f_i\) is given by the definition of the problem so we start the sum of the forwards at \(f_{i+1}\).
 
-% however, the fact that we are being precise about memory costs has a large impact on the solution too:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Handling the Continuous Memory State by Tracking the Peak Memory Cost of a Solution \texorpdfstring{\(C(\cdot)\)}{\textit{C()}}}
+However, all is not so simple.
+The fact that we are now being precise about memory causes a lot of issues.
 
-% Because we are no longer using coarse-grained slots, but a specific amount of memory, the solution for some C(i,j,m) does not necessarily use all m memory.
-% we want to take advantage of that. If the optimal right and left only use much less memory than the specified m and m_r, we have less pressure to trade-off compute for memory at this `level' of the search space, so have opened up possible solutions with lower comp cost.
-% This means, as well as C, we need to track a B(i,j,m) that represents the peak memory within which C(i,j,m) was achieved.
-% What, then, is the corresponding peak memory for Q(i,j,k,m)?
-% Let us clarify that B(i,j,m) means i,j already in memory, do i,j in m.
-% First, we do forwards to k in-place, so the peak mem is the forwards pairwise (not including f_i)
-% Second, we do the right hand side in b_r whilst holding f_k, giving f_k+b_r
-% Third, we do the left hand side in b_l
-% The peak memory for us becomes the max of these three stages
-% Actually, given the fact that C(i,j,m) means b_j in memory, this doesn't quite work, but I will address after addressing the case of failure.
+Previously, for RNNs, we divided memory into coarse-grained slots, and every layer always used exactly one slot - no more, no less.
+Now, layers use a specific amount of memory, so the optimal solution to some \(C(i,\,j,\,m)\) may not use all \(m\) memory.
+We want to take advantage of that - if the optimal solutions for the left and right subproblems use less memory than required, we have less pressure at this `level' to trade-off compute for memory, resulting in a lower computational cost.
+This means, as well as \(C(i,\,j,\,m)\), we need to track a \(B(i,\,j,\,m)\) that represents the peak memory required for the corresponding solution to \(C(i,\,j,\,m)\).
+To be clear, \(B(i,\,j,\,m)\) means \(f_i\) and \(b_j\) have already been computed and are in memory, so we have \(m\) memory remaining in which to compute \(b_i\).
 
-% Again, because being precise about memory costs and not using coarse memory slots that all layers can definitely fit into, it is possible for C(i,j,m) to fail because it cannot be done in m memory. 
-% e.g. m=50 but the smallest tensor in the segment is 100, so even with constant mem strategy it cannot be done.
-% Thus, possibility of failure.
-% We encode failure into values of B, that is we check if b_r and b_l are failure before being able to evaluate Q(i,j,k,m)
-% Even before that though, we must consider we are no longer always recursing with m-1, but an arbitrary number.
-% so, we must check if m_r > 0 too
-% if none of these conditions hold for any k, the recursive case fails.
+Recall computing \(C(i,\,j,\,m)\) requires computing \(Q(i,\,j,\,k,\,m)\) for all possible actions \(k\), then picking the optimal one.
+Likewise, to find the corresponding \(B(i,\,j,\,m)\) we must know how to calculate the peak memory of each \(Q(i,\,j,\,k,\,m)\), then set \(B(\cdot)\) (and \(C(\cdot)\)) to the peak memory (and compute cost) of the optimal \(Q(\cdot)\).
 
-% failure propagation. explain later
+What, then, is the peak memory required for \(Q(i,\,j,\,k,\,m)\)?
+We consider the peak memory of the three stages of computing it.
+\begin{enumerate}
+    \item \textbf{Compute the forwards from \(f_{i+1}\) to \(f_k\)}:
+    The forwards are done in place, so peak memory for this is the maximum pairwise \(f_{l-1}+f_l\) across the layers.
+    For the computation of \(f_{i+1}\), though, we exclude the memory of \(f_i\) as the definition of \(B(\cdot)\) says it is already in memory, so not required to be within the \(m\) bound.
+    \item \textbf{Recurse on the right}: We hold \(f_k\) in memory and recurse on the right, so the peak memory cost becomes \(\beta^f_k\) plus the cost of the right.
+    We assume by induction that we have \(B(k,\, j,\, m\,-\,\beta^f_k)\).
+    \item \textbf{Recurse on the left}: We assume by induction we have \(B(i,\,k,\,m)\).
+\end{enumerate}
+The peak memory is the max of the three stages:
+\begin{align} \label{eqn:3-b-k-1}
+\begin{aligned}[t] % so only one label for whole thing
+    &\max(\\[0.5em]
+    &\qquad\begin{aligned}[t]
+        &\beta^f_{i+1}, \\[0.5em]
+        &\max_{i+1 \,<\, l \,\leq\, k}\; \beta^f_{l-1} + \beta^f_l, \\[0.5em]
+        &\beta^f_k \,+\, B(k,\, j,\, m\,-\,\beta^f_k), \\[0.5em]
+        &B(i,\,k,\,m)
+    \end{aligned} \\[0.5em]
+    &)
+\end{aligned}
+\end{align}
+All would seem well then, except it does not quite work due to the definition of \(C(i,\,j,\,m)\) stating \(b_j\) is already in memory elsewhere, not within the \(m\) memory, but I will explain this after first addressing the case of failure.
 
-% Now, going back to why the calculation of peak memory of Q(i,j,m,k) does not work.
-% Use diagrams to show how b_j not being freed.
-% Explain gives same problem when we transition from right to left subproblems
-% Thus, we must tweak definition of B/C: f_i is computed and already in memory, b_j is computed but must be placed within your m memory.
-% In effect, we are propagating down responsibility of placing and freeing b_j to the subcall that will eventually do f_j-1, b_j -> b_j-1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Handling Failure When Memory Is Insufficient}
+Again, because we are using precise memory costs, not coarse-grained memory slots, it is not guaranteed that \(C(i,\,j,\,m)\) can actually be done in \(m\) memory.
+Previously, we could always fall back to the `recompute everything' case that could compute any sequence within one slot.
+Now, it is possible, for example, to have \(m=50\) but a sequence with a tensor or size 100.
+In this case, not even the `recompute everything' strategy can save us; we have failed.
+This means, in \(Q(i,\,j,\,k,\,m)\), we must check for failure.
 
-% with all this, algorithm becomes:
+First, we see if the peak memory cost of running the forwards to the checkpoint exceeds \(m\).
+Then, before we can even look at the right subproblem, we must check that \(m - \beta^f_k \,>\, 0\).
+Once we have done that, we can check that neither the right or left subproblems resulted in failure.
+Finally, we compute the peak memory of our cost-action \(Q(\cdot)\) according to the above Equation \ref{eqn:3-b-k-1}, and check if that is under \(m\).
+
+If any one of these checks fails, this action \(k\) fails.
+If every action \(k\) fails, we have run out of options and must set the subproblem for \((i, j, m)\) to failure.
+I choose to propagate failure through \(B(\cdot)\), rather than \(C(\cdot)\).
+All this means is that we check \(B(\cdot)\) for failure of a subproblem and set failure of our current subproblem in \(B(\cdot)\), rather than \(C(\cdot)\).
+
+I will elaborate on how failure propagates `up' through the search space later, after I give the algorithm as derived so far, as it will be more clear then.
+Before that, as promised, we must talk about how our expression for \(Q(i,\,j,\,k,\,m)\) in Equation \ref{eqn:3-Q-1} is not quite right.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Delegating Ownership of \texorpdfstring{\(b_j\)}{\textit{b\_j}} to the Subproblems}
+The definition of \(Q(i,\,j,\,k,\,m)\) imposes that \(b_j\) is already computed and in memory elsewhere, not in the \(m\) we have left to compute \(b_i\).
+I will show how this definition is not consistent with our memory analysis in Section \ref{sec:2-4-2-peak-mem-training} that allows us to free \(b_j\) as soon as \(b_{j-1}\) is computed, but instead forces us to wait until \(b_i\) has been computed.
+
+Consider Figure \ref{fig:3-b-j-placement-problem}, which visualises the unrolling of a couple recursive calls of \(C(i,\,j,\,m)\).
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.83\linewidth]{b_j_placement_problem.pdf}
+    \caption{The unrolling of two recursive calls into the right subproblems of \(C(i,\,j,\,m)\).}
+    \label{fig:3-b-j-placement-problem}
+\end{figure}
+
+As per the definition of \(C(\cdot)\), we start with \(f_i\) and \(b_j\) already allocated in memory, and \(m\) memory left to work with to solve the problem.
+We pick some checkpoint \(f_k\) and recurse on the right.
+At the level of the subcall, \(f_k\) is defined as `already' in memory, separate from the \(m-\beta^f_k\) we have left to work with.
+Once again, we pick some \(f_{k^\prime}\) and recurse on the right.
+Now, \(f_{k^\prime}\) is already in memory, and we have \(m - \beta^f_k - \beta^f_{k^\prime}\) to work with.
+
+As we recurse further right, shown in Figure \ref{fig:3-b-j-placement-problem-right}, this memory will get used up as we place more checkpoints, until eventually we place \(f_{j-1}\), at which point we can start the backwards pass.
+We compute \(b_{j-1}\) from \(f_j\) and \(b_j\).
+As shown in our analysis in Section \ref{sec:2-4-2-peak-mem-training}, we can now free \(f_{j-1}\) and \(b_j\).
+As we proceed backwards freeing memory, eventually our subcall \(C(k^{\prime},\,j,\,m - \beta^f_k - \beta^f_{k^\prime})\) finishes with only the computed \(b_{k^\prime}\) sitting in the \(m - \beta^f_k - \beta^f_{k^\prime}\) memory.
+
+However, notice that \(b_j\) was considered already allocated in memory elsewhere, separate to our workspace of size \(m - \beta^f_k - \beta^f_{k^\prime}\);
+as we proceeded backwards, we had no control over whether \(b_j\) was freed so could not reclaim its memory and reuse it.
+The problem is that a much further up supercall had fixed the allocation of \(b_j\), and only when it returns is \(b_j\) freed.
+This is caused by defining \(C(\cdot)\) to say that \(b_j\) is already allocated outside of the \(m\) memory remaining, fixing its placement `early' in the supercall, and so it is not until the supercall returns that eventually it will be freed.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.6\linewidth]{b_j_placement_problem_recurse_further_right.pdf}
+    \caption{Moving `right' until we finally reach \(f_{j-1}\), at which point we can move left, freeing tensors until only the ouput \(b_{k^\prime}\) remains.}
+    \label{fig:3-b-j-placement-problem-right}
+\end{figure}
+Instead, we want to delegate responsibility of placing and freeing \(b_j\) down the subcalls, until eventually a subcall performs the backward step and can free it, reclaiming the memory.
+Otherwise, when we start with \(C(0,\, N+1,\, m)\), the targets \(b_{N+1}\) will be kept allocated until the entire call has finished and we have gone all the way left to \(b_0\), rather than being the first backward at the end to get freed.
+Each time we recurse on the left, the \(b_j\) for that call will also not be finished until we have proceeded all the way left to the \(b_i\) for that call.
+Clearly, this definition of \(C(\cdot)\) has totally broken our memory analysis.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.77\linewidth]{b_j_placement_new.pdf}
+    \caption{How \(b_j\) is now placed within \(m\), so the subcalls take ownership of placing it.}
+    \label{fig:3-b-j-placement-new}
+\end{figure}
+
+Therefore, we redefine \(C(i,\,j,\,m)\) to mean that \(f_i\) is computed and already in memory, and \(b_j\) is computed, \textit{but we are responsible for placing \(b_j\) within our \(m\) memory and freeing it}.
+This way, as we recurse down the subcalls, say to the right, we pass `ownership' of \(b_j\) to that subcall, which will place \(b_j\) within its own \(m-\beta^f_k\) memory and then free it as soon as possible.
+This is visualised in Figure \ref{fig:3-b-j-placement-new}.
+
+Now, as we keep recursing further right placing checkpoints, when we eventually reach \(f_{j-1}\), the subcall we are in can compute the backward step for \(b_{j-1}\) and free \(b_j\).
+As the backward pass proceeds left, the backwards will now actually be freed, until we have gone back up to the \(C(k^\prime,\, j,\, m-\beta^f_k -\beta^f_{k^\prime})\) call and \(b_{k^\prime}\) is the only tensor left.
+This is shown in Figure \ref{fig:3-b-j-placement-new-right}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth]{b_j_placement_new_recurse_right.pdf}
+    \caption{Demonstrating how the backwards will now actually be freed during the backwards pass}
+    \label{fig:3-b-j-placement-new-right}
+\end{figure}
+
+This new definition of \(C(\cdot)\) of course affects our analysis of peak memory for \(Q(i,\,j,\,k,\,m)\) in Equation \ref{eqn:3-b-k-1}.
+We must take into account the fact the \(b_j\) is using part of the \(m\) memory.
+Thus, the first stage where we compute the forwards to \(f_k\) must be done within \(m-\beta^b_j\) memory.
+Then, we recurse on the right with the same \(m-\beta^f_k\) memory as before, but now the definition of the subcall is that it must also place \(b_j\) within that memory.
+By the time the subcall has finished, \(b_j\) will be long gone and \(b_k\) will be all that remains in its \(m-\beta^f_k\) memory.
+We then recurse on the left with the same \(m\) memory as before;
+the left subcall is now responsible for placing \(b_k\) within that \(m\) memory (and then freeing it), rather than saying \(b_k\) is in some separate memory to \(m\) whilst the left subcall proceeds.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{new_Q_peak_mem.pdf}
+    \caption{How peak memory occurs across the three stages of \(Q(\cdot)\).}
+    \label{fig:3-new-Q-peak-mem}
+\end{figure}
+
+The peak memory across the three stages is visualised Figure \ref{fig:3-new-Q-peak-mem}.
+Specifically, we update the peak memory of \(Q(i,\,j,\,k,\,m)\) as established in Equation \ref{eqn:3-b-k-1} to the following:
+\begin{align} \label{eqn:3-b-k-2}
+    \begin{aligned}[t] % so only one label for whole thing
+        &\max(\\[0.5em]
+        &\qquad\begin{aligned}[t]
+            &\beta^b_j \,+\, \beta^f_{i+1}, \\[0.5em]
+            &\beta^b_j \,+\, \max_{i+1 \,<\, l \,\leq\, k}\; \beta^f_{l-1} + \beta^f_l, \\[0.5em]
+            &\beta^f_k \,+\, B(k,\, j,\, m\,-\,\beta^f_k), \\[0.5em]
+            &B(i,\,k,\,m)
+        \end{aligned} \\[0.5em]
+        &)
+\end{aligned}
+\end{align}
+As before, we will have to check each of these stages for failure before evaluating \(Q(\cdot)\).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{The New Algorithm So Far}
+In the above sections, I have accounted for per-layer costs; how to traverse the subproblem space; introduced \(B(\cdot)\); accounted for failure; and changed how the problem is modelled so the backwards actually get freed during the backward pass.
+
+Putting this all together, I can present the new the solver algorithm, with the changes \textit{thus far}:
+
 
 % Notice we have done memoisation in the algo we are yet to discuss.
 % First, as we go over the k loop, we need cost of f_i->f_k. Obviously, this can be acculumated over the loop so we only have to add f_k each time, not compute the whole f_i to f_k.
