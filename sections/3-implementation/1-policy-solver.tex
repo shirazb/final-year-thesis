@@ -73,7 +73,7 @@ This is the same as before, except we now incur the \textit{precise} costs of ex
 Note \(f_i\) is given by the definition of the problem so we start the sum of the forwards at \(f_{i+1}\).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Handling the Continuous Memory State by Tracking the Peak Memory Cost of a Solution \texorpdfstring{\(C(\cdot)\)}{\textit{C()}}}
+\subsection{Handling the Continuous Memory State by Tracking the Peak Memory Cost of Subproblems \texorpdfstring{\(B(\cdot)\)}{\textit{B()}}}
 However, all is not so simple.
 The fact that we are now being precise about memory causes a lot of issues.
 
@@ -227,29 +227,199 @@ As before, we will have to check each of these stages for failure before evaluat
 \subsection{The New Algorithm So Far}
 In the above sections, I have accounted for per-layer costs; how to traverse the subproblem space; introduced \(B(\cdot)\); accounted for failure; and changed how the problem is modelled so the backwards actually get freed during the backward pass.
 
-Putting this all together, I can present the new the solver algorithm, with the changes \textit{thus far}:
+Let us take a breather from analysing the naunces of the problem, and instead consolidate the above changes into the new algorithm \textit{thus far}, shown in Algorithm \ref{alg:3-policy-solver-intermediate}.
 
+There are a still a few minor details to note. First, whereas Gruslys et al. defined \(y = D(i,\, j,\, m)\) as the \textit{offset} to the next layer to checkpoint; I use \(k = D(i,\,j,\,m)\) as the \textit{index} of the forward tensor.
 
+Second, according to our definition of \(C(i,\,j,\,m)\), the \(m\) memory budget does not include \(f_i\) but does include \(b_j\).
+This means the largest subproblem on \((0,\,N+1)\) must be solved within \(M-\beta^f_0\) memory, not \(M\), as there must be enough space remaining in the original \(M\) to store \(f_0\) and separately compute \(C(0,\,N+1,\,m-\beta^f_0)\).
+
+Also, \(\alpha^f_{N+1}\) and \(\beta^f_{N+1}\) are not actually defined tensors, but since \(\alpha^b_{N+1}\) and \(\beta^b_{N+1}\) are defined, I make the second dimension of their arrays \(N+2\).
+
+Lastly, as arrays start at 0, but memory starts at 1, we will index \(B,\, C,\, D\) with \(m-1\) when referring to \(m\) memory.
+
+\begin{algorithm}[htbp]
+    \DontPrintSemicolon
+    \SetKwData{PeakFs}{peak\textsubscript{F}}
+    \SetKwData{Failed}{failed}
+    \SetKwData{PeakR}{peak\textsubscript{R}}
+    \SetKwData{PeakL}{peak\textsubscript{L}}
+    \SetKwData{Peak}{peak}
+    \SetKw{Continue}{continue}
+
+    \KwIn{\(N\) the sequence length}
+    \KwIn{\(M\) the memory budget}
+    \KwIn{\(\alpha\) a \(2\times(N+2)\) \texttt{float} array of the per-operator compute costs}
+    \KwIn{\(\beta\) a \(2\times(N+2)\) \texttt{int} array of the per-operator memory costs}
+    \BlankLine
+    
+    \(M \;\leftarrow\; M \,-\, \alpha^f_0\)\;
+    \BlankLine
+
+    Let \(B\), \(C\), \(D\) be 3D arrays of size \((N+1)\times(N+1)\times M\)\;
+    \BlankLine
+
+    Base cases will go here.\;
+    \BlankLine
+
+    \# Traverse the subproblems bottom-up.\;
+    \For{\(m \;=\; 2\) \KwTo \(M\)}{
+        \For{\(i \;=\; N\) \KwTo \(0\)}{
+            \# Base case has already handled \((i,\,i+1)\), so start at \(i+2\).\;
+            \For{\(j \;=\; i+2\) \KwTo \(N+1\)}{
+                \(C_{min} \;\leftarrow\; \infty\)\;
+                \Failed \(\;\leftarrow\; \top\)\;
+                \For{\(k \;=\; i\,+\,1\) \KwTo \(j\,-\,1\)}{
+                    \# Pre-check the stages of this strategy for failure.\;
+                    \BlankLine
+
+                    \# 1: Forwards to \(f_k\) in-place whilst holding \(b_j\).\;
+                    \PeakFs \(\leftarrow\; \beta^b_j \;+\; \max(f_{i+1},\, \max_{i \,<\, l \,<\, k}\, \beta^f_l + \beta^f_{l+1})\)\;
+                    \BlankLine
+
+                    \If{\PeakFs \(>\, m\)}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \# 2, 3: Right and left subproblems \;
+                    \BlankLine
+
+                    \If{\(m \,-\, \beta^f_k \,<\, m\)}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \PeakR \(\;\leftarrow\; B[k][j][m-\beta^f_k-1]\)\;
+                    \PeakL \(\;\leftarrow\; B[i][j][m-1]\)\;
+                    \BlankLine
+
+                    \If{\PeakR or \PeakL failed}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \Peak \(\;\leftarrow\; \max( \)\PeakFs\(,\, \beta^f_k + \) \PeakR\(,\,\)\PeakL\( ) \)\;
+                    \BlankLine
+
+                    \If{\Peak\(\;>\; m\)}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \# Success, a strategy works!\;
+                    \Failed\(\;\leftarrow\; \bot\)\;
+                    \BlankLine
+
+                    \(c \;\leftarrow\; \sum_{l\;=\;i\,+\,1}^k \alpha^f_l \,+\, C[k][j][m-\beta^f_k-1] \,+\, C[i][k][m-1]\)\;
+                    \BlankLine
+
+                    \If{\(c \,<\, C_{min}\)}{
+                        \(C_{min} \;\leftarrow\; c\)\;
+                        \(B[i][j][m-1] \;\leftarrow\;\) \Peak\;
+                        \(C[i][j][m-1] \;\leftarrow\; c\)\;
+                        \(D[i][j][m-1] \;\leftarrow\; k\)\;
+                    }
+                }
+            }
+        }
+    }
+    \Return{\((C,\, D)\)}
+    
+    \caption{The new policy solver thus far, incorporating the changes from the above sections.}
+    \label{alg:3-policy-solver-intermediate}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Memoisation of Costs Across Sequences}
 % Notice we have done memoisation in the algo we are yet to discuss.
-% First, as we go over the k loop, we need cost of f_i->f_k. Obviously, this can be acculumated over the loop so we only have to add f_k each time, not compute the whole f_i to f_k.
-% We could memoise this over i too - as in, given cost of forwards from i->k, when we come across i-1->k later, we can do i-1 + i->k.
-% However, I don't think the extra effort is worth. The extra code in the j loop is so little compared to the whole loop body that it hardly affects the runtime at all, meaning extra memoisation effort will hardly give any extra effect.
-% In fact, I reckon the extra complexity may even make it overall slower.
+Now that we have the algorithm concretely written down, we can see further opportunity for memoisation.
 
-% Secondly, we can `memoise' failure, that is, propagate failure. If some i,j fails - as in even using the constant memory strategy we cannot do that subsequence - then we definitely cannot do any i',j' where i'<=i, j'>=j. 
-% We can propagate this failure right through j easily as we just short-circuit all the j'>=j to failure then break from the j loop.
-% Propagating left through i is more complex because i is the outer loop. How would we amend the space of (i,j) iterated over by the loops to remove the (i',j_fail) forall i<=i? The extra complexity probably would in fact increase computational cost and make an already quite unreadable algorithm really unreadable.
-% To clarify, I do not mean storing the j_fail at which we failed, then for each i'<i we iterate to, we do the j's up to j_fail then set the rest to fail and break.
-% I mean actually skipping over those elements of the search space altogether, like we do by breaking out of the j loop.
-% I'm sure any solution would greatly increase complextiy and maybe actually be slower.
-% we don't even bother with the stated approach because we would only have to run one extra iteration to j_fail+1 before we hit failure and set all the i,j', j'>=j_fail to failure.
+First, as we go over the \(k\) loop, we need the cost of computing \(f_{i+1}\rightarrow f_k\).
+Obviously, we can accumulate this over the loop, rather than summing from \(f_{i+1}\) each time.
 
-% Next, we still need to address the base cases (constant mem, t=1, constant time)
+We could memoise this fully over all possible subsequences, so when we move \(j\) right we already have the costs to \(j-1\), and when we move \(i\) left, we already have the costs from \(i+1\).
+However, I do not think the extra effort is worth it.
+The extra code to memoise over just the \(k\) loop is so little compared to the entire loop body that it hardly adds any cost, so further savings from full memoisation will not have much effect.
 
-% t=1 easy, just becomes i=j+1. Set c=, b=. B must *include* j due to updated definition of problem
+Likewise, across the \(k\) loop, we can memoise the peak memory of computing the forwards to \(f_k\); and likewise, I do not bother with `fully' memoising this.
 
-% constant time? give eqn for peak mem of sequence that does max Bf_i+Bb_i+1 + Bb_i
-% However, we need to explicit base case of this. The recursive case and t=1 base case were carefully crafted to account for this themselves: draw diagram explaining how rec case chooses i+1, then, inductively, on the right the rec case chooses i+2, and so on.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Failure Propagation and Short-Circuiting}
+In this section, I consider how failure propagates `up' through the search space.
+If some \(i,\,j,\,m\) fails - as in even when using the constant memory strategy we cannot run the subsequence - then we definitely cannot do any sequence of which this is a subsequence.
+That is, all \(i^\prime,\, j^\prime\) where \(i^\prime \,\leq\, i\) and \(j^\prime \,\geq\, j\) must fail too.
+
+We can propagate this failure right through \(j\) easily, as it is the inner loop.
+When we encounter the failed subsequence, we short-circuit and set all the \(i,\, j^\prime\) to failure, then break from the \(j\) loop.
+
+Propagating left through \(i\) is more complex, as it is the outer loop.
+If the failure occurred on \((i_\mathrm{F},\, j_\mathrm{F})\) We need to remove from the \((i,\,j)\) space iterated over by the loops all \((i^\prime,\, j_{\mathrm{F}})\) for \(i^\prime \,\leq\, i_\mathrm{F}\).
+To clarify, I do not mean storing the \(j_\mathrm{F}\) at which we failed, then for each \(i^\prime \,\leq\, i\) we iterate to, doing the \(j\)s up to \(j_\mathrm{F}\), setting the rest to failure, and breaking from the loop.
+I mean actually removing those elements from the search space altogether, so we never iterate to them, like we elide the \(j\) by breaking out of the the \(j\) loop.
+
+I am sure any solution would greatly increase the code complexity and so even make it slower.
+I do not even bother with the stated approach of storing \(j_\mathrm{F}\) and immediately short-circuiting when we hit it, as the algorithm will only have to run that one extra iteration for \(j_\mathrm{F}\) before realising failure and setting all \(j^\prime \,\geq\, j_{F}\) to failure.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Base Cases}
+Finally, we consider the base cases of the algorithm.
+Previously, these were when the sequence length \(t\) was 1;
+when \(m\) was 1 so we employed the constant space strategy;
+and when \(m \,\geq\, t\), so we employed the no recomputation strategy.
+
+\subsubsection*{Unit Sequence Length}
+We shall first address the unit sequence length case.
+It corresponds to \(j \,=\, i+1\).
+For the problem \(C(i,\,i+1,\,m)\), we are given \(f_i\) and \(b_{i+1}\), and simply need to run the backward operator to get \(b_i\).
+Thus, the computational cost is \(C(i,\,i+1,\,m) \;=\; \alpha^b_i\).
+Recall the definition of the subproblem means it is responsible for placing \(b_{i+1}\) within its memory, as well as of course \(b_{i}\).
+This makes the peak memory cost \(B(i,\,i+1,\,m) \;=\; \beta^b_i \,+\, \beta^b_{i+1}\).
+Also, we need to check for failure - that this memory cost is less than \(m\) - before actually setting \(C(\cdot)\) and \(B(\cdot)\).
+If failure did occur, then, like explained above, we set all \((i, j^\prime)\) where \(j^\prime \,\geq\, i+1\) to failure, then skip over the rest of the \(j\) loop.
+Finally, we do not need to explcitly set the policy \(D(\cdot)\) as the executor function will have a base case for \(j \,=\, i+1\) that performs the backward step.
+
+Given that we have already set up the loops to traverse \textit{all} subproblems bottom-up, we do not need a separate loop beforehand for initialising \(C(\cdot)\) with this base case, like in the original Algorithm \ref{alg:2-policy-solver} for RNNs.
+In fact, looking at our new Algorithm \ref{alg:3-policy-solver-intermediate}, we can see that, before the \(j\) loop starts, initialised to \(j\,=\,i+2\), we can handle the \(j\,=\,i+1\) base case first.
+
+\subsubsection*{The ``No Recomputation Strategy''}
+When there is enough memory, we do not need to trade-off any compute for memory.
+Recall from Equation \ref{eqn:2-nn-peak-mem} the peak memory of running backpropagation on a sequence:
+\begin{equation*}
+    \max_{0 \leq i \leq N} \sum_{l\;=\;0}^i \beta^f_l + \beta^b_{i+1} + \beta^b_i
+\end{equation*}
+Figure \ref{} visualises some possibilities of what this looks like.
+
+The base case would be triggered for any subsequence we encounter where this expression is within \(m\).
+That would be quite hard to memoise over and efficiently detect.
+However, I have carefully crafted the \(j\,=\,i+1\) base case and the recursive case \(Q(\cdot)\) to have already accounted for this base case themselves.
+The following outlines a proof of this.
+
+First, consider a sequence of size one.
+The \(j\,=\,i+1\) base case for this simply computes the single backward operator; it is vacuously true that no recomputation occurs.
+
+Second, consider again the sequence of length greater than one in Figure \ref{}.
+Let us say that its peak memory with no recomputation, represented by one of the coloured lines, is within the memory budget \(m\).
+To find the optimal \(C(i,\,j,\,m)\), the algorithm will consider \(Q(i,\,j,\,k,\,m)\), for all \(i \,<\, k \,<\, j\).
+That is, we break the problem down into the left subproblem \((i,\,k,\,m)\) and the right subproblem \((k,j,m-\beta^f_k)\).
+For the optimal strategy of recomputing nothing to arise, we need the algorithm to choose to checkpoint the first forward, \(k\,=\,i+1\), and for the right subproblem to also checkpoint the first forward, and so on to \(f_{j-1}\); meaning everything was checkpointed and nothing was recomputed.
+The left subproblem for each of these is the unit length base case so it is vacuously true that they involve no recomputation.
+
+Consider the \(k\,=\,i+1\) case, where the right subproblem is \((i+1,\,j,\,m-\beta^f_{i+1})\).
+Let \(c\) be the optimal computational cost when choosing \(k\,=\,i+1\).
+By induction, let us say the optimal solution to this subproblem has correctly been found to be the no recomputation case.
+Then, the cost \(c\) becomes the cost to compute \(f_i\rightarrow f_{i+1}\), plus the cost of the right subproblem, which involved no recomputation, plus the cost of the left subproblem, which will be over a single layer and so involves no recomputation.
+Thus, choosing this strategy involves no recomputation, so it must be the optimal strategy that is picked by the algorithm, as it is impossible to beat the computational cost of doing no recomputation.
+
+Consider any other \(k^\prime\) with optimal cost \(c^\prime\).
+Say its right and left subproblem involve no recomputation;
+we get the same optimal cost \(c^\prime\,=\,c\) and so, regardless of whether the algorithm chooses \(k\) or \(k^\prime\), it will have found the optimal cost.
+On the other hand, if either subproblem involved recomputation, then the cost cannot possibly be better than \(c\), so we choose \(k\) and get the no recomputation strategy.
+
+Thus, we have (loosely) shown by induction that the algorithm already takes care of the ``no recomputation'' base case itself, so no further work is required to encode it in.
+
+\subsubsection{The ``Recompute Everything'' Strategy}
+some stuff about how to do this!
 
 % The quadratic case has peak mem of whichever specific f_i->f_k, f_k,b_k+1->b_k, has the highest peak mem. If the peak mem of quadratic > m, we fail
 % How to calculate this peak mem efficiently? That is, clearly in the already done subproblems we have already evaulated the peak mem of a lot of the computations that occur in the quadratic case.
