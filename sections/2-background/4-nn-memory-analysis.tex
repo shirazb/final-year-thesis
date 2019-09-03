@@ -10,7 +10,7 @@ In the game, `pebbles' are placed on the nodes, representing their allocation in
 The following rules govern the placement of the pebbles:
 \begin{enumerate}[topsep=0.1em]
     \item For any \(c = f(a, b)\); \(c\) cannot be computed until both \(a\) and \(b\) have been allocated.
-    \item Once no computation relies on \(a\) being in memory, it can be deallocated.
+    \item Once no computation relies on \(b\) being in memory, it can be deallocated.
 \end{enumerate}
 However, these rules allow for many allocation strategies - the order in which we place pebbles, remove them, and reuse them for other nodes.
 
@@ -176,5 +176,5 @@ because the sizes of the tensors vary, peak memory could occur in say the third 
 Thus, if \(\beta : \{f, b\}\times[0, N] \rightarrow \Z^+\) denotes the memory requirement of the \(i^{\mathrm{th}}\) forward or backward tensor, the peak memory of an N layer network becomes:
 \begin{equation}
     \label{eqn:2-nn-peak-mem}
-    \max_{0 \leq i \leq N} \sum_{l\;=\;0}^i \beta^f_l + \beta^b_{i+1} + \beta^b_i
+    \max_{0 \leq i \leq N}\; \sum_{l\;=\;0}^i \beta^f_l + \beta^b_{i+1} + \beta^b_i
 \end{equation}

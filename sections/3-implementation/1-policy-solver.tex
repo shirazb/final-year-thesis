@@ -253,7 +253,7 @@ Lastly, as arrays start at 0, but memory starts at 1, we will index \(B,\, C,\, 
     \KwIn{\(\beta\) a \(2\times(N+2)\) \texttt{int} array of the per-operator memory costs}
     \BlankLine
     
-    \(M \;\leftarrow\; M \,-\, \alpha^f_0\)\;
+    \(M \;\leftarrow\; M \,-\, \beta^f_0\)\;
     \BlankLine
 
     Let \(B\), \(C\), \(D\) be 3D arrays of size \((N+1)\times(N+1)\times M\)\;
@@ -321,6 +321,9 @@ Lastly, as arrays start at 0, but memory starts at 1, we will index \(B,\, C,\, 
                         \(D[i][j][m-1] \;\leftarrow\; k\)\;
                     }
                 }
+                \If{failed}{
+                    \(B[i][j][m-1] \;\leftarrow\;\) \textit{failure}
+                }
             }
         }
     }
@@ -331,7 +334,7 @@ Lastly, as arrays start at 0, but memory starts at 1, we will index \(B,\, C,\, 
 \end{algorithm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Memoisation of Costs Across Sequences}
+\subsection{More Memoisation of Costs}
 % Notice we have done memoisation in the algo we are yet to discuss.
 Now that we have the algorithm concretely written down, we can see further opportunity for memoisation.
 
@@ -364,7 +367,7 @@ I do not even bother with the stated approach of storing \(j_\mathrm{F}\) and im
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Base Cases}
 Finally, we consider the base cases of the algorithm.
-Previously, these were when the sequence length \(t\) was 1;
+Previously, in Algorithm \ref{alg:2-policy-solver}, these were when the sequence length \(t\) was 1;
 when \(m\) was 1 so we employed the constant space strategy;
 and when \(m \,\geq\, t\), so we employed the no recomputation strategy.
 
@@ -375,7 +378,7 @@ For the problem \(C(i,\,i+1,\,m)\), we are given \(f_i\) and \(b_{i+1}\), and si
 Thus, the computational cost is \(C(i,\,i+1,\,m) \;=\; \alpha^b_i\).
 Recall the definition of the subproblem means it is responsible for placing \(b_{i+1}\) within its memory, as well as of course \(b_{i}\).
 This makes the peak memory cost \(B(i,\,i+1,\,m) \;=\; \beta^b_i \,+\, \beta^b_{i+1}\).
-Also, we need to check for failure - that this memory cost is less than \(m\) - before actually setting \(C(\cdot)\) and \(B(\cdot)\).
+Also, we need to check for failure (that this memory cost is less than \(m\)) before actually setting \(C(\cdot)\) and \(B(\cdot)\).
 If failure did occur, then, like explained above, we set all \((i, j^\prime)\) where \(j^\prime \,\geq\, i+1\) to failure, then skip over the rest of the \(j\) loop.
 Finally, we do not need to explcitly set the policy \(D(\cdot)\) as the executor function will have a base case for \(j \,=\, i+1\) that performs the backward step.
 
@@ -386,9 +389,16 @@ In fact, looking at our new Algorithm \ref{alg:3-policy-solver-intermediate}, we
 When there is enough memory, we do not need to trade-off any compute for memory.
 Recall from Equation \ref{eqn:2-nn-peak-mem} the peak memory of running backpropagation on a sequence:
 \begin{equation*}
-    \max_{0 \leq i \leq N} \sum_{l\;=\;0}^i \beta^f_l + \beta^b_{i+1} + \beta^b_i
+    \max_{0 \leq i \leq N}\; \sum_{l\;=\;0}^i \beta^f_l + \beta^b_{i+1} + \beta^b_i
 \end{equation*}
-Figure \ref{} visualises some possibilities of what this looks like.
+Figure \ref{fig:3-base-case-peak-mem} visualises some possibilities of what this looks like.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{no_recompute_peak_mem_vis.jpg}
+    \caption{Two possibilities for when peak memory occurs. The blue line indicates peak memory occurs at the beginning of the backward pass. The red line indicates when we are computing the backward of the second layer.}
+    \label{fig:3-base-case-peak-mem}
+\end{figure}
 
 The base case would be triggered for any subsequence we encounter where this expression is within \(m\).
 That would be quite hard to memoise over and efficiently detect.
@@ -398,20 +408,23 @@ The following outlines a proof of this.
 First, consider a sequence of size one.
 The \(j\,=\,i+1\) base case for this simply computes the single backward operator; it is vacuously true that no recomputation occurs.
 
-Second, consider again the sequence of length greater than one in Figure \ref{}.
-Let us say that its peak memory with no recomputation, represented by one of the coloured lines, is within the memory budget \(m\).
+Second, consider again the sequence of length greater than one in Figure \ref{fig:3-base-case-peak-mem}.
+Let us say that its peak memory with no recomputation, represented by either of the coloured lines, is within the memory budget \(m\).
 To find the optimal \(C(i,\,j,\,m)\), the algorithm will consider \(Q(i,\,j,\,k,\,m)\), for all \(i \,<\, k \,<\, j\).
 That is, we break the problem down into the left subproblem \((i,\,k,\,m)\) and the right subproblem \((k,j,m-\beta^f_k)\).
 For the optimal strategy of recomputing nothing to arise, we need the algorithm to choose to checkpoint the first forward, \(k\,=\,i+1\), and for the right subproblem to also checkpoint the first forward, and so on to \(f_{j-1}\); meaning everything was checkpointed and nothing was recomputed.
 The left subproblem for each of these is the unit length base case so it is vacuously true that they involve no recomputation.
 
-Consider the \(k\,=\,i+1\) case, where the right subproblem is \((i+1,\,j,\,m-\beta^f_{i+1})\).
+Consider the \(k\,=\,i+1\) case, where the right subproblem becomes \((i+1,\,j,\,m-\beta^f_{i+1})\).
 Let \(c\) be the optimal computational cost when choosing \(k\,=\,i+1\).
 By induction, let us say the optimal solution to this subproblem has correctly been found to be the no recomputation case.
-Then, the cost \(c\) becomes the cost to compute \(f_i\rightarrow f_{i+1}\), plus the cost of the right subproblem, which involved no recomputation, plus the cost of the left subproblem, which will be over a single layer and so involves no recomputation.
+Note it does not matter which backward step, shown as the coloured lines in Figure \ref{fig:3-base-case-peak-mem}, actually incurred the peak memory,
+as either way, it is less than the memory budget by the definition of the problem, and has no bearing on whether we can say by induction that the right subproblem will have involved no recomputation.
+
+So, in the \(k\,=\,i+1\) case, the cost \(c\) becomes the cost to compute \(f_i\rightarrow f_{i+1}\), plus the cost of the right subproblem, which involved no recomputation, plus the cost of the left subproblem, which will be over a single layer and so involves no recomputation.
 Thus, choosing this strategy involves no recomputation, so it must be the optimal strategy that is picked by the algorithm, as it is impossible to beat the computational cost of doing no recomputation.
 
-Consider any other \(k^\prime\) with optimal cost \(c^\prime\).
+To show this, consider any other \(k^\prime\) with optimal cost \(c^\prime\).
 Say its right and left subproblem involve no recomputation;
 we get the same optimal cost \(c^\prime\,=\,c\) and so, regardless of whether the algorithm chooses \(k\) or \(k^\prime\), it will have found the optimal cost.
 On the other hand, if either subproblem involved recomputation, then the cost cannot possibly be better than \(c\), so we choose \(k\) and get the no recomputation strategy.
@@ -419,8 +432,48 @@ On the other hand, if either subproblem involved recomputation, then the cost ca
 Thus, we have (loosely) shown by induction that the algorithm already takes care of the ``no recomputation'' base case itself, so no further work is required to encode it in.
 
 \subsubsection{The ``Recompute Everything'' Strategy}
-some stuff about how to do this!
+Let us recap how this strategy works.
+To perform backpropagation on the sequence \((i,\,j)\), we start with \(f_i\) and \(b_j\), then run the forwards in-place to \(f_{j-1}\).
+The peak memory so far is the max of the forwards pair-wise across the layers we just ran, whilst holding \(b_j\) in memory.
+Then, we compute \(f_{j-1}, b_j \,\rightarrow\, b_{j-1}\).
+The peak memory for the entire first step then, is the max of the peak memory of each invididual forward step, whilst holding the upstream backward, and the backward step.
+Next, we start again at \(f_i\), run the forwards in-place to \(f_{j-2}\) whilst holding \(b_{j-1}\), and compute \(f_{j-2}, b_{j-1} \,\rightarrow\, b_{j-2}\).
+We repeat this until we have computed all the backward steps to \(b_i\).
 
+Thus, the peak memory becomes the max of all the individual backward steps and, for each of those steps, the max of the forward steps to that layer whilst holding the upstream backward.
+It is essentially the size of the single largest step required to perform backpropagation on the sequence.
+The precise definition given below makes this more clear.
+As explained in the previous sections, we will exclude the memory of \(f_i\) but include \(b_j\).
+This cost is \(\Theta(1)\) with respect to the number of layers.
+\begin{align*}
+\begin{aligned}[t] % so only one label for whole thing
+    &\max(\\[0.25em]
+    &\qquad\begin{aligned}[t]
+        &\max_{i\,<\, j^\prime \,<\, j}\; \beta^b_{j^\prime+1} \,+\, \max_{i+1\,<\, l \,<\,j^\prime}\; \beta^f_{l-1} \,+\, \beta^f_l, \\[0.5em]
+        &\max_{i\,\leq\, l \,<\, j}\; \beta^f_l \,+\, \beta^b_{l+1} \,+\, \beta^b_l, \\[0.5em]
+    \end{aligned} \\[0.25em]
+     &)
+\end{aligned}
+\end{align*}
+
+The computational cost of this strategy is \(\Theta(N^2)\); first we do \(j-i\) forward steps, then \(j-i-1\) steps, down to a single step.
+In total, the first forward will be computed \(j-i\) times, the second \(j-i-1\) times, and so on, with the last forward only being computed once on the first step.
+We do each of the \(j-i\) backward steps once.
+This gives the precise computational below.
+In accordance to the definition of \(C(\cdot)\), we do not count the cost of computing \(f_i\) or \(b_j\).
+\begin{equation*}
+    \sum_{l\;=\;1}^{j\,-\,i\,-\,1} (j\,-\,i\,-\,l) \cdot \alpha^f_{i+l} \;+\; \sum_{l\;=\;i}^{j-1}\alpha^b_l
+\end{equation*}
+% f_i to b_j
+% f_i+1 to f_j-1
+% b_i to b_j-1
+
+% f_i+1: j-i-1
+% f_i+2: j-i-2
+% ...
+% f_i+(j-i-1): j-i-(j-i-1)
+
+explain how to memoise....
 % The quadratic case has peak mem of whichever specific f_i->f_k, f_k,b_k+1->b_k, has the highest peak mem. If the peak mem of quadratic > m, we fail
 % How to calculate this peak mem efficiently? That is, clearly in the already done subproblems we have already evaulated the peak mem of a lot of the computations that occur in the quadratic case.
 % As we iterate from some j-1 to j, most of the quadratic computation is the same, so we should be able to memoise this result to efficiently calculate peak mem for i,j.
