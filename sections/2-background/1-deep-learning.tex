@@ -102,12 +102,12 @@ Consider the example network in Figure \ref{fig:2-nn-chain-rule-forward}.
 Then, we use the recursive formulas to obtain the desired derivates:
 
 \begin{align*}
-    \frac{\partial L}{\partial \theta_4} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial \theta_4} \,&&=\, \delta^4\frac{\partial f_4}{\partial \theta_4} \\[0.5em]
-    \frac{\partial L}{\partial \theta_3} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial \theta_3} \,&&=\, \delta^4\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial \theta_3} \,&&&=\, \delta^3\frac{\partial f_3}{\partial \theta_3} \\[0.5em]
-    \frac{\partial L}{\partial \theta_2} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial f_2}\frac{\partial f_2}{\partial \theta_2} \,&&=\, \delta^3\frac{\partial f_3}{\partial f_2}\frac{\partial f_2}{\partial \theta_2} \,&&&=\, \delta^2\frac{\partial f_2}{\partial \theta_2} \\[0.5em]
-    \frac{\partial L}{\partial \theta_1} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial f_1}\frac{\partial f_1}{\partial \theta_1} \,&&=\, \delta^3\frac{\partial f_3}{\partial f_1}\frac{\partial f_1}{\partial \theta_1} \,&&&=\, \delta^1\frac{\partial f_1}{\partial \theta_1} \\[0.5em]
+    \frac{\partial L}{\partial \theta_4} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial \theta_4} \,&&=\, \delta_4\frac{\partial f_4}{\partial \theta_4} \\[0.5em]
+    \frac{\partial L}{\partial \theta_3} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial \theta_3} \,&&=\, \delta_4\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial \theta_3} \,&&&=\, \delta_3\frac{\partial f_3}{\partial \theta_3} \\[0.5em]
+    \frac{\partial L}{\partial \theta_2} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial f_2}\frac{\partial f_2}{\partial \theta_2} \,&&=\, \delta_3\frac{\partial f_3}{\partial f_2}\frac{\partial f_2}{\partial \theta_2} \,&&&=\, \delta_2\frac{\partial f_2}{\partial \theta_2} \\[0.5em]
+    \frac{\partial L}{\partial \theta_1} \,&=\, \frac{\partial L}{\partial f_4}\frac{\partial f_4}{\partial f_3}\frac{\partial f_3}{\partial f_1}\frac{\partial f_1}{\partial \theta_1} \,&&=\, \delta_3\frac{\partial f_3}{\partial f_1}\frac{\partial f_1}{\partial \theta_1} \,&&&=\, \delta_1\frac{\partial f_1}{\partial \theta_1} \\[0.5em]
     \text{where}\\[0.6em]
-    \delta^l &= \frac{\partial L}{\partial f_l}
+    \delta_l &= \frac{\partial L}{\partial f_l}
 \end{align*}
 
 \begin{figure}[t]
@@ -118,8 +118,8 @@ Then, we use the recursive formulas to obtain the desired derivates:
 \end{figure}
 
 That is, we start at the end of the network and go backwards:
-we use \(\delta^{l+1}\) to work out \(\delta^l\) and \(\frac{\partial L}{\partial \theta_l}\);
-then use \(\delta^l\) to work out \(\delta^{l-1}\) and \(\frac{\partial L}{\partial \theta_{l-1}}\); and so on.
+we use \(\delta_{l+1}\) to work out \(\delta_l\) and \(\frac{\partial L}{\partial \theta_l}\);
+then use \(\delta_l\) to work out \(\delta_{l-1}\) and \(\frac{\partial L}{\partial \theta_{l-1}}\); and so on.
 Thus, the \textit{deltas} are being propagated backwards, and so the process is known as \textit{backpropagation}.
 Figure \ref{fig:2-nn-chain-rule-backward} shows the computational graph for this.
 The `forward graph' is shown with the corresponding `backward graph' for computing the derivates using the chain rule.
@@ -189,10 +189,13 @@ Substituting in the derivates of Equations~\ref{eq:z^l_k}-\ref{eq:z^lplus1_k}, w
 Next, define the deltas \(\delta^l_k\) for a specific neuron,
 
 \begin{align}
-    \delta^l_k &= \frac{\partial L}{\partial z^l_k}.
+    \delta^l_k &= \frac{\partial L}{\partial z^l_k}. \label{eq:delta^l_k}
 \end{align}
 
-We can expand this expression leading to a recursive formula for computing the delta for every weight,
+Note that in contrast with the previous section, here we use notation \(\delta^l_k\), where the layer \(l\) now appears in superscript, and the subscript \(k\) refers to a specific neuron in that layer.
+Furthermore, the delta refers to the derivative of the loss \(L\) with respect to the input sum (unthresholded output) of a layer.
+
+We can expand Equation~\ref{eq:delta^l_k} leading to a recursive formula for computing the delta for every weight,
 
 \begin{align}
     \delta^l_k = \frac{\partial L}{\partial z^l_k} &= \left(
@@ -223,8 +226,10 @@ To compute the gradient of the loss with respect to the weights and biases, we f
 for all \(j\) neurons in the final layer. Then, we can apply the recursive formulas to compute \(\delta^{N-1}_k\) for all \(k\) layers in the (\(N-1\))-th layer, and so on.
 Note we need to know \(\frac{\partial L}{\partial a^N_j}\), the derivative of the loss with respect to the final outputs, which can be found analytically (else it cannot be used).
 
-Rather than working with individual neurons, we can generalise the equations to deal with vectors \(\delta^l\) and matrices \(\mat{W}^l\), the deltas and weight matrices for an entire layer.
-This gives the following recursive backpropagation formulas,
+Rather than working with individual neurons, we can generalise the equations to deal with deltas and weight matrices for an entire layer.
+Because we need not refer to deltas of a particular neuron anymore, we make the notational change of using subscript to index the layer, restoring notation used in the previous section.
+That is, we use vectors \(\delta^l\) and matrices \(\mat{W}^l\), the delta vectors and weight matrices for an entire layer.
+This gives the following recursive backpropagation formulae,
 
 \begin{align}
     \delta^N &= \nabla_{\vec{y}^N} L \odot \sigma'(\vec{z}^l), \\
@@ -281,7 +286,7 @@ It can be seen from the rules that, in order to perform one step of gradient des
 The full algorithm is given in \todo{backprop algo} [TODO].
 
 By further inspection, we can derive the full computational graph for this algorithm.
-For simplicity, collect the weights and biases for a layer l into an object \(\vec{\theta}_l\).
+For simplicity, collect the weights and biases for a layer \(l\) into an object \(\vec{\theta}_l\).
 To find the weight update for \(\vec{\theta}_l\), we must:
 
 \begin{enumerate}[topsep=0.2em]
