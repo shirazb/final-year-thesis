@@ -360,7 +360,7 @@ When we encounter the failed subsequence, we short-circuit and set all the \(i,\
 Propagating left through \(i\) is more complex, as it is the outer loop.
 If the failure occurred on \((i_\mathrm{F},\, j_\mathrm{F})\) We need to remove from the \((i,\,j)\) space iterated over by the loops all \((i^\prime,\, j_{\mathrm{F}})\) for \(i^\prime \,\leq\, i_\mathrm{F}\).
 To clarify, I do not mean storing the \(j_\mathrm{F}\) at which we failed, then for each \(i^\prime \,\leq\, i\) we iterate to, doing the \(j\)s up to \(j_\mathrm{F}\), setting the rest to failure, and breaking from the loop.
-I mean actually removing those elements from the search space altogether, so we never iterate to them, like we elide the \(j\) by breaking out of the the \(j\) loop.
+I mean actually removing those elements from the search space altogether, so we never iterate to them, like we elide the \(j\) by breaking out of the \(j\) loop.
 
 I am sure any solution would greatly increase the code complexity and so even make it slower.
 I do not even bother with the stated approach of storing \(j_\mathrm{F}\) and immediately short-circuiting when we hit it, as the algorithm will only have to run that one extra iteration for \(j_\mathrm{F}\) before realising failure and setting all \(j^\prime \,\geq\, j_{F}\) to failure.
@@ -369,8 +369,9 @@ I do not even bother with the stated approach of storing \(j_\mathrm{F}\) and im
 \subsection{Base Cases}
 Finally, we consider the base cases of the algorithm.
 Previously, in Algorithm \ref{alg:2-policy-solver}, these were when the sequence length \(t\) was 1;
-when \(m\) was 1 so we employed the constant space strategy;
+when the number of memory slots \(m\) was 1, so we employed the constant space strategy;
 and when \(m \,\geq\, t\), so we employed the no recomputation strategy.
+In this section, I show how they generalise under arbitrary-costs.
 
 \subsubsection*{Unit Sequence Length}
 We shall first address the unit sequence length case.
@@ -420,9 +421,9 @@ Consider the \(k\,=\,i+1\) case, where the right subproblem becomes \((i+1,\,j,\
 Let \(c\) be the optimal computational cost when choosing \(k\,=\,i+1\).
 By induction, let us say the optimal solution to this subproblem has correctly been found to be the no recomputation case.
 Note it does not matter which backward step, shown as the coloured lines in Figure \ref{fig:3-base-case-peak-mem}, actually incurred the peak memory,
-as either way, it is less than the memory budget by the definition of the problem, and has no bearing on whether we can say by induction that the right subproblem will have involved no recomputation.
+as either way it is less than the memory budget by the definition of the problem, and has no bearing on whether we can say by induction that the right subproblem will have involved no recomputation.
 
-So, in the \(k\,=\,i+1\) case, the cost \(c\) becomes the cost to compute \(f_i\rightarrow f_{i+1}\), plus the cost of the right subproblem, which involved no recomputation, plus the cost of the left subproblem, which will be over a single layer and so involves no recomputation.
+So, in the \(k\,=\,i+1\) case, the optimal cost \(c\) becomes the cost to compute \(f_i\rightarrow f_{i+1}\), plus the cost of the right subproblem, which involved no recomputation, plus the cost of the left subproblem, which will be over a single layer and so involves no recomputation.
 Thus, choosing this strategy involves no recomputation, so it must be the optimal strategy that is picked by the algorithm, as it is impossible to beat the computational cost of doing no recomputation.
 
 To show this, consider any other \(k^\prime\) with optimal cost \(c^\prime\).
@@ -437,11 +438,11 @@ Let us recap how this strategy works.
 To perform backpropagation on the sequence \((i,\,j)\), we start with \(f_i\) and \(b_j\), then run the forwards in-place to \(f_{j-1}\).
 The peak memory so far is the max of the forwards pair-wise across the layers we just ran, whilst holding \(b_j\) in memory.
 Then, we compute \(f_{j-1}, b_j \,\rightarrow\, b_{j-1}\).
-The peak memory for the entire first step then, is the max of the peak memory of each invididual forward step, whilst holding the upstream backward, and the backward step.
+The peak memory for the entire first step then, is (i) the max of the peak memory of each invididual forward step, whilst holding the upstream backward and (ii) the backward step.
 Next, we start again at \(f_i\), run the forwards in-place to \(f_{j-2}\) whilst holding \(b_{j-1}\), and compute \(f_{j-2}, b_{j-1} \,\rightarrow\, b_{j-2}\).
 We repeat this until we have computed all the backward steps to \(b_i\).
 
-Thus, the peak memory becomes the max of all the individual backward steps and, for each of those steps, the max of the forward steps to that layer whilst holding the upstream backward.
+Thus, the peak memory becomes the max of (i) the max of all the individual backward steps and (ii) for each of those steps, the max of the forward steps to that layer whilst holding the layer's upstream backward.
 It is essentially the size of the single largest step required to perform backpropagation on the sequence.
 The precise definition given below makes this more clear.
 As explained in the previous sections, we will exclude the memory of \(f_i\) but include \(b_j\).
@@ -457,10 +458,10 @@ This cost is \(\Theta(1)\) with respect to the number of layers.
 \end{aligned}
 \end{align}
 
-The computational cost of this strategy is \(\Theta(N^2)\); first we do \(j-i\) forward steps, then \(j-i-1\) steps, down to a single step.
-In total, the first forward will be computed \(j-i\) times, the second \(j-i-1\) times, and so on, with the last forward only being computed once on the first step.
+The computational cost of this strategy is \(\Theta(N^2)\); first we do \(j-i\) forward steps, then \(j-i-1\) forward steps, down to a single step.
+In total, the first forward \(f_{i+1}\) will be computed \(j-i-1\) times, the second \(j-i-2\) times, and so on, with the last forward \(f_{j-1}\) only being computed once on the first step.
 We do each of the \(j-i\) backward steps once.
-This gives the precise computational below.
+This gives the precise computational cost below.
 In accordance to the definition of \(C(\cdot)\), we do not count the cost of computing \(f_i\) or \(b_j\).
 \begin{equation} \label{eqn:3-comp-quad}
     \sum_{l\;=\;1}^{j\,-\,i\,-\,1} (j\,-\,i\,-\,l) \cdot \alpha^f_{i+l} \;+\; \sum_{l\;=\;i}^{j-1}\alpha^b_l
@@ -481,8 +482,8 @@ However, memoising over  \(i\) is actually quite hard for this problem.
 Consider we know the peak memory for some \((i,\,j)\), then move left to \((i-1,\,j)\).
 For the first problem, we considered \(f_i\) as already given, so did not take into account its memory cost.
 For the second problem, we do now consider the memory cost of \(f_i\).
-Normally, if \(f_i\) is part of the step incurring the peak memory cost for \((i-1,\,j\), then we would expect this to be reflected in the memoised peak memory cost of \((i,\,j)\).
-This will not be the case as the memory of \(f_i\) was considered in the \(i,\,j\) subproblem.
+Normally, if \(f_i\) is part of the step incurring the peak memory cost for \((i-1,\,j)\), then we would expect this to be reflected in the memoised peak memory cost of \((i,\,j)\).
+This will not be the case as the memory of \(f_i\) was not included in the \((i,\,j)\) subproblem.
 Thus, we cannot easily `induct' over the subproblems.
 Instead, similar to before, we will trade off a little bit of speed for reduced code complexity by only memoising over the \(j\) loop.
 Also as before, the extra cost of performing this memoisation is very little compared to the size of the \(j\) loop, so there is not much scope for improvement anyway.
@@ -496,8 +497,8 @@ The forward steps are a bit more complicated.
 Let us break down the max expression.
 The outer expression ranges over \(j^\prime\).
 Each \(j^\prime\) all share the same inner expression - the peak memory of the forward pass - but only  up to layer \(j^\prime -1\).
-Thus, as the \(j\) loop moves right, we can can memoise the peak of the forward layers separately.
-The new overall peak then becomes the max of (i) the peak of the forwards plus this layer's backward and (ii) the backward step for this layer.
+Thus, as the \(j\) loop moves right, we can can memoise the peak of the forward layers separately and use that result in the calculation of the overall peak.
+That is, the new overall peak becomes the max of (i) the peak of the forwards so far plus this layer's backward and (ii) the backward step for this layer.
 This is shown in Algorithm \ref{alg:3-memoise-quad-mem}
 
 \begin{algorithm}[htb]
@@ -526,14 +527,15 @@ This is shown in Algorithm \ref{alg:3-memoise-quad-mem}
 Now we look at the compute costs.
 Equation \ref{eqn:3-comp-quad} sums over the layers \(j\).
 There are two separate sums for the forwards and backwards costs.
-Thought it was easier to explain it in that way, we can rethink it to be more suited to memoisation.
+Though it was easier to explain it in that way, we can rethink it to be more suited to memoisation.
 
 Consider we are at some \((i,\, j)\) subsequence.
-Say \(c\) is the memoised cost of executing the quadratic strategy on the subsequence.
+Say \(c\) is the memoised cost of executing the quadratic (no recomputation) strategy on that subsequence.
 As we move right to \((i,\, j+1)\), we want to add the marginal cost of performing quadratic on this longer subsequence.
-The strategy on \((i,\,j+1)\) does everything the strategy on \(i,\,j\) does, except it has an extra step at the beginning where all the forwards to \(f_j\) are calculated, and then \(b_{j-1}\) is calculated. 
-In order to avoid summing the forwards to \(f_j\) every time, we can memoise the cost of the forward pass.
-Thus, we memoise both the cost of the forwards and the overall cost of the quadratic strategy.
+The strategy on \((i,\,j+1)\) does everything the strategy on \(i,\,j\) does, except it has an extra step at the beginning where all the forwards from \(f_{i+1}\) to \(f_{j-1}\) are calculated, and then \(b_{j-1}\) is calculated.
+This cost can be trivially memoised by accumulated the marginal cost as we move right over the layers.
+However, it involves summing the forward costs from \(f_{i+1}\) to \(f_{j-1}\) every time.
+To avoid this, we separately memoise the cost of a single pass over the forwards.
 The memoisation is demonstrated in Algorithmm \ref{alg:3-memoise-quad-comp}.
 
 \begin{algorithm}[htb]
