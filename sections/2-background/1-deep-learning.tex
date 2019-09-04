@@ -235,9 +235,10 @@ This gives the following recursive backpropagation formulae,
     \delta^N &= \nabla_{\vec{y}^N} L \odot \sigma'(\vec{z}^l), \\
     \delta^l &= {(\mat{W}^{l+1})}^{\top} \delta^{l+1} \odot \sigma'(\vec{z}^l), \\
     \frac{\partial L}{\partial b^l_j} &= \delta^l_j, \\
-    \frac{\partial L}{\partial w^l_{kj}} &= \delta^l_k y^{l-1}_j.
+    \frac{\partial L}{\partial w^l_{kj}} &= \delta^l_k y^{l-1}_j,
 \end{align}
 
+where \(\odot\) denotes Hadamard (element-wise) product.
 
 % for a specific neural network. \todo{do we? use arbitrary actv}
 % We will assume a feedforward network of fully-connected layers with sigmoid activations and a mean-square-error loss.
