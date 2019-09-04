@@ -73,7 +73,7 @@ This is the same as before, except we now incur the \textit{precise} costs of ex
 Note \(f_i\) is given by the definition of the problem so we start the sum of the forwards at \(f_{i+1}\).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Handling the Continuous Memory State by Tracking the Peak Memory Cost of Subproblems \texorpdfstring{\(B(\cdot)\)}{\textit{B()}}}
+\subsection{Handling the Continuous Memory State by Tracking the Peak Memory Cost of Subproblems, \texorpdfstring{\(B(\cdot)\)}{\textit{B()}}}
 However, all is not so simple.
 The fact that we are now being precise about memory causes a lot of issues.
 
@@ -193,7 +193,8 @@ This is shown in Figure \ref{fig:3-b-j-placement-new-right}.
     \label{fig:3-b-j-placement-new-right}
 \end{figure}
 
-This new definition of \(C(\cdot)\) of course affects our analysis of peak memory for \(Q(i,\,j,\,k,\,m)\) in Equation \ref{eqn:3-b-k-1}.
+This new definition of \(C(\cdot)\) of course affects our analysis of peak memory
+for \(Q(i,\,j,\,k,\,m)\) in Equation \ref{eqn:3-b-k-1}.
 We must take into account the fact the \(b_j\) is using part of the \(m\) memory.
 Thus, the first stage where we compute the forwards to \(f_k\) must be done within \(m-\beta^b_j\) memory.
 Then, we recurse on the right with the same \(m-\beta^f_k\) memory as before, but now the definition of the subcall is that it must also place \(b_j\) within that memory.
@@ -461,7 +462,7 @@ In total, the first forward will be computed \(j-i\) times, the second \(j-i-1\)
 We do each of the \(j-i\) backward steps once.
 This gives the precise computational below.
 In accordance to the definition of \(C(\cdot)\), we do not count the cost of computing \(f_i\) or \(b_j\).
-\begin{equation} \label{eqn:3-base-case-comp}
+\begin{equation} \label{eqn:3-comp-quad}
     \sum_{l\;=\;1}^{j\,-\,i\,-\,1} (j\,-\,i\,-\,l) \cdot \alpha^f_{i+l} \;+\; \sum_{l\;=\;i}^{j-1}\alpha^b_l
 \end{equation}
 % f_i to b_j
@@ -523,13 +524,13 @@ This is shown in Algorithm \ref{alg:3-memoise-quad-mem}
 \end{algorithm}
 
 Now we look at the compute costs.
-Equation \ref{3-comp-quad} sums over the layers \(j\).
+Equation \ref{eqn:3-comp-quad} sums over the layers \(j\).
 There are two separate sums for the forwards and backwards costs.
 Thought it was easier to explain it in that way, we can rethink it to be more suited to memoisation.
 
 Consider we are at some \((i,\, j)\) subsequence.
 Say \(c\) is the memoised cost of executing the quadratic strategy on the subsequence.
-As we move right to \(i,\, j+1\), we want to add the marginal cost of performing quadratic on this longer subsequence.
+As we move right to \((i,\, j+1)\), we want to add the marginal cost of performing quadratic on this longer subsequence.
 The strategy on \((i,\,j+1)\) does everything the strategy on \(i,\,j\) does, except it has an extra step at the beginning where all the forwards to \(f_j\) are calculated, and then \(b_{j-1}\) is calculated. 
 In order to avoid summing the forwards to \(f_j\) every time, we can memoise the cost of the forward pass.
 Thus, we memoise both the cost of the forwards and the overall cost of the quadratic strategy.
@@ -560,21 +561,22 @@ The memoisation is demonstrated in Algorithmm \ref{alg:3-memoise-quad-comp}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection*{Removing the Separate Base Case Loop}
-Lastly, I will show that, unlike in the original policy solver in Algorithm \ref{alg:2-policy-solver}, there is no need for a separate initialisation of \(C(\cdot)\) with the base cases, prior to the main loop.
+Lastly, I will show that, unlike in the original policy solver in Algorithm \ref{alg:2-policy-solver}, there is no need for ato separately \(C(\cdot)\) with the base cases prior to the main loop.
 
 Recall when we discussed the \(j\,=\,i+1\) base case.
 We concluded that it can be done inside the main loop, as it traverses the subproblems in order, including that base case.
 It is the only `real' base case.
+
 The second one we looked at, when no recomputation is required, turned out to no longer be a separate base case.
-The last base case of recomputing everything is not something that for any \(i,\,j,\,m\) subsequence we trivially know how to set.
+The last base case of recomputing everything is not something that for any \((i,\,j,\,m)\) subsequence we trivially know how to set.
 It requires knowing the costs across the layers, which can be memoised as above.
 We do this as part of the main loop over \(j\).
-Then, only if the recursive case failed to find a viable strategy, do we resort to this `base case'.
+Then, \textit{only if the recursive case failed to find a viable strategy} - that is, every action \(k\) failed - do we resort to this `base case'.
 
 Therefore, there is no longer a separate loop at the beginning to set the trivial base cases; everything is done within the main loop body.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{The New Policy Solver Algorithm}
+\subsection{The Final Policy Solver Algorithm}
 Finally, we are done.
 The new policy solver algorithm, with all of the above rigmarole, is given in Algorithm \ref{alg:3-policy-solver-final}.
 
