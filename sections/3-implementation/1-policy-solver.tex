@@ -499,7 +499,7 @@ The outer expression ranges over \(j^\prime\).
 Each \(j^\prime\) all share the same inner expression - the peak memory of the forward pass - but only  up to layer \(j^\prime -1\).
 Thus, as the \(j\) loop moves right, we can can memoise the peak of the forward layers separately and use that result in the calculation of the overall peak.
 That is, the new overall peak becomes the max of (i) the peak of the forwards so far plus this layer's backward and (ii) the backward step for this layer.
-This is shown in Algorithm \ref{alg:3-memoise-quad-mem}
+This is shown in Algorithm \ref{alg:3-memoise-quad-mem}. The conditional on \(j-2\,=\,i\) is because we do not count the memory of \(f_i\).
 
 \begin{algorithm}[htb]
     \DontPrintSemicolon
@@ -509,12 +509,12 @@ This is shown in Algorithm \ref{alg:3-memoise-quad-mem}
     \ldots\;
     \BlankLine
 
-    \PeakF \(\leftarrow\; \beta^f_{i+1}\)\;
-    \PeakQuad \(\leftarrow\; \max(\)\PeakF\(,\, \beta^f_{i}\,+\,\beta^b_{i+1}\,+\,\beta^b_i\)\;
+    \PeakF \(\leftarrow\; 0\)\;
+    \PeakQuad \(\leftarrow\; \max(\)\PeakF\(,\, \beta^b_{i+1}\,+\,\beta^b_i)\)\;
     \BlankLine
 
     \For{\(j \;\leftarrow\; i+2\) \KwTo \(N+1\)}{
-        \PeakF \(\leftarrow\; \max(\)\PeakF\(,\, \beta^f_{j-1}\,+\,\beta^f_j)\)\;
+        \PeakF \(\leftarrow\; \max(\)\PeakF\(,\, (j-2\,=\,i \;?\; 0 \;:\; \beta^f_{j-2})\,+\,\beta^f_{j-1})\)\;
         \PeakQuad \(\leftarrow\; \max(\)\PeakQuad\(,\, \beta^b_j \,+\,\)\PeakF\(,\, \beta^f_{j-1}\,+\,\beta^b_j\,+\,\beta^b_{j-1}\)\;
         \BlankLine
         \ldots\;
@@ -551,7 +551,7 @@ The memoisation is demonstrated in Algorithmm \ref{alg:3-memoise-quad-comp}.
     \BlankLine
 
     \For{\(j \;\leftarrow\; i+2\) \KwTo \(N+1\)}{
-        \ComputeF \(\leftarrow\;\)\ComputeF\(\,+\, \alpha^f_j\) \;
+        \ComputeF \(\leftarrow\;\)\ComputeF\(\,+\, \alpha^f_{j-1}\) \;
         \ComputeQuad \(\leftarrow\;\)\ComputeF\(\,+\, \alpha^b_{j-1}\)\;
         \BlankLine
         \ldots\;
