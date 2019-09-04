@@ -226,9 +226,9 @@ To compute the gradient of the loss with respect to the weights and biases, we f
 for all \(j\) neurons in the final layer. Then, we can apply the recursive formulas to compute \(\delta^{N-1}_k\) for all \(k\) layers in the (\(N-1\))-th layer, and so on.
 Note we need to know \(\frac{\partial L}{\partial a^N_j}\), the derivative of the loss with respect to the final outputs, which can be found analytically (else it cannot be used).
 
-Rather than working with individual neurons, we can generalise the equations to deal with deltas and weight matrices for an entire layer.
-Because we need not refer to deltas of a particular neuron anymore, we make the notational change of using subscript to index the layer, restoring notation used in the previous section.
-That is, we use vectors \(\delta^l\) and matrices \(\mat{W}^l\), the delta vectors and weight matrices for an entire layer.
+Rather than working with individual neurons, we can generalise the equations to deal with delta vectors \(\delta^l\) and weight matrices \(\mat{W}^l\) for an entire layer.
+% Because we need not refer to deltas of a particular neuron anymore, we make the notational change of using subscript to index the layer, restoring notation used in the previous section.
+% That is, we use vectors \(\delta^l\) and matrices \(\mat{W}^l\), the delta vectors and weight matrices for an entire layer.
 This gives the following recursive backpropagation formulae,
 
 \begin{align}
