@@ -322,7 +322,7 @@ Lastly, as arrays start at 0, but memory starts at 1, we will index \(B,\, C,\, 
                         \(D[i][j][m-1] \;\leftarrow\; k\)\;
                     }
                 }
-                \If{failed}{
+                \If{\Failed}{
                     \(B[i][j][m-1] \;\leftarrow\;\) \textit{failure}
                 }
             }
@@ -591,14 +591,21 @@ Therefore, there is no longer a separate loop at the beginning to set the trivia
 Finally, we are done.
 The new policy solver algorithm, with all of the above rigmarole, is given in Algorithm \ref{alg:3-policy-solver-final}.
 
-\begin{algorithm}[htbp]
+\begin{algorithm}
     \DontPrintSemicolon
     \SetKwData{PeakFs}{peak\textsubscript{F}}
     \SetKwData{Failed}{failed}
     \SetKwData{PeakR}{peak\textsubscript{R}}
     \SetKwData{PeakL}{peak\textsubscript{L}}
     \SetKwData{Peak}{peak}
+    \SetKwData{ComputeFQuad}{fcompute\textsubscript{quad}}
+    \SetKwData{ComputeQuad}{compute\textsubscript{quad}}
+    \SetKwData{PeakFQuad}{fpeak\textsubscript{quad}}
+    \SetKwData{PeakQuad}{peak\textsubscript{quad}}
+    \SetKwData{PeakK}{fpeak\textsubscript{k}}
+    \SetKwData{ComputeK}{fcompute\textsubscript{k}}
     \SetKw{Continue}{continue}
+    \SetKw{Break}{break}
 
     \KwIn{\(N\) the sequence length}
     \KwIn{\(M\) the memory budget}
@@ -612,17 +619,58 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
     Let \(B\), \(C\), \(D\) be 3D arrays of size \((N+1)\times(N+1)\times M\)\;
     \BlankLine
 
-    Base cases will go here.\;
-    \BlankLine
-
     \# Traverse the subproblems bottom-up.\;
     \For{\(m \;\leftarrow\; 2\) \KwTo \(M\)}{
         \For{\(i \;\leftarrow\; N\) \KwTo \(0\)}{
-            \# Base case has already handled \((i,\,i+1)\), so start at \(i+2\).\;
+            \# Base Case: \([i,\,i+1,\,,m-1]\)\;    
+
+            \(b \;\leftarrow\; \beta^b_i \,+\, \beta^b_{i+1}\)\;
+            \(c \;\leftarrow\; \beta^b_i\)\;
+            \BlankLine
+            
+            \If{\(b\;>\;m\)}{
+                \(B[i][j][m-1]\;\leftarrow\;\)failure\(, \quad \forall j \,\in\,[i+1,\, N+1]\)\;
+                \Continue\;
+            }
+            \BlankLine
+
+            \(B[i][i+1][m-1]\;\leftarrow\; b\)\;
+            \(C[i][i+1][m-1]\;\leftarrow\; c\)\;
+            \BlankLine
+
+            \# Recursive Case for each \(j\) to the right.\;
+            \BlankLine
+
+            \# Set up memoisation of quadratic strategy costs.\;
+            \ComputeFQuad \(\leftarrow\; 0\)\;
+            \ComputeQuad \(\leftarrow\;\)\ComputeFQuad\(\,+\, c\)\;
+            \BlankLine
+            \PeakFQuad \(\leftarrow\; 0\)\;
+            \PeakQuad \(\leftarrow\; \max(\)\PeakFQuad\(,\, b\)\;
+            \BlankLine
+
             \For{\(j \;\leftarrow\; i+2\) \KwTo \(N+1\)}{
+                \# Update quadratic costs.\;
+                \ComputeFQuad \(\leftarrow\;\)\ComputeFQuad\(\,+\, \alpha^f_{j-1}\) \;
+                \ComputeQuad \(\leftarrow\;\)\ComputeFQuad\(\,+\, \alpha^b_{j-1}\)\;
+                \BlankLine
+                \PeakFQuad \(\leftarrow\; \max(\)\PeakFQuad\(,\, (j-2\,=\,i \;?\; 0 \;:\; \beta^f_{j-2})\,+\,\beta^f_{j-1})\)\;
+                \PeakQuad \(\leftarrow\; \max(\)\PeakQuad\(,\, \beta^b_j \,+\,\)\PeakFQuad\(,\, \beta^f_{j-1}\,+\,\beta^b_j\,+\,\beta^b_{j-1}\)\;
+                \BlankLine
+
+                \# Choose optimal checkpoint \(k\). Initialise variables for its loop.\;
+                \PeakK\(\;\leftarrow\; -\infty\)\;
+                \ComputeK\(\;\leftarrow\; 0\)\;
                 \(C_{min} \;\leftarrow\; \infty\)\;
                 \Failed \(\;\leftarrow\; \top\)\;
+                \BlankLine
+
                 \For{\(k \;\leftarrow\; i\,+\,1\) \KwTo \(j\,-\,1\)}{
+                    \# Update costs over k.\;
+                    \ComputeK\(\;\leftarrow\;\)\ComputeK\(\;+\; \alpha^f_k\)\;
+                    \PeakK\(\;\leftarrow\; \max(\)\PeakK\(,\; (k-1\,=\,i \;?\; 0 \;:\; \beta^f_{k-1})\;+\; \beta^b_k)\)\;
+                    \BlankLine
+
                     \# Pre-check the stages of this strategy for failure.\;
                     \BlankLine
 
@@ -674,8 +722,21 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
                         \(D[i][j][m-1] \;\leftarrow\; k\)\;
                     }
                 }
-                \If{failed}{
-                    \(B[i][j][m-1] \;\leftarrow\;\) \textit{failure}
+                \BlankLine
+
+                \# All possible checkpointing strategies failed.\;
+                \BlankLine
+                \# Resort to quadratic. If even that fails, fail this subproblem.\;
+                \If{\Failed}{
+                    \If{\PeakQuad\(\;>\; m\)}{
+                        \(B[i][j^\prime][m-1]\;\leftarrow\;\)failure\(, \quad \forall j^\prime \,\in\,[j,\, N+1]\)\;
+                        \Break\;
+                    }
+                    \BlankLine
+
+                    \(B[i][j][m-1] \;\leftarrow\;\) \PeakQuad\;
+                    \(C[i][j][m-1] \;\leftarrow\;\) \ComputeQuad\;
+                    \(D[i][j][m-1] \;\leftarrow\;\) quadratic strategy\;
                 }
             }
         }
@@ -685,3 +746,7 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
     \caption{Not this algorithm!}
     \label{alg:3-policy-solver-final}
 \end{algorithm}
+% \begin{algorithm}
+%     \DontPrintSemicolon
+
+% \end{algorithm}
