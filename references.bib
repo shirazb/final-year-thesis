@@ -824,3 +824,56 @@ url = {https://medium.com/tensorflow/fitting-larger-networks-into-memory-583e3c7
 year = {2018},
 urldate = {2019-09-01}
 }
+@inproceedings{Bodlaender2005,
+abstract = {Treewidth is a graph parameter with several interesting theoretical and practical applications. This survey reviews algorithmic results on determining the treewidth of a given graph, and finding a tree decomposition of small width. Both theoretical results, establishing the asymptotic computational complexity of the problem, as experimental work on heuristics (both for upper bounds as for lower bounds), preprocessing, exact algorithms, and postprocessing are discussed.},
+address = {Berlin, Heidelberg},
+author = {Bodlaender, Hans L},
+booktitle = {SOFSEM 2005: Theory and Practice of Computer Science},
+editor = {Vojt{\'{a}}{\v{s}}, Peter and Bielikov{\'{a}}, M{\'{a}}ria and Charron-Bost, Bernadette and S{\'{y}}kora, Ondrej},
+isbn = {978-3-540-30577-4},
+mendeley-groups = {Individual Project},
+pages = {1--16},
+publisher = {Springer Berlin Heidelberg},
+title = {{Discovering Treewidth}},
+year = {2005}
+}
+@article{Liu1987,
+address = {Philadelphia, PA, USA},
+author = {Liu, Joseph W H},
+doi = {10.1137/0608031},
+issn = {0196-5212},
+journal = {SIAM J. Algebraic Discrete Methods},
+mendeley-groups = {Individual Project},
+month = {jul},
+number = {3},
+pages = {375--395},
+publisher = {Society for Industrial and Applied Mathematics},
+title = {{An Application of Generalized Tree Pebbling to Sparse Matrix Factorization}},
+url = {http://dx.doi.org/10.1137/0608031},
+volume = {8},
+year = {1987}
+}
+@article{Feng2019,
+abstract = {Deep Neural Networks(DNNs) require huge GPU memory when training on modern image/video databases. Unfortunately, the GPU memory in off-the-shelf devices is always finite, which limits the image resolutions and batch sizes that could be used for better DNN performance. In this paper, we propose a novel training approach, called Re-forwarding, that substantially reduces memory usage in training. Our approach automatically finds a subset of vertices in a DNN computation graph, and stores tensors only at these vertices during the first forward. During backward, extra local forwards (called the Re-forwarding operations) are conducted to compute the missing tensors. The total training memory cost becomes the sum of (1) the memory cost of the subset of vertices and (2) the maximum memory cost of local forwards. Re-forwarding trades time overheads for memory costs and does not compromise any performance in testing. We present theories and algorithms that achieve optimal memory solutions on DNNs with both linear and arbitrary computation graphs. Experiments show that Re-forwarding cuts down up-to 80{\%} of training memory with a moderate time overhead (around 40{\%}) on popular DNNs such as Alexnet, VGG, ResNet, Densenet and Inception net.},
+archivePrefix = {arXiv},
+arxivId = {1808.00079},
+author = {Feng, Jianwei and Huang, Dong},
+eprint = {1808.00079},
+mendeley-groups = {Individual Project},
+month = {jul},
+title = {{Cutting Down Training Memory by Re-fowarding}},
+url = {http://arxiv.org/abs/1808.00079},
+year = {2019}
+}
+@article{Kusumoto2019,
+abstract = {Recomputation algorithms collectively refer to a family of methods that aims to reduce the memory consumption of the backpropagation by selectively discarding the intermediate results of the forward propagation and recomputing the discarded results as needed. In this paper, we will propose a novel and efficient recomputation method that can be applied to a wider range of neural nets than previous methods. We use the language of graph theory to formalize the general recomputation problem of minimizing the computational overhead under a fixed memory budget constraint, and provide a dynamic programming solution to the problem. Our method can reduce the peak memory consumption on various benchmark networks by 36{\%}{\~{}}81{\%}, which outperforms the reduction achieved by other methods.},
+archivePrefix = {arXiv},
+arxivId = {1905.11722},
+author = {Kusumoto, Mitsuru and Inoue, Takuya and Watanabe, Gentaro and Akiba, Takuya and Koyama, Masanori},
+eprint = {1905.11722},
+mendeley-groups = {Individual Project},
+month = {may},
+title = {{A Graph Theoretic Framework of Recomputation Algorithms for Memory-Efficient Backpropagation}},
+url = {http://arxiv.org/abs/1905.11722},
+year = {2019}
+}
