@@ -3,6 +3,13 @@ In this section, I will show how to perform liveness analysis on an arbitrary co
 I will then apply this to the computational graph of training a neural network.
 The optimal policy solver for checkpointing presented later will assume these optimisations are in place.
 
+Tim Salimans and Yaroslav Bulatov of OpenAI have a great article online that, with animations, shows how the peak memory of a neural network arises; how to reduce this with checkpointing; and the limitation of chekckpointing to sequences \cite{Bulatov-checkpointing-article}.
+I highly recommend reading it.
+I borrow from their work in a few sections throughout this thesis, starting here.
+I will give a similar analysis of peak memory, but make it more precise for arbtirary costs, and eventually define the exact computation graph that will be used by my policy solver.
+In Section \ref{sec:2-5-bg-checkpointing}, I will give a more in-depth discussion of the existing checkpointing techniques, including those already studied in the automatic differentiation literature.
+In section \ref{sec:5-qual-eval-seq-only}, I will also show how checkpointing is limited to sequences, as well as reference some recent approaches for tackling this in neural networks.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Pebbling}
 Sethi introduced the `pebble game' as a framework for understanding how much memory must be allocated to a computation \cite{Sethi1973}.
