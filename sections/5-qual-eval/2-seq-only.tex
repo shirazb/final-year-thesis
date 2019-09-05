@@ -82,9 +82,9 @@ Furthermore, like \texttt{REVOLVE} iteself, it is optimal in the sense that it w
 In 2019, there has been some promising work in the Machine Learning community that generalises checkpointing to arbitrary graphs.
 I have only become aware of this work very recently so did not have time to reformulate my solution to build on top of theirs.
 
-The approach of Feng and Huang \cite{Feng2019} generalises can find a checkpointing strategy given an arbitrary graph, without user annotation.
+The approach of Feng and Huang \cite{Feng2019} can find a checkpointing strategy given an arbitrary graph, without user annotation.
 They can even handle arbitrary memory costs.
-However, their algorithm minimies the peak memory cost using one recomputation at most; rather than minimising the compute cost given a memory bound with any number of allowed recopmutations.
+However, their algorithm minimises the peak memory cost using one recomputation at most; rather than minimising the compute cost given a memory bound with any number of allowed recopmutations.
 
 Kusumoto, Inoue et al. \cite{Kusumoto2019} also generalise checkpointing to arbtirary graphs.
 They do indeed minimise computational cost given a memory budget.
@@ -92,8 +92,8 @@ However, all is not perfect.
 Firstly, like Feng and Huang's approach, they only consider at most one recomputation.
 Furthermore, the per-layer costs are not truly precise, profiled costs.
 For example, they assume backward tensors are always twice as large as the forwards, something I found not to be the case in my experiments (sometimes they were even ten times as large).
-They also model compute costs by saying that convolutional layers are 10x more expensive then all the other layers.
-Lastly, they report that their exact dynamical programming solution is too inefficient for large networks; but they also give an approximate solution that gives very near-optimal results.
+They also model compute costs by saying that convolutional layers are ten times more expensive then all the other layers.
+Lastly, they report that their exact dynamic programming solution is too inefficient for large networks; but they also give an approximate solution that gives very near-optimal results.
 
 Nonetheless, both of the above papers represent huge progress, as they generalise to arbitrary graphs.
 However, it is clear that a perfect solution is yet to exist;

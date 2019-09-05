@@ -18,13 +18,13 @@ The states of our MDP are all the possible combinations of subsequences and memo
 The memory budget, however, is now akin to a continuous state, unlike the discrete memory slots.
 This makes finding the optimal policy very impractical, as there are far too many states to iterate over.
 For example, the memory budget on NVIDIA's T4 GPU, designed specifically for deep learning performance, has 16GB of memory \cite{Nvidia2019-T4}, which is 16e9 possible states.
-This is totally intractable, unless we apply some bucketing on memory, but this detracts from the true optimality of the solution and eventually becomes too crude a solution.
+This is totally intractable, unless we apply some bucketing on memory; but this detracts from the true optimality of the solution and eventually becomes too crude.
 
 The second core issue is that our algorithm attempts to be `too perfect' - it finds \textit{the} perfect solution, but requires perfect information and a lot of time to do this.
-I have found that getting this perfect information is not always too easy.
-Also, we do not need to converge to the true optimum, only something that is close enough.
+I have found that getting this perfect information is not always easy to do in practice.
+Also, we do not need to spend inordinate amounts of time converging to the true optimum, only something that is close enough.
 
-These issues are at the core of MDPs and Reinforcement Learning, if not the entire point of reinforcement learning (when it is too impractical to solve MDPs perfectly using dynamic programming, statistically infer a solution using data).
+These issues are at the core of MDPs and Reinforcement Learning, if not the entire point of Reinforcement Learning: when it is too impractical to solve MDPs perfectly using dynamic programming, statistically infer a solution using data.
 Though the notion of statistical inference does not translate here, I am sure there must be a wealth of techniques we can leverage to cope with the above issues and make the solver more practical.
 I am not aware of any literature that has attempted to do this.
 It would definitely be the next step for this project.
