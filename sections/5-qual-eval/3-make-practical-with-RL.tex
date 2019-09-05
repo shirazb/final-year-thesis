@@ -1,13 +1,36 @@
 \section{Making the Solver More Practical with Reinforcement Learning Techniques}
-\begin{itemize}[topsep=0.2em]
-    \item Real world M like 12GB (12e9) is way too big because algo iterates over every single m.
-    \item Have to do this because M is a state of our `MDP', but now it is like a very large \textit{continuous} state.
-    \item Takes way too long to converge! We should use a constrained MDP on m instead.
-    \item I think, fundamentally, so much of effort in getting new algorithm to work is because of this continuous m state.
-    \item Also, bucketing, after a certain extent, is a crude solution. causes internal fragmentation in buckets.
-    \item Algorithm takes so much effort to be \textit{perfect}, only to be ruined by bucketing
-    \item Don't actually need to be anywhere near that perfect anyway, and don't have the information to do so either
-    \item Exact costs and especially memory budget very hard to profile
-    \item So, instead have...
-    \item Does not give perfect answer but will converge to `good enough' far faster than my algo will reach perfect and terminate.
-\end{itemize}
+% \begin{itemize}[topsep=0.2em]
+%     \item Real world M like 12GB (12e9) is way too big because algo iterates over every single m.
+%     \item Have to do this because M is a state of our `MDP', but now it is like a very large \textit{continuous} state.
+%     \item Takes way too long to converge! We should use a constrained MDP on m instead.
+%     \item I think, fundamentally, so much of effort in getting new algorithm to work is because of this continuous m state.
+%     \item Also, bucketing, after a certain extent, is a crude solution. causes internal fragmentation in buckets.
+%     \item Algorithm takes so much effort to be \textit{perfect}, only to be ruined by bucketing
+%     \item Don't actually need to be anywhere near that perfect anyway, and don't have the information to do so either
+%     \item Exact costs and especially memory budget very hard to profile
+%     \item So, instead have...
+%     \item Does not give perfect answer but will converge to `good enough' far faster than my algo will reach perfect and terminate.
+% \end{itemize}
+
+As we saw in Section \ref{sec:3-policy-solver}, generalising to precise memory costs, rather than using discrete memory slots, caused a lot of headache for the policy solver.
+We can see why when we view the algorithm in a similar light to Markov Decision Processes, as described in Section \ref{sec:2-5-dp-checkpointing}.
+The states of our MDP are all the possible combinations of subsequences and memory budgets.
+The memory budget, however, is now akin to a continuous state, unlike the discrete memory slots.
+This makes finding the optimal policy very impractical, as there are far too many states to iterate over.
+For example, the memory budget on NVIDIA's T4 GPU, designed specifically for deep learning performance, has 16GB of memory \cite{Nvidia2019-T4}, which is 16e9 possible states.
+This is totally intractable, unless we apply some bucketing on memory, but this detracts from the true optimality of the solution and eventually becomes too crude a solution.
+
+The second core issue is that our algorithm attempts to be `too perfect' - it finds \textit{the} perfect solution, but requires perfect information and a lot of time to do this.
+I have found that getting this perfect information is not always too easy.
+Also, we do not need to converge to the true optimum, only something that is close enough.
+
+These issues are at the core of MDPs and Reinforcement Learning, if not the entire point of reinforcement learning (when it is too impractical to solve MDPs perfectly using dynamic programming, statistically infer a solution using data).
+Though the notion of statistical inference does not translate here, I am sure there must be a wealth of techniques we can leverage to cope with the above issues and make the solver more practical.
+I am not aware of any literature that has attempted to do this.
+It would definitely be the next step for this project.
+
+An example for dealing with the first issue is to use a constrained MDP \cite{Altman1999-constrained-mdps}.
+This was suggested to me by Sanket Kamthe, a PhD student at Imperial College London.
+Rather than modelling memory as a continuous state, we constrain the set of possible actions taken to satisfy the memory budget.
+That is, we still minimise \(Q(i,\,j,\,k)\), but only choose \(k\) that give a peak memory within the memory constraint \(m\).
+This is distinctly different from \(m\) being a part of the state space, as we no longer have to iterate over every possible \(m\).
