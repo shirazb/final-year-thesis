@@ -607,6 +607,9 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
     \SetKw{Continue}{continue}
     \SetKw{Break}{break}
 
+    % hide end for
+    \SetKwFor{HFor}{for}{do}{}
+
     \KwIn{\(N\) the sequence length}
     \KwIn{\(M\) the memory budget}
     \KwIn{\(\alpha\) a \(2\times(N+2)\) \texttt{float} array of the per-operator compute costs}
@@ -620,8 +623,8 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
     \BlankLine
 
     \# Traverse the subproblems bottom-up.\;
-    \For{\(m \;\leftarrow\; 2\) \KwTo \(M\)}{
-        \For{\(i \;\leftarrow\; N\) \KwTo \(0\)}{
+    \HFor{\(m \;\leftarrow\; 2\) \KwTo \(M\)}{
+        \HFor{\(i \;\leftarrow\; N\) \KwTo \(0\)}{
             \# Base Case: \([i,\,i+1,\,,m-1]\)\;    
 
             \(b \;\leftarrow\; \beta^b_i \,+\, \beta^b_{i+1}\)\;
@@ -646,10 +649,10 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
             \ComputeQuad \(\leftarrow\;\)\ComputeFQuad\(\,+\, c\)\;
             \BlankLine
             \PeakFQuad \(\leftarrow\; 0\)\;
-            \PeakQuad \(\leftarrow\; \max(\)\PeakFQuad\(,\, b\)\;
+            \PeakQuad \(\leftarrow\; \max(\)\PeakFQuad\(,\, b)\)\;
             \BlankLine
 
-            \For{\(j \;\leftarrow\; i+2\) \KwTo \(N+1\)}{
+            \HFor{\(j \;\leftarrow\; i+2\) \KwTo \(N+1\)}{
                 \# Update quadratic costs.\;
                 \ComputeFQuad \(\leftarrow\;\)\ComputeFQuad\(\,+\, \alpha^f_{j-1}\) \;
                 \ComputeQuad \(\leftarrow\;\)\ComputeFQuad\(\,+\, \alpha^b_{j-1}\)\;
@@ -663,58 +666,89 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
                 \ComputeK\(\;\leftarrow\; 0\)\;
                 \(C_{min} \;\leftarrow\; \infty\)\;
                 \Failed \(\;\leftarrow\; \top\)\;
-                \BlankLine
+                % \BlankLine
+            }
+        }
+    }
+    
+    \caption{Not this algorithm!}
+    \label{alg:3-policy-solver-final}
+\end{algorithm}
 
+\begin{algorithm}
+    \DontPrintSemicolon
+    \setcounter{AlgoLine}{30}
+
+    \SetKwData{PeakFs}{peak\textsubscript{F}}
+    \SetKwData{Failed}{failed}
+    \SetKwData{PeakR}{peak\textsubscript{R}}
+    \SetKwData{PeakL}{peak\textsubscript{L}}
+    \SetKwData{Peak}{peak}
+    \SetKwData{ComputeFQuad}{fcompute\textsubscript{quad}}
+    \SetKwData{ComputeQuad}{compute\textsubscript{quad}}
+    \SetKwData{PeakFQuad}{fpeak\textsubscript{quad}}
+    \SetKwData{PeakQuad}{peak\textsubscript{quad}}
+    \SetKwData{PeakK}{fpeak\textsubscript{k}}
+    \SetKwData{ComputeK}{fcompute\textsubscript{k}}
+    \SetKw{Continue}{continue}
+    \SetKw{Break}{break}
+
+    % hide start for
+    \SetKwFor{HFor}{}{}{end}
+
+    \HFor{}{
+        \HFor{}{
+            \HFor{}{
                 \For{\(k \;\leftarrow\; i\,+\,1\) \KwTo \(j\,-\,1\)}{
                     \# Update costs over k.\;
                     \ComputeK\(\;\leftarrow\;\)\ComputeK\(\;+\; \alpha^f_k\)\;
                     \PeakK\(\;\leftarrow\; \max(\)\PeakK\(,\; (k-1\,=\,i \;?\; 0 \;:\; \beta^f_{k-1})\;+\; \beta^b_k)\)\;
                     \BlankLine
-
+            
                     \# Pre-check the stages of this strategy for failure.\;
                     \BlankLine
-
+            
                     \# 1: Forwards to \(f_k\) in-place whilst holding \(b_j\).\;
                     \PeakFs \(\leftarrow\; \beta^b_j \;+\; \max(f_{i+1},\, \max_{i \,<\, l \,<\, k}\, \beta^f_l + \beta^f_{l+1})\)\;
                     \BlankLine
-
+            
                     \If{\PeakFs \(>\, m\)}{
                         \Continue\;
                     }
                     \BlankLine
-
+            
                     \# 2, 3: Right and left subproblems \;
                     \BlankLine
-
+            
                     \If{\(m \,-\, \beta^f_k \,<\, 0\)}{
                         \Continue\;
                     }
                     \BlankLine
-
+            
                     \PeakR \(\;\leftarrow\; B[k][j][m-\beta^f_k-1]\)\;
                     \PeakL \(\;\leftarrow\; B[i][j][m-1]\)\;
                     \BlankLine
-
+            
                     \If{\PeakR or \PeakL failed}{
                         \Continue\;
                     }
                     \BlankLine
-
+            
                     \Peak \(\;\leftarrow\; \max( \)\PeakFs\(,\, \beta^f_k + \) \PeakR\(,\,\)\PeakL\( ) \)\;
                     \BlankLine
-
+            
                     \If{\Peak\(\;>\; m\)}{
                         \Continue\;
                     }
                     \BlankLine
-
+            
                     \# Success, a strategy works!\;
                     \Failed\(\;\leftarrow\; \bot\)\;
                     \BlankLine
-
+            
                     \(c \;\leftarrow\; \sum_{l\;=\;i\,+\,1}^k \alpha^f_l \,+\, C[k][j][m-\beta^f_k-1] \,+\, C[i][k][m-1]\)\;
                     \BlankLine
-
+            
                     \If{\(c \,<\, C_{min}\)}{
                         \(C_{min} \;\leftarrow\; c\)\;
                         \(B[i][j][m-1] \;\leftarrow\;\) \Peak\;
@@ -723,7 +757,7 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
                     }
                 }
                 \BlankLine
-
+            
                 \# All possible checkpointing strategies failed.\;
                 \BlankLine
                 \# Resort to quadratic. If even that fails, fail this subproblem.\;
@@ -733,7 +767,7 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
                         \Break\;
                     }
                     \BlankLine
-
+            
                     \(B[i][j][m-1] \;\leftarrow\;\) \PeakQuad\;
                     \(C[i][j][m-1] \;\leftarrow\;\) \ComputeQuad\;
                     \(D[i][j][m-1] \;\leftarrow\;\) quadratic strategy\;
@@ -742,11 +776,5 @@ The new policy solver algorithm, with all of the above rigmarole, is given in Al
         }
     }
     \Return{\((C,\, D)\)}
-    
-    \caption{Not this algorithm!}
-    \label{alg:3-policy-solver-final}
-\end{algorithm}
-% \begin{algorithm}
-%     \DontPrintSemicolon
 
-% \end{algorithm}
+\end{algorithm}
