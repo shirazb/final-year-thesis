@@ -365,6 +365,15 @@ I mean actually removing those elements from the search space altogether, so we 
 I am sure any solution would greatly increase the code complexity and so even make it slower.
 I do not even bother with the stated approach of storing \(j_\mathrm{F}\) and immediately short-circuiting when we hit it, as the algorithm will only have to run that one extra iteration for \(j_\mathrm{F}\) before realising failure and setting all \(j^\prime \,\geq\, j_{F}\) to failure.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Skipping the Small \texorpdfstring{\(m\)}{\textit{m}}}
+If \(m_{min}\) is the absolute minimum memory required to run the network (by using the `recompute everything' strategy), then every \((i,\,j,\,m)\) subproblem for \(m\leq m_{min}\) is guaranteed to fail.
+Considering \(m_{min}\) could be in the hundreds or thousands, and that this is \(N^2 m_{min}\) subproblems, this is a considerable amount of unnecessary work.
+We can easily elide it by pre-calculating \(m_{min}\) and only starting the \(m\) loop from there, rather than 1.
+In the section on base cases, I explain how \(m_{min}\) is calculated.
+It corresponds to the peak memory cost of the `recompute everything' strategy on the entire sequence.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Base Cases}
 Finally, we consider the base cases of the algorithm.
@@ -582,25 +591,97 @@ Therefore, there is no longer a separate loop at the beginning to set the trivia
 Finally, we are done.
 The new policy solver algorithm, with all of the above rigmarole, is given in Algorithm \ref{alg:3-policy-solver-final}.
 
-\begin{algorithm}[htb]
+\begin{algorithm}[htbp]
     \DontPrintSemicolon
-    \SetKwData{ComputeF}{fcompute\textsubscript{quad}}
-    \SetKwData{ComputeQuad}{compute\textsubscript{quad}}
+    \SetKwData{PeakFs}{peak\textsubscript{F}}
+    \SetKwData{Failed}{failed}
+    \SetKwData{PeakR}{peak\textsubscript{R}}
+    \SetKwData{PeakL}{peak\textsubscript{L}}
+    \SetKwData{Peak}{peak}
+    \SetKw{Continue}{continue}
 
-    \ldots\;
+    \KwIn{\(N\) the sequence length}
+    \KwIn{\(M\) the memory budget}
+    \KwIn{\(\alpha\) a \(2\times(N+2)\) \texttt{float} array of the per-operator compute costs}
+    \KwIn{\(\beta\) a \(2\times(N+2)\) \texttt{int} array of the per-operator memory costs}
+    \BlankLine
+    
+    \(M \;\leftarrow\; M \,-\, \beta^f_0\)\;
     \BlankLine
 
-    \ComputeF \(\leftarrow\; 0\)\;
-    \ComputeQuad \(\leftarrow\;\)\ComputeF\(\,+\, \alpha^b_i\)\;
+    Let \(B\), \(C\), \(D\) be 3D arrays of size \((N+1)\times(N+1)\times M\)\;
     \BlankLine
 
-    \For{\(j \;\leftarrow\; i+2\) \KwTo \(N+1\)}{
-        \ComputeF \(\leftarrow\;\)\ComputeF\(\,+\, \alpha^f_j\) \;
-        \ComputeQuad \(\leftarrow\;\)\ComputeF\(\,+\, \alpha^b_{j-1}\)\;
-        \BlankLine
-        \ldots\;
+    Base cases will go here.\;
+    \BlankLine
+
+    \# Traverse the subproblems bottom-up.\;
+    \For{\(m \;\leftarrow\; 2\) \KwTo \(M\)}{
+        \For{\(i \;\leftarrow\; N\) \KwTo \(0\)}{
+            \# Base case has already handled \((i,\,i+1)\), so start at \(i+2\).\;
+            \For{\(j \;\leftarrow\; i+2\) \KwTo \(N+1\)}{
+                \(C_{min} \;\leftarrow\; \infty\)\;
+                \Failed \(\;\leftarrow\; \top\)\;
+                \For{\(k \;\leftarrow\; i\,+\,1\) \KwTo \(j\,-\,1\)}{
+                    \# Pre-check the stages of this strategy for failure.\;
+                    \BlankLine
+
+                    \# 1: Forwards to \(f_k\) in-place whilst holding \(b_j\).\;
+                    \PeakFs \(\leftarrow\; \beta^b_j \;+\; \max(f_{i+1},\, \max_{i \,<\, l \,<\, k}\, \beta^f_l + \beta^f_{l+1})\)\;
+                    \BlankLine
+
+                    \If{\PeakFs \(>\, m\)}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \# 2, 3: Right and left subproblems \;
+                    \BlankLine
+
+                    \If{\(m \,-\, \beta^f_k \,<\, 0\)}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \PeakR \(\;\leftarrow\; B[k][j][m-\beta^f_k-1]\)\;
+                    \PeakL \(\;\leftarrow\; B[i][j][m-1]\)\;
+                    \BlankLine
+
+                    \If{\PeakR or \PeakL failed}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \Peak \(\;\leftarrow\; \max( \)\PeakFs\(,\, \beta^f_k + \) \PeakR\(,\,\)\PeakL\( ) \)\;
+                    \BlankLine
+
+                    \If{\Peak\(\;>\; m\)}{
+                        \Continue\;
+                    }
+                    \BlankLine
+
+                    \# Success, a strategy works!\;
+                    \Failed\(\;\leftarrow\; \bot\)\;
+                    \BlankLine
+
+                    \(c \;\leftarrow\; \sum_{l\;=\;i\,+\,1}^k \alpha^f_l \,+\, C[k][j][m-\beta^f_k-1] \,+\, C[i][k][m-1]\)\;
+                    \BlankLine
+
+                    \If{\(c \,<\, C_{min}\)}{
+                        \(C_{min} \;\leftarrow\; c\)\;
+                        \(B[i][j][m-1] \;\leftarrow\;\) \Peak\;
+                        \(C[i][j][m-1] \;\leftarrow\; c\)\;
+                        \(D[i][j][m-1] \;\leftarrow\; k\)\;
+                    }
+                }
+                \If{failed}{
+                    \(B[i][j][m-1] \;\leftarrow\;\) \textit{failure}
+                }
+            }
+        }
     }
-    \ldots\;
-    \caption{not this algorithm!}
+    \Return{\((C,\, D)\)}
+    
+    \caption{Not this algorithm!}
     \label{alg:3-policy-solver-final}
 \end{algorithm}
