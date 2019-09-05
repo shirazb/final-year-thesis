@@ -133,17 +133,11 @@ The `forward graph' is shown with the corresponding `backward graph' for computi
 
 
 \subsection{The Computational Graph for Training a Network}
-% let us fully derive comp graph. Specifically, we will use feedforward network of sigmoid-ed fully connected layers with a MSE loss. Note final layer directly feeding loss is unthresholded.
-% Give definitions
-% Give specific loss eqn
-% Give update rules for one step of SGD
-% Give full comp graph
-
-Figure \ref{fig:2-nn-chain-rule-backward} merely shows how to backpropagate deltas.
+Figure \ref{fig:2-nn-chain-rule-backward} merely shows how to backpropagate the deltas.
 It does not fully describe one step of training a neural network, for example it does not show the weight updates.
 
-To derive the full graph, we must fully specify the update rules for backpropagation and gradient descent.
-
+To derive the full graph, we must first fully specify the update rules for backpropagation and gradient descent.
+I have borrowed from Erik Hallstr\"{o}m's derivation of the update rules, which can be found online \cite{Hallstrom-backprop}.
 
 Consider an \(N\) layer network with any number of neurons per layer.
 Let \(\vec{y}^l\) be the activations of the neurons in layer \(l\).
@@ -292,7 +286,7 @@ To find the weight update for \(\vec{\theta}_l\), we must:
 
 \begin{enumerate}[topsep=0.2em]
     \item Calculate \(\delta^l\) using the layer's output \(\vec{y}^l\), the upstream deltas \(\delta^{l+1}\) and the upstream weights \(\vec{\theta}_l\).
-    \item Calculate the weight change \(\Delta\vec{\theta}_l\) using the layer's inputs \(\vec{y}^{l-1}\) and \(\delta^l\) from the previous step.
+    \item Calculate the parameter update \(\Delta\vec{\theta}_l\) using the layer's inputs \(\vec{y}^{l-1}\) and \(\delta^l\) from the previous step.
 \end{enumerate}
 
 Also, as the forward passes for each input in a batch are independent, we collate the inputs into one tensor and perform the forward pass at once element-wise.
