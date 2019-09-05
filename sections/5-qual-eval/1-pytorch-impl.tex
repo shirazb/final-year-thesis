@@ -1,0 +1,7 @@
+\section{Implementation in PyTorch}
+\begin{itemize}[topsep=0.2em]
+    \item Not good API at all. Needs to be an Autograd function, not some helper that does both forwards and backwards manually.
+    \item Forces it to be a separate helper you call in train loop, rather than a function you naturally use and backward is automatically set up - completely against the spirit of PyTorch!
+    \item Likely requires considerable fudging of existing user models where only a sub-model is sequential to make compatabile with this API. This case describes just about every case.
+    \item PyTorch graph really does not correspond to our theoretic graph...
+\end{itemize}

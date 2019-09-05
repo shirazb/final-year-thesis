@@ -1,0 +1,22 @@
+\section{The Role of Checkpointing in Relation to Other Existing Techniques}
+\begin{itemize}[topsep=0.2em]
+    \item C-M curves show as memory really gets tight, compute cost gets really bad
+    \item This is where swapping is much better, can often get a theoretical overhead of 0
+    \item But really hard to do - although maybe these papers like PipeDream can suggest how to do the required pipelining
+    \item Checkpointing still useful as often faster to do than swap. Or really, more about freeing up PCIe bandwidth, allowing all future swaps to be done earlier, possibly removing a bottleneck. However, swapping something makes it not eligible for checkpointing.
+    \item Can actually perform my DP checkpointing on a sequence with an imposed swapping schedule and find the optimal combined schedule.
+    \item However, did not have time to implement and later found that already somewhat suggested.
+    Swapping can be considered as a generalisation of checkpointing to multiple layers of memory - swapping is simply checkpointing to the 2nd layer and incurs a transfer cost. Work on this already...
+    \item Really really intractable though, especially cos swapping. Becomes something like a Resource Constrained Scheduling Problem.
+    \item Sync or async swapping? uniform costs? optimal compute given M?
+    \item Singapore paper seems most promising, explain+evaluate...
+    \item Next, consider choice of conv alg.
+    \item Just like in DBs, search over logical ops and their physical implementations.
+    \item vDNN figure shows workspace memory is quite significant, and that optimising for this has a significant effect.
+    \item Can implement in my checkpointing framework - extend actions to be over all possible \(k, \mathrm{alg}\). Going to be even slower!
+    \item Finally, look at reducing memory pool fragmentation.
+    \item My alg assumes no fragmentation, we can always perfectly allocate \(x\) amount of memory without worrying about whether \(x\) consecutive bytes exist in the pool of size \(M\).
+    \item Online defrag methods exist, but offline bin-packing heuristic algo from Singapore paper seems really promising
+    \item As checkpointing done offline, should be theoretically possible to plan memory placement in light of checkpointing.
+    \item \textbf{Conclusion:} Though limited for really tight M, checkpointing certainly has its place. Just look at significantly increased number of papers in last couple years. Is quite suited to combination with choice of conv alg, as can naturally extend DP framework. I think swapping will be the most heavily used if can be done right, as it gives near 0 overhead, and checkpointing will supplement it to reduce the overhead even further where possible. But difficulty of overhauling the memory manager of framework...
+\end{itemize}
