@@ -1,22 +1,72 @@
 \section{The Role of Checkpointing in Relation to Other Memory Optimisations}
-\begin{itemize}[topsep=0.2em]
-    \item C-M curves show as memory really gets tight, compute cost gets really bad
-    \item This is where swapping is much better, can often get a theoretical overhead of 0
-    \item But really hard to do - although maybe these papers like PipeDream can suggest how to do the required pipelining
-    \item Checkpointing still useful as often faster to do than swap. Or really, more about freeing up PCIe bandwidth, allowing all future swaps to be done earlier, possibly removing a bottleneck. However, swapping something makes it not eligible for checkpointing.
-    \item Can actually perform my DP checkpointing on a sequence with an imposed swapping schedule and find the optimal combined schedule.
-    \item However, did not have time to implement and later found that already somewhat suggested.
-    Swapping can be considered as a generalisation of checkpointing to multiple layers of memory - swapping is simply checkpointing to the 2nd layer and incurs a transfer cost. Work on this already...
-    \item Really really intractable though, especially cos swapping. Becomes something like a Resource Constrained Scheduling Problem.
-    \item Sync or async swapping? uniform costs? optimal compute given M?
-    \item Singapore paper seems most promising, explain+evaluate...
-    \item Next, consider choice of conv alg.
-    \item Just like in DBs, search over logical ops and their physical implementations.
-    \item vDNN figure shows workspace memory is quite significant, and that optimising for this has a significant effect.
-    \item Can implement in my checkpointing framework - extend actions to be over all possible \(k, \mathrm{alg}\). Going to be even slower!
-    \item Finally, look at reducing memory pool fragmentation.
-    \item My alg assumes no fragmentation, we can always perfectly allocate \(x\) amount of memory without worrying about whether \(x\) consecutive bytes exist in the pool of size \(M\).
-    \item Online defrag methods exist, but offline bin-packing heuristic algo from Singapore paper seems really promising
-    \item As checkpointing done offline, should be theoretically possible to plan memory placement in light of checkpointing.
-    \item \textbf{Conclusion:} Though limited for really tight M, checkpointing certainly has its place. Just look at significantly increased number of papers in last couple years. Is quite suited to combination with choice of conv alg, as can naturally extend DP framework. I think swapping will be the most heavily used if can be done right, as it gives near 0 overhead, and checkpointing will supplement it to reduce the overhead even further where possible. But difficulty of overhauling the memory manager of framework...
-\end{itemize}
+In this thesis, I have shown that checkpointing can greatly decrease memory costs at a reasonable overhead.
+However, other memory optimisations for deep learning exist, which are certainly very powerful too.
+It is therefore important to appraise my work, and checkpointing more generally, in light of these other techniques; evaluating the trade-offs between them and how they can or cannot be combined.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Swapping}
+First, I introduce swapping, where forward tensors are swapped out to CPU memory and swapped back in when they are required in the backward pass.
+In the optimal case, this incurs no compute overhead and constant memory; you can keep everything swapped out except the currently in-use tensors, as long as you can swap the other tensors back in on time.
+That is, communication has to be hidden under computation.
+Whether or not we can do this depends on how big a tensor is and how long they take to compute, just like in checkpointing.
+However, it is actually even more difficult than this.
+Choosing to swap a tensor consumes the bandwidth of the CPU-GPU link, usually PCIe, for a certain amount of time.
+This means it is not just about the properties of individual tensors, but that swapping a tensor delays all future swaps, making this a scheduling problem.
+For example, this could be modelled as a Resource Constrained Scheduling Problem.
+To quote one textbook \cite[p.~23]{Artigues2007-rcps}, these problems are ``one of the most intractable combinatorial optimization problems'' as they are NP-hard in the strong sense.
+Scheduling problems are an entire field of research in their own right, and will surely have a great deal of literature we can leverage in ML.
+
+Many approximate approaches in ML exist \cite{Zhang2019, Wang2018, Rhu2016, ShriramS2019, Li2019-mem-limited-devices, Le2018-tflms, Chen2019-modnn, Ito2017-ooc-cudnn, Aupy2016, Schanen2016, Kukreja2018, Aupy2019}, which have varying merits and limitations.
+I will not give a fully survey here.
+Instead, I will discuss how the technique in general compares to checkpointing.
+
+Swapping tends to give better overheads than checkpointing when the memory budget is quite tight.
+We can see why from the Compute-Memory trade-off curves in Figure \ref{} - compute cost degrades quite drastically for very low \(M\).
+This does not mean checkpointing is not needed and that swapping is without difficulty.
+First, in order to precisely hide communication under computation, we need to know the precise per-layer costs, just like we need to find the optimal checkpointing policy.
+Moreover, as described above, it is very hard to solve for an optimal swapping schedule given these costs.
+Zhang et al. \cite{Zhang2019} have proposed a powerful approximation that gets excellent results.
+Similar to my work, they swap enough tensors to satisfy the memory budget whilst trying to minimise overhead, rather than picking an arbitrary point on the compute-memory trade-off.
+
+However, it is still not perfect.
+It is fairly often the case that the overhead of recomputing a tensor is less than the overhead caused by swapping, especially given the ever-increasing performance of ML libraries and GPUs.
+Tensors towards the end of a network are especially difficult to swap without incurring overhead, as they are the first to be reused in the backward.
+Recomputing them instead is not affected by their position in the network.
+Most importantly though, choosing to recompute a tensor rather than swapping it will free up PCIe over the time period it would have been swapped, \textit{bringing forward all future swaps}.
+Thus, I believe that any approach to combining the techniques should have this idea at their core.
+
+I did try to extend my policy solver to do this (in theory), given an already worked out swapping schedule.
+When it measures the cost of checkpointing a node that was swapped, it considers the possible savings from being able to swap the other tensors earlier.
+It also takes into account the fact that swapping a checkpointed node means all of the dropped forwards would have to be recomputed from the last checkpoint.
+Due to time constraints, this was not fully worked out.
+
+Also, I have recently come across a whole set of literature that describes swapping as a generalisation of checkpointing to two levels of memory, called heirarchical or multistage checkpointing \cite{Aupy2016, Schanen2016, Kukreja2018, Aupy2019}.
+Swapping becomes merely checkpointing to the second layer.
+These approaches model this is as a scheduling problem that takes into account memory costs, compute costs, transfer costs, and even allocation/deallocation costs.
+However, these are surely \textit{really} intractable to solve perfectly.
+Due to time constraints, exacerbated by how recent some of the work is, I am unsure of the practicality of these algorithms when applied to neural networks or in what sense they claim to be optimal.
+I do know each has their limitations, for example not all permit multiple recomputations or asynchronous swapping (which greatly reduces overhead).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Choice of Convolutional Algorithm}
+%    \item \textbf{Conclusion:} Though limited for really tight M, checkpointing certainly has its place. Just look at significantly increased number of papers in last couple years. Is quite suited to combination with choice of conv alg, as can naturally extend DP framework. I think swapping will be the most heavily used if can be done right, as it gives near 0 overhead, and checkpointing will supplement it to reduce the overhead even further where possible. But difficulty of overhauling the memory manager of framework...
+Next, I consider the choice of convolutional algorithm.
+The convolutional layer is a type of layer in a neural network.
+It is one of the most compute and memory intensive.
+Various algorithms exist for computing a convolution \cite{Xu2018-convs, Li2016-convs}, with varying time and space complexities.
+This adds another dimension to our optimisation problem, akin to how database optimisers search over the logical operators \textit{and} their physical implementations.
+
+Recall Figure \ref{fig:2-memory-breakdown} which shows the memory breakdown of neural networks.
+The space required for the workspace, that is the specific implementation of a convolutional layer, is quite significant.
+Therefore, what implementation we choose can have a large affect on how we can apply the other optimisations.
+It is not just that more memory can be saved, but that compute can be saved when memory is being asggressively reduced by other heuristics.
+For example, Rhu et al \cite{Rhu2016} developed \textit{vDNN}, which achieves most of its memory savings from swapping.
+However, it is not based on real costs; they have heuristics to either swap all layers or all convolutional layers.
+Often, this is too much, causing unnecessary overhead from the communication.
+To combat this, they profile the convolutional layers using the different implementations, and then greedily choose faster, less memory-efficient implementations of the layers until the memory budget will no longer be satisfied.
+
+It should be possible to extend my policy solver algorithm with checkpointing.
+Rather than choosing just the tensor to checkpoint, the algorithm will choose both a tensor and an implementation of computing that tensor.
+Due to time constraints, I did not implement this.
+One drawback is that clearly it would make the algorithm less efficient, as it increase the size of the search space.
+However, I think it could significantly improve the technique, due to the large variation in space and time of the implementaions, unlocking new strategies for the algorithm to discover.
