@@ -1,0 +1,35 @@
+\section{The Compute-Memory Trade-Off}
+I demonstrate the compute-memory trade-off by showing for varying memory budget \(m\), what is the optimal computational cost the solver predicts.
+I plot this for sequence lengths \(N\,=\, 20,\,40,\,100\), and for each vary \(m\) up to \(60\).
+I use a uniform network: the compute and memory costs of every forward and backward tensor is 1.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\linewidth]{compute_mem_tradeoff.png}
+    \caption{The compute-memory trade-off for networks of different sequence length.}
+    \label{fig:4-cm-tradeoff}
+\end{figure}
+
+For \(N\,=\,20\),
+
+Starting from the right, we can see that compute cost degrades very slowly until \(m\) gets too low, then there is a visible `corner` and it degrades very fast.
+However, this \(m\) is really quite low.
+The following numbers are all read approximately from the graph.
+
+We can see that, for \(N\,=\,40\), the cost starts at just under 100 for \(m\,=\,60\).
+\(m\) decreases all the way to just over 10 before we even see a 30\% overhead.
+I postulate that, for a uniform network like this, the solver is keeping to one recompution until the corner.
+The costs are consistent with Chen's \(\Theta(\sqrt{N})\) analysis for one recoputation.
+For \(N\,=\,20\), the theoretical optimal memory consumption for unfiform layers is \(2\sqrt{20}\,\approx\,9\).
+We can see that it is at about \(m\,=\,9\) where the corner is encountered and the cost starts to quickly degrade.
+This shows, primarly, how powerful even one recomputation is.
+It also shows that, when given enough memory to not need to do more than one recomputation, the solver finds Chen's theoretical optimal policy.
+However, Chen's solution simply picks a point on that curve, my solver is much more flexible.
+It can make use of any extra memory to do less recomputation than the \(\Theta(\sqrt{N})\) approach, and, if memory gets too tight for that approach, it will find a policy that still satisfies the memory budget.
+All of this is done automatically for the user.
+In the extreme case, we can see that for \(N\,=\,20\), at about \(m\,=\,40\) the curve flattens out, because there is now enough memory for \textit{no} recomputation to be required.
+
+How well checkpointing scales to very deep networks can also be seen, by looking at the differences across the three graphs.
+For \(N\,=\,20\), reducing the memory budget from about 40 to 10, which is a 60\% reduction, gives a 38\% overhead.
+For \(N\,=\,100\). reducing from about 60 to 24, which also is a 60\% reduction, gives hardly any visible effect.
+Reducing all the way down to \(m\,=\,10\), a huge 83\% reduction, is required to observe a similar overhead of 40\%.
