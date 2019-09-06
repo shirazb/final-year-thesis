@@ -62,7 +62,8 @@ Solving this gives:
 \begin{equation*}
     g(n) \;=\; k\log_{k+1}(n)
 \end{equation*}
-Setting \(k\,=\,1\) minimises this to \(\log_2(n)\). \todo{EXPLAIN COMP COMPLEXITY}
+Setting \(k\,=\,1\) minimises this to \(\log_2(n)\).
+%\todo{EXPLAIN COMP COMPLEXITY}
 Setting up a similar recurrence for the computational cost shows it has increased to \(n\log_k(n)\).
 This demonstrates how, through multiple recomputations, we have further traded compute for memory.
 
@@ -102,7 +103,7 @@ Before detailing Gruslys et al.'s \cite{Gruslys2016} work on memory-efficient RN
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Related Work}
-\todo{TODO} This section should either be much more in-depth or removed.
+%\todo{TODO} This section should either be much more in-depth or removed.
 
 \texttt{REVOLVE} gives the optimal recursion depth for sequences of known length.
 Work has also been done for sequences of unknown length.
@@ -117,7 +118,7 @@ Siskind and Pearlmutter \cite{Siskind2018} generalised \texttt{REVOLVE} to arbit
 However, their implementation does not take into account precise per-operator costs and does not solve for the least computational cost given a memory budget, but instead gives \texttt{REVOLVE}-like optimality by finding the strategy of least recursion depth.
 Also, though non-linear architectures are now prevalent in neural networks, they tend to not be trees either.
 
-\todo{others} H-revolve? Imperial one? Those two new papers that generalise to arbitrary graphs?
+%{others} H-revolve? Imperial one? Those two new papers that generalise to arbitrary graphs?
 % heirarchical checkpointing: async and sync? num levels of memory? Assumptions on comp costs, memory costs, transfer costs, allocation costs?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -100,7 +100,7 @@ When the original backward graph is traversed, the new tensor will not have a \t
 
 Detaching is often used to ensure the backward graph is cleared from memory when the backward pass has been done and the gradients are no longer required, but we would like to keep a forward tensor.
 I will use detaching in my implementation of checkpointing with multiple recomputations to manually control how execution moves forward and backward along a sequence.
-More on this in \todo{[sec]}.
+%More on this in \todo{[sec]}.
 
 For a more in-depth look on Autograd internals, I recommend starting with Elliot Waite's excellent tutorial on Youtube \footnote{\url{https://youtu.be/MswxJw-8PvE}, accessed 26/08/19}.
 
