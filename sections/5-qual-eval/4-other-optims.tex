@@ -59,14 +59,14 @@ This adds another dimension to our optimisation problem, akin to how database op
 Recall Figure \ref{fig:2-memory-breakdown} which shows the memory breakdown of neural networks.
 The space required for the workspace, that is the specific implementation of a convolutional layer, is quite significant.
 Therefore, what implementation we choose can have a large affect on how we can apply the other optimisations.
-It is not just that more memory can be saved, but that compute can be saved when memory is being asggressively reduced by other heuristics.
-For example, Rhu et al \cite{Rhu2016} developed \textit{vDNN}, which achieves most of its memory savings from swapping.
+It is not just that more memory can be saved, but that compute can be saved when memory is being over-aggressively reduced by other heuristics.
+For example, Rhu et al \cite{Rhu2016} developed \texttt{vDNN}, which achieves most of its memory savings from swapping.
 However, it is not based on real costs; they have heuristics to either swap all layers or all convolutional layers.
 Often, this is too much, causing unnecessary overhead from the communication.
-To combat this, they profile the convolutional layers using the different implementations, and then greedily choose faster, less memory-efficient implementations of the layers until the memory budget will no longer be satisfied.
+To combat this, they profile the convolutional layers using the different implementations, and then greedily choose faster, less memory-efficient implementations of the layers whilst the memory budget is still satisfied.
 
 It should be possible to extend my policy solver algorithm with checkpointing.
 Rather than choosing just the tensor to checkpoint, the algorithm will choose both a tensor and an implementation of computing that tensor.
-Due to time constraints, I did not implement this.
 One drawback is that clearly it would make the algorithm less efficient, as it increase the size of the search space.
 However, I think it could significantly improve the technique, due to the large variation in space and time of the implementaions, unlocking new strategies for the algorithm to discover.
+The poor compute degradation when the memory budget is very small could be alleviated by the algorithm choosing more memory-efficient implementations, rather than excessively recomputing.
