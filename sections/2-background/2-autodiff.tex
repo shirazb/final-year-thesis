@@ -1,5 +1,5 @@
 \section{Automatic Differentiation}
-Evidently, training a neural network involves taking derivates of a computation - applying the network to the batch of data to get the loss -
+Evidently, training a neural network involves taking derivates of a computation - applying the network to a batch of data to get the loss -
 but how do we actually evaluate derivates on a computer?
 There are three main approaches: numerical differentiation, symbolic differentiation, and automatic differentiation (AD).
 In this section, I will show how automatic differentiation is used in machine learning.
@@ -56,16 +56,16 @@ A specific forward pass on some data is a primal trace, and the backward an adjo
 \begin{figure}[tb]
     \centering
     \includegraphics[width=0.9\linewidth]{rv-ad-trace.png}
-    \caption{Reverse mode AD example, with \(f(x_1, x_2) = \ln(x_1) + x_1x_2 + \sin(x_2)\) at \(x_1, x_2) = (2, 5)\). After running the original forward run on the left, the augmented AD operations on the right are run in reverse. \cite[Table~3]{Baydin2015}}
+    \caption{Reverse mode AD example, with \(f(x_1, x_2) = \ln(x_1) + x_1x_2 - \sin(x_2)\) at \(x_1, x_2) = (2, 5)\). After running the original forward run on the left, the augmented AD operations on the right are run in reverse. \cite[Table~3]{Baydin2015}}
     \label{fig:2-rv-ad-trace}
 \end{figure}
 
-Consider \(f(x_1, x_2) = \ln(x_1) + x_1x_2 + \sin(x_2)\).
+Consider \(f(x_1, x_2) = \ln(x_1) + x_1x_2 - \sin(x_2)\).
 The computational graph for this is given in Figure \ref{fig:2-rv-ad-comp-graph}.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.75\linewidth]{rv-ad-comp-graph.png}
-    \caption{Computational graph of the example \(f(x_1, x_2) = \ln(x_1) + x_1x_2 + \sin(x_2)\). See Figure \ref{fig:2-rv-ad-comp-graph} for the definitions of the intermediate variables \(\nu_{-1}\ldots\nu{5}\). \cite[Figure~3]{Baydin2015}}
+    \caption{Computational graph of the example \(f(x_1, x_2) = \ln(x_1) + x_1x_2 - \sin(x_2)\). See Figure \ref{fig:2-rv-ad-comp-graph} for the definitions of the intermediate variables \(\nu_{-1}\ldots\nu{5}\). \cite[Figure~3]{Baydin2015}}
     \label{fig:2-rv-ad-comp-graph}
 \end{figure}
 The \(\nu_i\) denote the intermediate outputs (primals).
