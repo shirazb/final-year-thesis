@@ -1,11 +1,12 @@
 \section{The Role of Checkpointing in Relation to Other Memory Optimisations}
 In this thesis, I have shown that checkpointing can greatly decrease memory costs at a reasonable overhead.
-However, other memory optimisations for deep learning exist, which are certainly very powerful too.
+However, other memory optimisations for deep learning exist that are certainly very powerful too.
 It is therefore important to appraise my work, and checkpointing more generally, in light of these other techniques; evaluating the trade-offs between them and how they can or cannot be combined.
+I will cover swapping and the choice of convolutional algorithm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Swapping}
-First, I introduce swapping, where forward tensors are swapped out to CPU memory and swapped back in when they are required in the backward pass.
+\textit{Swapping} is where forward tensors are swapped out to CPU memory and swapped back in when they are required in the backward pass.
 In the optimal case, this incurs no compute overhead and constant memory; you can keep everything swapped out except the currently in-use tensors, as long as you can swap the other tensors back in on time.
 That is, communication has to be hidden under computation.
 Whether or not we can do this depends on how big a tensor is and how long they take to compute, just like in checkpointing.
@@ -21,7 +22,7 @@ I will not give a fully survey here.
 Instead, I will discuss how the technique in general compares to checkpointing.
 
 Swapping tends to give better overheads than checkpointing when the memory budget is quite tight.
-We can see why from the Compute-Memory trade-off curves in Figure \ref{} - compute cost degrades quite drastically for very low \(M\).
+We can see why from the Compute-Memory trade-off curves for checkpointing in Figure \ref{} - compute cost degrades quite drastically for very low \(M\).
 This does not mean checkpointing is not needed and that swapping is without difficulty.
 First, in order to precisely hide communication under computation, we need to know the precise per-layer costs, just like we need to find the optimal checkpointing policy.
 Moreover, as described above, it is very hard to solve for an optimal swapping schedule given these costs.
@@ -36,16 +37,17 @@ Most importantly though, choosing to recompute a tensor rather than swapping it 
 Thus, I believe that any approach to combining the techniques should have this idea at their core.
 
 I did try to extend my policy solver to do this (in theory), given an already worked out swapping schedule.
-When it measures the cost of checkpointing a node that was swapped, it considers the possible savings from being able to swap the other tensors earlier.
+When it measures the cost of checkpointing a node that has been swapped, it considers the possible savings from being able to swap the other tensors earlier.
 It also takes into account the fact that swapping a checkpointed node means all of the dropped forwards would have to be recomputed from the last checkpoint.
-Due to time constraints, this was not fully worked out.
+Fully deriving the theory for this and implementing it was outside of the feasible scope of this project.
 
-Also, I have recently come across a whole set of literature that describes swapping as a generalisation of checkpointing to two levels of memory, called heirarchical or multistage checkpointing \cite{Aupy2016, Schanen2016, Kukreja2018, Aupy2019}.
+Also, I have recently come across a whole set of literature in the automatic differentiation community that describes swapping as a generalisation of checkpointing to two levels of memory, called heirarchical or multistage checkpointing \cite{Aupy2016, Schanen2016, Kukreja2018, Aupy2019}.
 Swapping becomes merely checkpointing to the second layer.
 These approaches model this is as a scheduling problem that takes into account memory costs, compute costs, transfer costs, and even allocation/deallocation costs.
 However, these are surely \textit{really} intractable to solve perfectly.
 Due to time constraints, exacerbated by how recent some of the work is, I am unsure of the practicality of these algorithms when applied to neural networks or in what sense they claim to be optimal.
 I do know each has their limitations, for example not all permit multiple recomputations or asynchronous swapping (which greatly reduces overhead).
+However, this seems like a powerful technique that we should look into in ML.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Choice of Convolutional Algorithm}
@@ -62,11 +64,11 @@ Therefore, what implementation we choose can have a large affect on how we can a
 It is not just that more memory can be saved, but that compute can be saved when memory is being over-aggressively reduced by other heuristics.
 For example, Rhu et al \cite{Rhu2016} developed \texttt{vDNN}, which achieves most of its memory savings from swapping.
 However, it is not based on real costs; they have heuristics to either swap all layers or all convolutional layers.
-Often, this is too much, causing unnecessary overhead from the communication.
+Often, this is too much, causing unnecessary overhead from communication.
 To combat this, they profile the convolutional layers using the different implementations, and then greedily choose faster, less memory-efficient implementations of the layers whilst the memory budget is still satisfied.
 
 It should be possible to extend my policy solver algorithm with checkpointing.
 Rather than choosing just the tensor to checkpoint, the algorithm will choose both a tensor and an implementation of computing that tensor.
-One drawback is that clearly it would make the algorithm less efficient, as it increase the size of the search space.
+One drawback is that clearly it would make the algorithm less efficient, as it increases the dimension of the search space, though that dimension is quite small as there are only a handful of algorithms.
 However, I think it could significantly improve the technique, due to the large variation in space and time of the implementaions, unlocking new strategies for the algorithm to discover.
-The poor compute degradation when the memory budget is very small could be alleviated by the algorithm choosing more memory-efficient implementations, rather than excessively recomputing.
+The poor compute degradation of checkpointing when the memory budget is very small could be alleviated by the algorithm choosing more memory-efficient implementations, rather than excessively recomputing.

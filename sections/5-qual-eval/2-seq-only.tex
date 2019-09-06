@@ -92,11 +92,11 @@ However, all is not perfect.
 Firstly, like Feng and Huang's approach, they only consider at most one recomputation.
 Furthermore, the per-layer costs are not truly precise, profiled costs.
 For example, they assume backward tensors are always twice as large as the forwards, something I found not to be the case in my experiments (sometimes they were even ten times as large).
-They also model compute costs by saying that convolutional layers are ten times more expensive then all the other layers.
+They also model compute costs by saying that convolutional layers are ten times more expensive than all the other layers.
 Lastly, they report that their exact dynamic programming solution is too inefficient for large networks; but they also give an approximate solution that gives very near-optimal results.
 
 Nonetheless, both of the above papers represent huge progress, as they generalise to arbitrary graphs.
 However, it is clear that a perfect solution is yet to exist;
 none of our approaches tick all the boxes.
 In the future, we need to find a way to combine the merits of the many approaches.
-In particular for me, I would like to look into combining the latter approach, that uses dynamic programming on arbtirary graphs to minimise compute given a memory bound, with mine, that uses dynamic programming on sequences to minimise compute given a memory bound whilst allowing multiple recomputations and taking into account the exact per-operator costs.
+In particular for me, I would like to look into combining the latter approach, that uses dynamic programming on arbtirary graphs to minimise compute given a memory bound, with mine, that does the same for sequences only, but allows multiple recomputations and takes into account the exact per-operator costs.
