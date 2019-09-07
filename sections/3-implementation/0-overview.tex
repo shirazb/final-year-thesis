@@ -1,8 +1,8 @@
 In this chapter, I will detail the contributions I make in this thesis.
 First, I will show how to generalise the uniform-cost assumptions in Gruslys et al.'s policy solver.
 At least to me, this seemed fairly trivial at first thought, but it turns out there are a lot of gritty details to get through.
-My explanation will start with their approach and gradually amend the algorithm as I consider the effects of relaxing the assumptions.
+My explanation will gradually amend their algorithm as I consider the effects of relaxing the assumptions.
 
-Secondly, I will present my implementation in PyTorch, which takes a sequence of layers, profiles them, solves for the optimal policy, and performs backpropagation on the sequence, checkpointing according to the policy.
+Secondly, I will present my implementation in PyTorch, which takes a sequence of layers, profiles them, solves for the optimal policy, and performs backpropagation on the sequence according to the checkpointing policy.
 I will give the algorithm for executing backpropagation according to the policy, essentially the same as the one used by Gruslys et al., but with some PyTorch-specific considerations.
 As I describe the implementation, I will motivate and evaluate some of the design decisions, such as the API it presents to the user.
