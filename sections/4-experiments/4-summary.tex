@@ -1,0 +1,8 @@
+\section{Summary of Results}
+To summarise, the experiments in this section have showed the following:
+\begin{itemize}
+    \item Dynamic programming checkpointing is flexible. It successfully uses as little recomputation as possible to satisfy the budget and, only as the budget decreases, does it gradually incur more compute cost.
+    \item The compute cost degradation is very good until the budget becomes very small, at which point the cost starts to increase drastically due to the many recomputations.
+    \item However, pertinently, this shows the solver is still capable of finding a strategy to satisfy such small budgets.
+    \item The solver is still practical when using bucketing to overcome the large memory budget. That is, the execution time of the solver is made sufficiently quick at little expense to the compute cost of the found optimal strategy.
+\end{itemize}

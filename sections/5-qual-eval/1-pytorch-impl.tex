@@ -5,15 +5,16 @@
 %     \item Likely requires considerable fudging of existing user models where only a sub-model is sequential to make compatabile with this API. This case describes just about every case.
 %     \item PyTorch graph really does not correspond to our theoretic graph...
 % \end{itemize}
-I think my implementation in PyTorch does not present a good API.
-Instead, it should be an Autograd function that wraps the user's existing sequence to be checkpointed.
-This way, they will naturally call the forward and backward functions, and the recomputation will automatically take place;
-rather than a helper you must call in the training loop to explicitly perform the forwards \textit{and} backwards operations.
-That is completely against the spirit of PyTorch and automatic differentiation, the user should run a forward computation and the backwards automatically tracked.
+I think the API of my PyTorch implementation needs improvement.
+It presents a helper function to the user that they must call in the training loop to explictly perform the forwards \textit{and} backwards opertaions.
+To clarify, I mean the actual Autograd backward functions of the intermediate variables, not \texttt{.backward()} on the output tensor.
+This is completely against the spirit of PyTorch and automatic differentiation;
+the user should run a forward computation and the backwards should be automatically tracked.
+To achieve this, the API should be an Autograd function that wraps the user's existing sequence to be checkpointed such that, when they call the forward functions as usual, and then call \texttt{.backward()} on the output, the recomputation will automatically take place.
 
-When the sequence is a sub-model of a larger model, which is very likely the case, some ugly fudging is required from the user to be compatabile with my API.
+When the sequence is a sub-model of a larger model, which is very likely the case, some ugly fudging is required from the user to be compatible with my API.
 In the forward pass, they must manually detach the output of the sequence to be checkpointed before propagating further forward.
 This is so the backward propagation can be interrupted and the upstream gradient manually fed by the user into the checkpointing function.
 
 However, avoiding this was, to my knowledge, impossible with PyTorch.
-Implementing multiple recomputations requires manually moving up and down the sequence in a way that is not naturally compatabile with Autograd.
+Implementing multiple recomputations requires manually moving up and down the sequence in a way that is not naturally compatible with Autograd.

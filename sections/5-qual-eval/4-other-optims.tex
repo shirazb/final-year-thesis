@@ -14,7 +14,7 @@ However, it is actually even more difficult than this.
 Choosing to swap a tensor consumes the bandwidth of the CPU-GPU link, usually PCIe, for a certain amount of time.
 This means it is not just about the properties of individual tensors, but that swapping a tensor delays all future swaps, making this a scheduling problem.
 For example, this could be modelled as a Resource Constrained Scheduling Problem.
-To quote one textbook \cite[p.~23]{Artigues2007-rcps}, these problems are ``one of the most intractable combinatorial optimization problems'' as they are NP-hard in the strong sense.
+To quote one textbook \cite[p.~23]{Artigues2007-rcps}, these problems are ``one of the most intractable combinatorial optimization problems'' and are NP-hard in the strong sense.
 Scheduling problems are an entire field of research in their own right, and will surely have a great deal of literature we can leverage in ML.
 
 Many approximate approaches in ML exist \cite{Zhang2019, Wang2018, Rhu2016, ShriramS2019, Li2019-mem-limited-devices, Le2018-tflms, Chen2019-modnn, Ito2017-ooc-cudnn, Aupy2016, Schanen2016, Kukreja2018, Aupy2019}, which have varying merits and limitations.
@@ -22,9 +22,10 @@ I will not give a fully survey here.
 Instead, I will discuss how the technique in general compares to checkpointing.
 
 Swapping tends to give better overheads than checkpointing when the memory budget is quite tight.
-We can see why from the Compute-Memory trade-off curves for checkpointing in Figure \ref{} - compute cost degrades quite drastically for very low \(M\).
+We can see why from the Compute-Memory trade-off curves for checkpointing in Figure \ref{fig:4-cm-tradeoff} - compute cost degrades quite drastically for very low \(M\).
 This does not mean checkpointing is not needed and that swapping is without difficulty.
-First, in order to precisely hide communication under computation, we need to know the precise per-layer costs, just like we need to find the optimal checkpointing policy.
+Firstly, as shown in Section \ref{ch:4-experiments}, checkpointing gives good results for most reasonable \(M\).
+Secondly, in order to precisely hide communication under computation, we need to know the precise per-layer costs, just like when finding the optimal checkpointing policy, which can be hard to do.
 Moreover, as described above, it is very hard to solve for an optimal swapping schedule given these costs.
 Zhang et al. \cite{Zhang2019} have proposed a powerful approximation that gets excellent results.
 Similar to my work, they swap enough tensors to satisfy the memory budget whilst trying to minimise overhead, rather than picking an arbitrary point on the compute-memory trade-off.
@@ -36,7 +37,7 @@ Recomputing them instead is not affected by their position in the network.
 Most importantly though, choosing to recompute a tensor rather than swapping it will free up PCIe over the time period it would have been swapped, \textit{bringing forward all future swaps}.
 Thus, I believe that any approach to combining the techniques should have this idea at their core.
 
-I did try to extend my policy solver to do this (in theory), given an already worked out swapping schedule.
+I did try to extend my policy solver to do this, given an already worked out swapping schedule.
 When it measures the cost of checkpointing a node that has been swapped, it considers the possible savings from being able to swap the other tensors earlier.
 It also takes into account the fact that swapping a checkpointed node means all of the dropped forwards would have to be recomputed from the last checkpoint.
 Fully deriving the theory for this and implementing it was outside of the feasible scope of this project.
@@ -44,7 +45,7 @@ Fully deriving the theory for this and implementing it was outside of the feasib
 Also, I have recently come across a whole set of literature in the automatic differentiation community that describes swapping as a generalisation of checkpointing to two levels of memory, called heirarchical or multistage checkpointing \cite{Aupy2016, Schanen2016, Kukreja2018, Aupy2019}.
 Swapping becomes merely checkpointing to the second layer.
 These approaches model this is as a scheduling problem that takes into account memory costs, compute costs, transfer costs, and even allocation/deallocation costs.
-However, these are surely \textit{really} intractable to solve perfectly.
+However, they are surely \textit{really} intractable to solve perfectly.
 Due to time constraints, exacerbated by how recent some of the work is, I am unsure of the practicality of these algorithms when applied to neural networks or in what sense they claim to be optimal.
 I do know each has their limitations, for example not all permit multiple recomputations or asynchronous swapping (which greatly reduces overhead).
 However, this seems like a powerful technique that we should look into in ML.
@@ -71,4 +72,4 @@ It should be possible to extend my policy solver algorithm with checkpointing.
 Rather than choosing just the tensor to checkpoint, the algorithm will choose both a tensor and an implementation of computing that tensor.
 One drawback is that clearly it would make the algorithm less efficient, as it increases the dimension of the search space, though that dimension is quite small as there are only a handful of algorithms.
 However, I think it could significantly improve the technique, due to the large variation in space and time of the implementaions, unlocking new strategies for the algorithm to discover.
-The poor compute degradation of checkpointing when the memory budget is very small could be alleviated by the algorithm choosing more memory-efficient implementations, rather than excessively recomputing.
+For example, the poor compute degradation of checkpointing when the memory budget is very small could be alleviated by choosing more memory-efficient implementations, rather than excessively recomputing.
