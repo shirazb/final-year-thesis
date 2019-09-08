@@ -1,1 +1,32 @@
-i did some things!
+In this thesis, I have described how deep learning is hindered by its large memory requirement, and that checkpointing is used to make it more memory-efficient.
+I have outlined the work that the automatic differentiation community has already done in this field, which the machine learning community is now rediscovering.
+
+My contributions center on improving the dynamic programming checkpointing technique proposed by Gruslys et al. of Google DeepMind.
+I have demonstrated that this technique is very \textit{powerful}, due to the low memory cost it can achieve through multiple recomputations.
+Even with one recomputation, large memory savings can be obtained at little overhead.
+It can even achieve constant-space complexity with respect to network depth, with quadratic-time overhead.
+However, unlike other work, this technique is also \textit{flexible}.
+It will automatically find for the user the most computationally efficient checkpointing strategy that recomputes as little as possible, rather than picking a single point on the compute-memory trade-off curve.
+
+I have generalised the existing technique to take into account the precise compute and memory costs of each tensor;
+allowing the policy solver to be significantly more judicious in finding the \textit{truly} optimal policy that gives the least computational cost, or to be able to satisfy even lower memory budgets.
+
+% describe impact with figures
+
+I have explained the limitations of checkpointing to sequential networks, but described recent literature that has made significant headway in this area.
+However, they either cannot flexibly find the optimal compute cost policy given a memory budget, or they do not implement multiple recomputations.
+In the future, the technique studied in this thesis should be combined with their techniques so we can solve for the optimal policy of more general networks.
+
+I have showed how the continuous memory state of the solver requires bucketing to avoid an intolerably long execution time.
+Although I showed reasonable amounts of bucketing to only have a modest effect on optimality, I have also suggested how this limitation could be elided altogether by leveraging existing reinforcement learning techniques.
+
+Lastly, I have appraised checkpointing with respect to other memory optimisations for deep learning and suggested how they could be combined.
+I have argued that checkpointing should be used to supplement swapping, which can already achieve very low compute overhead.
+I have aso outlined how dynamic programming checkpointing can be extended to additionally solve for the optimal implementation of each layer, and argued the signficance of this.
+
+To conclude, throughout my research on this project, I have found that deep learning systems are actually quite immature, and could certainly be improved when it comes to memory.
+I think the implementation of precise dynamic programming checkpointing would be a signficant improvement for the end-user, as it can automatically give the user great memory savings at reasonable overhead (depending on just how low the memory budget is).
+In the long run, I think there is surely a wealth of literature from more mature systems, such as compilers, databases, automatic differentiation or DAG execution engines;
+that could introduce major improvements to machine learning frameworks.
+
+I look forward to seeing what happens.
