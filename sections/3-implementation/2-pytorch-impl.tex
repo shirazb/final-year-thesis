@@ -1,4 +1,4 @@
-\section{PyTorch Implementation}
+\section{PyTorch Implementation} \label{sec:3-pytorch-impl}
 In this section, I present my implementation of dynamic programming checkpointing with precise per-layer costs.
 The implementation takes a sequence defined in PyTorch, profiles it, solves for the optimal policy, and executes the sequence according to the policy.
 It is a standard Python 3 package that can be installed with \texttt{pip}.
@@ -99,7 +99,7 @@ The original computational graph is repeated here in Figure \ref{fig:2-simplifie
     \centering
     \includegraphics[width=0.9\linewidth]{simplified_comp_graph.png}
     \caption{The computational graph of backpropagation that we have defined checkpointing on.}
-    \label{fig:2-simplified-comp-graph}
+    \label{fig:3-simplified-comp-graph}
 \end{figure}
 
 Consider my definition of the backward operator \(L_k^\prime\).
@@ -128,7 +128,7 @@ Changing this would require a fundamental change to Autograd.
 Additionally, as the solver expects a \(b_0\), rather than change the solver, I simply pass in a dummy value with zero costs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Imposing the Policy on a Network Through Autograd}
+\subsection{Imposing the Policy on a Network Through Autograd} \label{sec:3-pytorch-impl-autograd-recomp}
 We need to be able to execute a sequence according to a given policy.
 We can impose the dropping and recomputing of forwards in PyTorch through Autograd.
 
