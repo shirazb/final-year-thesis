@@ -207,7 +207,7 @@ The (adapted) psuedocode is given in Algorithm \ref{alg:3-ideal-executor}.
             }
         }
         \BlankLine
-        \(f_k.\mathrm{_detach()}\)\;
+        \(f_k.\mathrm{\_detach()}\)\;
         \(f_k\mathrm{.requires\_grad}\;\leftarrow\;\)\True\;
         \BlankLine
         \tcp{Recurse on the right and left}
@@ -248,4 +248,3 @@ However, I unfortunately could not resolve the \texttt{weakref} problem.
 I do have a simulator though.
 Given a policy, it will simulate the execution according to the above algorithm and report back the total execution time and peak memory.
 As we use precise profiled costs, these should be quite accurate.
- 
