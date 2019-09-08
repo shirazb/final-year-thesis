@@ -78,7 +78,14 @@ However, all is not so simple.
 The fact that we are now being precise about memory causes a lot of issues.
 
 Previously, for RNNs, we divided memory into coarse-grained slots, and every layer always used exactly one slot - no more, no less.
-Now, layers use a specific amount of memory, so the optimal solution to some \(C(i,\,j,\,m)\) may not use all \(m\) memory.
+Now, layers use a precise amount of memory, so when we checkpoint a tensor and recurse to the right, the new memory budget could be any arbitrary number.
+This means memory is now a \textit{continuous} state.
+As mentioned, this causes a lot of problems.
+Primarily, we now have a much larger state space to iterate over in the policy solver, as, no matter what the arbitrary new memory budget is, we need to have solved a subproblem for it.
+Thus, a 10GB GPU would result in us having to iterate from \(m\,=\,1\) all the way to 10 billion.
+I will show in Section \ref{sec:4-exp-practicality} that this can be dealt with by bucketing memory, and that it only has a reasonable affect on optimality.
+
+Secondly, because layers use a specific amount of memory, the optimal solution to some \(C(i,\,j,\,m)\) may not use all of the \(m\) permitted memory.
 We want to take advantage of that - if the optimal solutions for the left and right subproblems use less memory than required, we have less pressure at this `level' to trade-off compute for memory, resulting in a lower computational cost.
 This means, as well as \(C(i,\,j,\,m)\), we need to track a \(B(i,\,j,\,m)\) that represents the peak memory required for the corresponding solution to \(C(i,\,j,\,m)\).
 To be clear, \(B(i,\,j,\,m)\) means \(f_i\) and \(b_j\) have already been computed and are in memory, so we have \(m\) memory remaining in which to compute \(b_i\).

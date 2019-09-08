@@ -1,4 +1,4 @@
-\section{Investigating the Practicality of the Solver}
+\section{Investigating the Practicality of the Solver} \label{sec:4-exp-practicality}
 The policy solver has a continuous memory state, so it must solve the entire problem for \(m\,=\,1\) all the way up to the actual memory budget.
 Given that typical budgets would be in the range of gigabytes, so billions of bytes, that will obviously be intractable.
 Thus, we must apply some kind of bucketing to memory.
