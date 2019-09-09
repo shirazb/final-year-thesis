@@ -1,8 +1,15 @@
 \section{Summary of Results}
 To summarise, the experiments in this section have showed the following:
 \begin{itemize}
-    \item Dynamic programming checkpointing is flexible. It successfully uses as little recomputation as possible to satisfy the budget and, only as the budget decreases, does it gradually incur more compute cost.
+    \item Dynamic programming checkpointing is flexible: it successfully uses as little recomputation as possible to satisfy the budget and, only as the budget decreases, does it gradually incur more compute cost.
     \item The compute cost degradation is very good until the budget becomes very small, at which point the cost starts to increase drastically due to the many recomputations.
     \item However, pertinently, this shows the solver is still capable of finding a strategy to satisfy such small budgets.
     \item The solver is still practical when using bucketing to overcome the large memory budget. That is, the execution time of the solver is made sufficiently quick at little expense to the compute cost of the found optimal strategy.
+    \item The solver can judiciously exploit the varying, precise costs of the layers to find better policies than what a uniform-cost solver can find.
 \end{itemize}
+
+I regret that I was not able to give a proper quantitative evaluation of the precise-cost solver versus a uniform-cost solver.
+In the future, as well as this, I would like to run experiments on a greater varitey of networks to give more evidence as to the efficacy of the solver.
+
+I would also like to investigate quantitatively how the variations in per-layer costs causes the theoretical benefits of checkpointing to degrade \textit{as compared to if the network was actually of uniform costs}.
+This analysis could guide users, or future heuristics, as to when checkpointing may be more or less useful versus other optimisations.

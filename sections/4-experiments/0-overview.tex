@@ -1,2 +1,12 @@
 In this chapter, I will present and evaluate the results of my experiments.
 I will show the compute-memory tradeoff that dynamic programming checkpointing provides; profile the execution time of the solver to evaluate its practicality; and demonstrate the efficacy of generalising to arbitrary per-operator costs by measuring the effect of checkpointing when assuming uniform costs, profiling only memory, profiling only compute, and when profiling both memory and compute.
+
+All experiments were run on a \texttt{n1-highmem-4} Google Compute Engine instance using the Deep Learning image with the following specs:
+\begin{itemize}[topsep=0.2em]
+    \item Intel Xeon @ 2.3GHz (specifically family 6, model 63, stepping 0)
+    \item 15GB memory
+    \item NVIDIA Tesla K80
+    \item PyTorch 1.2.0
+    \item CUDA 10.0
+    \item cuDNN 7.6.2
+\end{itemize}
