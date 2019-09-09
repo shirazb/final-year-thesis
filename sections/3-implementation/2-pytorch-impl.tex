@@ -1,6 +1,5 @@
 \section{PyTorch Implementation} \label{sec:3-pytorch-impl}
-In this section, I present my implementation of dynamic programming checkpointing with precise per-layer costs.
-The implementation takes a sequence defined in PyTorch, profiles it, solves for the optimal policy, and executes the sequence according to the policy.
+In this section, I present my implementation in PyTorch of dynamic programming checkpointing with precise per-layer costs.
 It is a standard Python 3 package that can be installed with \texttt{pip}.
 However, I have not uploaded it to PyPI, so you must download the source and install it locally.
 This is done as in Listing \ref{lst:3-install}.
@@ -22,7 +21,7 @@ This is done as in Listing \ref{lst:3-install}.
 \subsection{Overview of API}
 The library presents a helper class \texttt{SequentialCheckpointer}.
 An overview of the API is given in Listing \ref{lst:3-demo}.
-If the checkpointed sequence is not a sub-model of some larger model, meaning there are no more layers after it, then the upstream gradient given to the profiler and executor is simply 1 (recall that reverse-mode automatic differentiation is initialised with the gradient of the output with itself, which is 1).
+The class takes a sequence, profiles it, solves for the optimal policy, and executes the sequence according to the policy.
 
 \begin{listing}[h]
     \inputminted[
@@ -37,10 +36,12 @@ If the checkpointed sequence is not a sub-model of some larger model, meaning th
     \label{lst:3-demo}
 \end{listing}
 
+Noe that, if the checkpointed sequence is not a sub-model of some larger model, meaning there are no more layers after it, then the `upstream gradient' is simply 1 (recall that reverse-mode automatic differentiation is initialised with the gradient of the output with itself, which is 1).
+
 For greater flexibility, the profiling stage can be done separately to the policy solver stage.
-Also, you can tell the solver to use uniform costs or to use given costs, shown in Listing \ref{lst:3-solve-with-costs}.
-This can be done for both compute and memory, or only one.
-Similarly, for flexibility, I have chosen to make the budget and policy not part of the class' state.
+Alternatively, you can tell the solver to use uniform costs or user-defined costs, shown in Listing \ref{lst:3-solve-with-costs}.
+This can be done for both compute and memory, or only one of them.
+Similarly, for enhanced flexibility, I have chosen to make the budget and policy not a part of the class' state.
 This way, the user can solve for many policies using the same profiling results.
 
 \begin{listing}[h]
