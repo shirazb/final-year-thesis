@@ -1,30 +1,45 @@
 \small
-Deep Learning has proven to be extremely powerful in variety of domains.
-However, research is hindered by systems problems, such as the high memory requirement of training.
-Checkpointing can help alleviate this by dropping forwards and recomputing them in the backwards pass; trading compute for memory.
-The question then becomes of finding the optimal checkpointing \textit{policy} - what forwards to checkpoint and how many times to recompute.
+Training a deep network is very memory intensive as the forward tensors must be kept alive for the backward pass.
+Checkpointing has been proposed to alleviate this, by dropping some forwards and recomputing them in the backwards pass.
+\(\sqrt{N}\) checkpointing \cite{Chen2016} is currently the most common technique.
+However, it is limited to only one recomputation, inhibiting the possible memory savings; assumes uniform per-layer compute and memory costs;
+and picks an arbitrary point on the compute-memory trade-off;
+that is, it minimises memory of an \(N\) layer network rather than minimising compute given \(M\) memory.
+A dynamic programming technique for RNNs has been proposed that achieves this \cite{Gruslys2016}.
+However, it also assumes uniform costs as it is for RNNs, so fails to find the truly optimal checkpointing policy for general deep networks.
+Taking into account the precise per-layer costs would allow it to more judiciously determine the policy according to the exact nature of the layers, and thus truly minimise compute whilst satisfying the memory budget.
+Furthermore, to my knowledge, the latter technique is not imlpemented in any of the popular deep learning frameworks.
+Thus, in this thesis, I generalise the dynamic programming technique to use precise per-layer costs obtained from profiling, and implement this in PyTorch.
+To provide the groundwork for this, I meticulously derive the exact computational graph and memory requirements of one training step.
+I show that the precise solver finds better policies than what a uniform-cost solver could possibly find, leading to reduced overhead and the ability to satisfy lower memory budgets.
+However, I unfortunately could not remedy some implementation issues around imposing a policy on the execution of a network in PyTorch, so only have a simulator. I discuss how these issues arise.
+I also show that the ML community has rediscovered checkpointing from the Automatic Differentiation community, and that there is more work from them that we can leverage.
+% Deep Learning has proven to be extremely powerful in variety of domains.
+% However, research is hindered by systems problems, such as the high memory requirement of training.
+% Checkpointing can help alleviate this by dropping forwards and recomputing them in the backwards pass; trading compute for memory.
+% The question then becomes of finding the optimal checkpointing \textit{policy} - what forwards to checkpoint and how many times to recompute.
 
-\(\sqrt{N}\) checkpointing is the technique most commonly used.
-It indiscriminately applies the policy that minimises the memory cost of an \(N\) layer network, rather than flexibly finding the policy that utilises all avaialble memory to minimise compute.
-It also assumes uniform per-layer costs and is limited to one recomputation, so cannot handle very low memory budgets. 
+% \(\sqrt{N}\) checkpointing is the technique most commonly used.
+% It indiscriminately applies the policy that minimises the memory cost of an \(N\) layer network, rather than flexibly finding the policy that utilises all avaialble memory to minimise compute.
+% It also assumes uniform per-layer costs and is limited to one recomputation, so cannot handle very low memory budgets. 
 
-A dynamic programming technique has been proposed for RNNs that achieves this.
-As it is for RNNs, it too assumes uniform per-layer compute and memory costs.
-Furthermore, to the best of my knowledge, the technique is not yet implemented in any of the popular deep learning frameworks.
+% A dynamic programming technique has been proposed for RNNs that achieves this.
+% As it is for RNNs, it too assumes uniform per-layer compute and memory costs.
+% Furthermore, to the best of my knowledge, the technique is not yet implemented in any of the popular deep learning frameworks.
 
-Therefore, in this thesis, I first generalise the dynamic programming technique for RNNs to take into account the precise per-layer costs obtained from profiling.
-The policy solver can then be much more judicious in determining how exactly to minimise compute whilst still satisfying the memory budget; resulting in lower compute costs for the same budget as before, or the ability to reach even lower budgets.
-I show how this is quite non-trivial due to the now \textit{continuous} memory state.
-Also, as a prerequisite to this, I meticulously derive the computational graph of network training and analyse its memory requirements, so as to lay a sufficiently precise groundwork for precise checkpointing.
+% Therefore, in this thesis, I first generalise the dynamic programming technique for RNNs to take into account the precise per-layer costs obtained from profiling.
+% The policy solver can then be much more judicious in determining how exactly to minimise compute whilst still satisfying the memory budget; resulting in lower compute costs for the same budget as before, or the ability to reach even lower budgets.
+% I show how this is quite non-trivial due to the now \textit{continuous} memory state.
+% Also, as a prerequisite to this, I meticulously derive the computational graph of network training and analyse its memory requirements, so as to lay a sufficiently precise groundwork for precise checkpointing.
 
-Secondly, I present a PyTorch library that, given a sequential network, profiles the layers, solves for the optimal policy, and runs the network according to this policy.
-Unfortunately, I have been unable to solve all of the implementation issues for running the network according to a policy, so thus far there is only a simulator.
-I explain how these issues arise in PyTorch and demonstrate why the technique cannot be naturally implemented in Autograd.
+% Secondly, I present a PyTorch library that, given a sequential network, profiles the layers, solves for the optimal policy, and runs the network according to this policy.
+% Unfortunately, I have been unable to solve all of the implementation issues for running the network according to a policy, so thus far there is only a simulator.
+% I explain how these issues arise in PyTorch and demonstrate why the technique cannot be naturally implemented in Autograd.
 
-I evaluate the efficacy of generalising the policy solver to precise per-layer costs by comparing the (simulated) peak memory and execution time
-when and when not profiling.
-I also investigate the extent to which bucketing memory affects the solver, required due to how large real-world budgets are.
-Finally, I give a thorough qualitative evaluation of my work, appraise checkpointing with respect to other memory optimisations, and suggest directions for future work.
+% I evaluate the efficacy of generalising the policy solver to precise per-layer costs by comparing the (simulated) peak memory and execution time
+% when and when not profiling.
+% I also investigate the extent to which bucketing memory affects the solver, required due to how large real-world budgets are.
+% Finally, I give a thorough qualitative evaluation of my work, appraise checkpointing with respect to other memory optimisations, and suggest directions for future work.
 
-The research into checkpointing done by the Machine Learning community has rediscovered results from Automatic Differentiation.
-Throughout this thesis, I refer to these resuts, especially when suggesting future work.
+% The research into checkpointing done by the Machine Learning community has rediscovered results from Automatic Differentiation.
+% Throughout this thesis, I refer to these resuts, especially when suggesting future work.

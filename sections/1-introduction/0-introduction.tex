@@ -1,3 +1,4 @@
+\section*{Deep Learning}
 Machine learning (ML) has become wildly popular among scientists, engineers, and even in the mainstream media, due to the unprecedented results it repeatedly provides in a multitude of areas. To name a few, we now have self-driving cars \cite{Fridman2019}; computers that can beat the best human players at complex games like StarCraft \cite{Vinyals2017}; messaging apps can that understand what you're saying \cite{Abdulkader2016, NIPS2015_5782}; many advances in computer vision such as automatic captioning \cite{Karpathy2017}; automatic fraud detection in finance \cite{DalPozzolo2015}; and automatic lesion detection in the fight against cancer \cite{Zlocha2019}.
 
 Artificial Neural Networks (ANNs), or Deep Learning, is the key technique behind many of these advances. They are a form of supervised statistical model. That is, given a set of \(\{x \in \R^n, \ y \in \R^m\}\) labelled data points (e.g. the pixels of an image and the classification of the image), they try to learn the underlying function from input \(x\) to output \(y\). ANNs use a particular kind of function representation made from the composition of elementary functions, or neurons, and try to incrementally optimise the parameters of the neurons by comparing the output of the network against the training data. The optimisation technique applied is almost always some variant of gradient descent, and the algorithm for applying it to an ANN is known as \textit{backpropagation}. An example neural network is given in Figure \ref{fig:1-example-net}.
@@ -21,6 +22,7 @@ Artificial Neural Networks (ANNs), or Deep Learning, is the key technique behind
     \label{fig:1-example-net}
 \end{figure}
 
+\section*{The High Memory Requirement of Training}
 Training a neural network has a large memory requirement. To see how this arises, we can examine the computational (or data-flow) graph of backpropagation, as given in Figure \ref{fig:1-backprop-peak-mem}. Backpropagation has two steps, (i) \textit{the forward pass}: compute the outputs at each layer given the input, and (ii) \textit{the backward pass}: compute the gradients of the parameters at each layer given the targets and the outputs from the forward pass. As a result, the forward tensors cannot be computed in-place and must instead be kept around in memory for when the backward pass requires them. Specifically, only once \(b_i\) has been computed can \(f_i\) and \(b_{i+1}\) be freed. Therefore, as shown in Figure \ref{fig:1-backprop-peak-mem}, peak memory will occur when all the forward tensors are in memory and the first backward tensor is being computed; a linear space complexity with respect to the number of layers.
 
 \begin{figure}[t]
@@ -36,6 +38,7 @@ This forces researchers to employ highly cumbersome and highly expensive alterna
 
 To this end, much has been done, but every memory optimisation proposed has its pitfalls. For example, quantization decreases the model's accuracy \cite{Zhou2016}; and GPU-CPU data swapping may require expert human intervention, is difficult to tractably solve for the optimal swapping strategy, and is hard to implement as you must delve deep into the ML framework's memory manager and have it precisely pipeline data transfer and computation \cite{Rhu2016, B, Zhang2019, Wang2018}.
 
+\section*{Checkpointing and its Limitations}
 In this thesis, I focus on a technique known as checkpointing \cite{Dauvergne2006, Martens2012, Siskind2018, Chen2016, Gruslys2016, Wang2018}, which results in large memory savings, is much simpler to implement, does not affect model accuracy and requires minimal effort from the user; though it is hard to solve tractably and, compared to a theoretically optimal swapping implementation, the computational overhead may be poor, though still very acceptable. \todo{concrete statement, not `acceptable'}
 
 Checkpointing trades computation for memory by only storing, or \textit{checkpointing}, some of the intermediate forwards and recomputing them later when required in the backwards pass. This causes backpropagation to become segmented, demonstrated in Figure \ref{fig:1-backprop-segmented}.  Martens and Sutskever \cite{Martens2012}, and later Chen \cite{Chen2016}, have shown that for \(k\) segments and \(n\) layers setting \(k = \sqrt{n}\) yields a sublinear memory cost of \(\Theta (2\sqrt{n})\), at the expense of an additional forward pass. Pages 7-8 of Chen's paper proposes recursively applying this technique to the segments to further trade compute for memory: during the recomputation of a segment, only checkpoint some tensors and recompute the rest in the backward, resulting in multiple recomputations.
@@ -53,13 +56,18 @@ Furthermore, popular ML frameworks like TensorFlow \cite{tensorflow2015-whitepap
 
 Clearly, the checkpointing support in these frameworks is behind research. I have chosen to improve PyTorch as it is one of the most popular frameworks, and because it lends itself nicely to extension in the manner desired \todo{elaborate}.
 
+\section*{Contributions}
 Specifically, to improve upon the above discussed limitations of checkpointing, I will make the following contributions in this thesis:
 \begin{itemize}[topsep=0pt]
+    \item Derive the exact computational graph of backpropagation and precisely describe its memory requirements so that precise checkpointing can be applied to it.
     \item Generalise the dynamic programming technique proposed by DeepMind to solve for the optimal checkpointing policy of a feedforward neural network given \textit{arbitrary} per-layer compute and memory costs and the memory budget.
     \item Provide an implementation of this technique in PyTorch that allows the user to overcome out-of-memory errors with minimal effort. Given only the user's existing sequential network, it will:
     \begin{enumerate}
         \item Profile the precise per-layer costs;
         \item Solve for the optimal checkpointing policy;
         \item Present a helper function that can be called in the user's training loop to execute the sequence according to the policy, satisfying the memory budget.
+        \begin{itemize}
+            \item Unfortunately, I have so far only been able to implement a simulator.
+        \end{itemize}
     \end{enumerate}
 \end{itemize}

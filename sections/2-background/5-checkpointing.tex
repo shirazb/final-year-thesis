@@ -186,49 +186,51 @@ The algorithm for solving these equations is given in Algorithm \ref{alg:2-polic
 I do not explicity define the linear cost base case as it depends on whether you are storing the full internal state of an RNN cell or just the hidden state and recomputing the internal state.
 I do not dwell on this further as I will be extending the technique for general feedforward networks where this is not a consideration.
 
-The algorithm is bottom-up:
+The algorithm is for solving these equations is bottom-up:
 It first sets the base cases, before moving `up' through the search space, solving for longer sequences and more memory slots recursively.
 The recursive case chooses the \(y\) that gives the least \(Q(t,\, m,\, y)\).
 It sets \(C(t,\, m)\) to that cost and \(D(t,\,m)\) to \(y\).
 
-\begin{algorithm}[h]
-\DontPrintSemicolon
-\KwIn{\(t_{max}\) the maximum sequence length}
-\KwIn{\(m_{max}\) the maximum memory capacity}
-\BlankLine
-
-Let \(C\), \(D\) be 2D arrays of size \(t_{max}\times m_{max}\)\;
-\For{\(t \,\in\, \{1,\,\ldots,\,t_{max}\}\)}{
-    \(C[t][1] \;\leftarrow\; \frac{t(t+1)}{2}\)\;
-    \For{\(m \,\in\, \{t,\,\ldots,\, m_{max}\}\)}{
-        \(C[t][m] \;\leftarrow\;\) \textit{linear cost}\;
-        \(D[t][m] \;\leftarrow\; 1\)\;
-    }
-}
-\BlankLine
-\For{\(m \,\in\, \{2,\,\ldots,\, m_{max}\}\)}{
-    \For{\(t \,\in\, \{m+1,\,\ldots,\,m_{max}\}\)}{
-        \(C_{min} \;\leftarrow\; \infty\)\;
-        \For{\(y \;\in\; \{1,\,\ldots,\,t-1\}\)}{
-            \(c \;\leftarrow\; y + C[y][m] + C[t\,-\,y][m\,-\,1]\)\;
-            \If{\(c \,<\, C_{min}\)}{
-                \(C_{min} \;\leftarrow\; c\)\;
-                \(D[t][m] \;\leftarrow\; y\)\;
-            }
-        }
-        \(C[t][m] \;\leftarrow\; C_{min}\)\;
-    }
-}
-\Return{\((C,\, D)\)}
-
-\caption{Optimal policy solver using dynamic programming \cite[Algorithm~1]{Gruslys2016}}
-\label{alg:2-policy-solver}
-\end{algorithm}
-
 Once we have the optimal policy, we can `traverse' it to perform backpropagation according to the policy.
 Say we are given \(f_i\) and \(b_j\), initialised to the inputs and targets, to perform backpropagation on this segment to compute \(b_i\) within \(m\) memory slots, we do the following:
-\begin{enumerate}
+\begin{enumerate}[topsep=0.1em]
     \item If the sequence length \(t = j-i\) is 1, we simply perform the backward operation.
     \item If \(m\) is 1, we use the constant-space, quadratic-cost strategy.
     \item Else, letting \(k = D[t][m]\), we run the forwards to \(f_k\), checkpoint it, recurse on the right to get \(b_k\), release \(f_k\), then recurse on the left to get \(b_i\).
 \end{enumerate}
+
+\vspace{1.5cm}
+
+\begin{algorithm}[h]
+    \DontPrintSemicolon
+    \KwIn{\(t_{max}\) the maximum sequence length}
+    \KwIn{\(m_{max}\) the maximum memory capacity}
+    \BlankLine
+    
+    Let \(C\), \(D\) be 2D arrays of size \(t_{max}\times m_{max}\)\;
+    \For{\(t \,\in\, \{1,\,\ldots,\,t_{max}\}\)}{
+        \(C[t][1] \;\leftarrow\; \frac{t(t+1)}{2}\)\;
+        \For{\(m \,\in\, \{t,\,\ldots,\, m_{max}\}\)}{
+            \(C[t][m] \;\leftarrow\;\) \textit{linear cost}\;
+            \(D[t][m] \;\leftarrow\; 1\)\;
+        }
+    }
+    \BlankLine
+    \For{\(m \,\in\, \{2,\,\ldots,\, m_{max}\}\)}{
+        \For{\(t \,\in\, \{m+1,\,\ldots,\,m_{max}\}\)}{
+            \(C_{min} \;\leftarrow\; \infty\)\;
+            \For{\(y \;\in\; \{1,\,\ldots,\,t-1\}\)}{
+                \(c \;\leftarrow\; y + C[y][m] + C[t\,-\,y][m\,-\,1]\)\;
+                \If{\(c \,<\, C_{min}\)}{
+                    \(C_{min} \;\leftarrow\; c\)\;
+                    \(D[t][m] \;\leftarrow\; y\)\;
+                }
+            }
+            \(C[t][m] \;\leftarrow\; C_{min}\)\;
+        }
+    }
+    \Return{\((C,\, D)\)}
+    
+    \caption{Optimal policy solver using dynamic programming \cite[Algorithm~1]{Gruslys2016}}
+    \label{alg:2-policy-solver}
+\end{algorithm}

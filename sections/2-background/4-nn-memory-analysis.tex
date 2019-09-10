@@ -3,7 +3,7 @@ In this section, I will show how to perform liveness analysis on an arbitrary co
 I will then apply this to the computational graph of training a neural network.
 The optimal policy solver for checkpointing presented later will assume these optimisations are in place.
 
-Tim Salimans and Yaroslav Bulatov of OpenAI have a great article online that, with animations, shows how the peak memory of a neural network arises; how to reduce this with checkpointing; and the limitation of chekckpointing to sequences \cite{Bulatov-checkpointing-article}.
+Tim Salimans and Yaroslav Bulatov of OpenAI have a great article online \cite{Bulatov-checkpointing-article} that, with animations, shows how the peak memory of a neural network arises; how to reduce this with checkpointing; and the limitation of chekckpointing to sequences.
 I highly recommend reading it.
 I borrow from their work in a few sections throughout this thesis, starting here.
 I will give a similar analysis of peak memory, but make it more precise for arbtirary costs, and eventually define the exact computation graph that will be used by my policy solver.
