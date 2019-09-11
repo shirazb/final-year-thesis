@@ -1,7 +1,7 @@
-\section{PyTorch Implementation} \label{sec:3-pytorch-impl}
+\section{Implementation in PyTorch} \label{sec:3-pytorch-impl}
 In this section, I present my implementation in PyTorch of dynamic programming checkpointing with precise per-layer costs.
 It is a standard Python 3 package that can be installed with \texttt{pip}.
-However, I have not uploaded it to PyPI, so you must download the source and install it locally.
+However, it is not published on PyPI, so you must download the source and install it locally.
 This is done as in Listing \ref{lst:3-install}.
 
 \begin{listing}[h]
@@ -108,7 +108,7 @@ It performs two operations: (i) computes the gradient of the parameters of the u
 This means a backward operation computes its own downstream gradient, but the gradient with respect to its parameters is computed by the downstream layer.
 
 This definition is not compatible with PyTorch.
-A layer is a Torch module, which contains some parameters.
+A layer is known as a module, which contains parameters.
 Running its forward function invokes an Autograd function on the parameters and the input to produce some output.
 Thus, when the layer's backward function is called, it will call the backward function of the parameters too (as they require gradient).
 It must be the case, then, that the layer's forward function saved its input as well as its output, as both are required to compute the gradient of the parameters.
@@ -140,7 +140,8 @@ As the output was computed with no grad and was not saved for the backward pass,
 In the backward function, the output is recomputed from the saved input, before running the backward function of the layer using the output.
 
 We can use this function to encode `drops' into a list of layers.
-That is, we create a \texttt{Drop} module that takes a child module and, in the forward, applies
+That is, we create a \texttt{Drop} module that takes a
+child module and, in the forward, applies
 \texttt{torch.utils.CheckpointFunction(child,\, x)} to implement recomputation.
 We can then implement multiple recomputations by nesting \texttt{Drop} modules.
 A \texttt{Drop} nested \(r\) times will have its forward called \(r+1\) times due to the \(r\) outer \texttt{Drop}s being recomputed, which invoke this \texttt{Drop}s forward again.
@@ -247,5 +248,5 @@ The recursive case now needs to manually check for the unit length base, and, if
 
 However, I unfortunately could not resolve the \texttt{weakref} problem.
 I do have a simulator though.
-Given a policy, it will simulate the execution according to the above algorithm and report back the total execution time and peak memory.
-As we use precise profiled costs, these should be quite accurate.
+Given a policy and the precise costs, it will simulate execution according to the above algorithm and report back the total execution time and peak memory.
+As we obtain the costs from profiling, these should be quite accurate.

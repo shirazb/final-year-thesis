@@ -1,16 +1,6 @@
+\sectionmark{Improving Practicality with RL}
 \section{Making the Solver More Practical with Reinforcement Learning Techniques}
-% \begin{itemize}[topsep=0.2em]
-%     \item Real world M like 12GB (12e9) is way too big because algo iterates over every single m.
-%     \item Have to do this because M is a state of our `MDP', but now it is like a very large \textit{continuous} state.
-%     \item Takes way too long to converge! We should use a constrained MDP on m instead.
-%     \item I think, fundamentally, so much of effort in getting new algorithm to work is because of this continuous m state.
-%     \item Also, bucketing, after a certain extent, is a crude solution. causes internal fragmentation in buckets.
-%     \item Algorithm takes so much effort to be \textit{perfect}, only to be ruined by bucketing
-%     \item Don't actually need to be anywhere near that perfect anyway, and don't have the information to do so either
-%     \item Exact costs and especially memory budget very hard to profile
-%     \item So, instead have...
-%     \item Does not give perfect answer but will converge to `good enough' far faster than my algo will reach perfect and terminate.
-% \end{itemize}
+\sectionmark{Improving Practicality with RL}
 
 As we saw in Section \ref{sec:3-policy-solver}, generalising to precise memory costs, rather than using discrete memory slots, caused a lot of headache for the policy solver.
 We can see why when we view the algorithm in a similar light to Markov Decision Processes, as described in Section \ref{sec:2-5-dp-checkpointing}.

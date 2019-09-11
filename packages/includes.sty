@@ -75,7 +75,6 @@
 %\usepackage[tight,ugly]{units}
 \usepackage{float}
 %\usepackage{tcolorbox}
-\usepackage[colorinlistoftodos]{todonotes}
 % \usepackage{ntheorem}
 % \theoremstyle{break}
 % \newtheorem{lemma}{Lemma}
@@ -87,11 +86,11 @@
 %%% Default fonts
 \newcommand{\hdrfamily}{\rmfamily} % Use with fancy packages to define headers, etc.
 
-
+\usepackage{XCharter}
 \usepackage[bitstream-charter]{mathdesign}
 \usepackage[T1]{fontenc}
 
-\renewcommand*{\rmdefault}{bch} %
+\renewcommand*{\rmdefault}{XCharter} %
 \renewcommand*{\ttdefault}{cmtt} %
 
 
@@ -99,9 +98,8 @@
 \setlength{\parindent}{0em}  % indentation of paragraph
 \setlength{\parskip}{1em}
 
-\setlength{\headheight}{14.5pt}
-\pagestyle{fancy}
-\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}} 
+%\setlength{\headheight}{14.5pt}
+%\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter.\ #1}{}} 
 %\fancyhead[RO]{\sffamily \textbf{\thepage}} %Page no.in the right on even pages
 %\fancyhead[LE]{\sffamily \textbf{\thepage}} %Page no. in the left on odd pages
 
@@ -115,36 +113,36 @@
 
 %--- chapter heading
 
-\def\@makechapterhead#1{%
-  \vspace*{10\p@}%
-  {\parindent \z@ \raggedright \hdrfamily
-    \interlinepenalty\@M
-    \Huge\bfseries \thechapter \space\space #1\par\nobreak
-    \vskip 30\p@
-  }}
+% \def\@makechapterhead#1{%
+%   \vspace*{10\p@}%
+%   {\parindent \z@ \raggedright \hdrfamily
+%     \interlinepenalty\@M
+%     \Huge\bfseries \thechapter \space\space #1\par\nobreak
+%     \vskip 30\p@
+%   }}
 
 %--- chapter heading
 
-\def\@makechapterhead#1{%
-  \vspace*{10\p@}%
-  {\parindent \z@ \raggedright \hdrfamily
-        %{\Large \MakeUppercase{\@chapapp} \space \thechapter}
-        %\\
-        %\hrulefill
-        %\par\nobreak
-        %\vskip 10\p@
-    \interlinepenalty\@M
-    \Huge\bfseries \thechapter \space\space #1\par\nobreak
-    \vskip 30\p@
-  }}
+% \def\@makechapterhead#1{%
+%   \vspace*{10\p@}%
+%   {\parindent \z@ \raggedright \hdrfamily
+%         %{\Large \MakeUppercase{\@chapapp} \space \thechapter}
+%         %\\
+%         %\hrulefill
+%         %\par\nobreak
+%         %\vskip 10\p@
+%     \interlinepenalty\@M
+%     \Huge\bfseries \thechapter \space\space #1\par\nobreak
+%     \vskip 30\p@
+%   }}
 
 %---chapter heading for \chapter*  
-\def\@makeschapterhead#1{%
-  \vspace*{10\p@}%
-  {\parindent \z@ \raggedright
-    \hdrfamily
-    \interlinepenalty\@M
-    \Huge \bfseries  #1\par\nobreak
-    \vskip 30\p@
-  }}	
-\allowdisplaybreaks
+% \def\@makeschapterhead#1{%
+%   \vspace*{10\p@}%
+%   {\parindent \z@ \raggedright
+%     \hdrfamily
+%     \interlinepenalty\@M
+%     \Huge \bfseries  #1\par\nobreak
+%     \vskip 30\p@
+%   }}	
+% \allowdisplaybreaks

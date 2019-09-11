@@ -1,15 +1,10 @@
 \section{The Compute-Memory Trade-Off}
+\sectionmark{Compute-Memory Trade-Off}
+
 I demonstrate the compute-memory trade-off by showing for varying memory budget \(m\), what is the optimal computational cost the solver predicts.
 `Simulated' in the \(y\) axis label refers to the fact that I am measuring what the solver `thinks', not that I am using the simulator instead of a real implementation.
 I plot this for sequence lengths \(N\,=\, 20,\,40,\,100\), and vary \(m\) up to \(60\) for each.
 I use a uniform network: the compute and memory costs of every forward and backward tensor is 1.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{compute_mem_tradeoff.png}
-    \caption{The compute-memory trade-off for networks of different sequence length.}
-    \label{fig:4-cm-tradeoff}
-\end{figure}
 
 Starting from the right of the curve, we can see that compute cost degrades very slowly until \(m\) gets too low, then there is a visible `corner' and it degrades very fast.
 However, this \(m\) is really quite low.
@@ -19,6 +14,13 @@ We can see that for \(N\,=\,40\), the cost at the right of the curve, where \(m\
 \(m\) decreases all the way to just over 10 before we even see a 30\% overhead.
 I postulate that, for a uniform network like this, the solver is keeping to at most one recomputation until the `corner'.
 The costs are consistent with Chen's \(\Theta(\sqrt{N})\) analysis for one recomputation.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{compute_mem_tradeoff.png}
+    \caption{The compute-memory trade-off for networks of different sequence length.}
+    \label{fig:4-cm-tradeoff}
+\end{figure}
 
 For \(N\,=\,20\), the theoretical optimal memory consumption for uniform layers is \(2\sqrt{20}\,\approx\,9\).
 We can see that it is at about \(m\,=\,9\) where the corner is encountered and the cost starts to quickly degrade.

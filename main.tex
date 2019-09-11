@@ -7,27 +7,29 @@
 \newcommand{\reporttitle}{Precise Optimal Checkpointing for Memory-Efficient Deep Learning}
 \newcommand{\reportauthor}{Shiraz Butt}
 \newcommand{\supervisor}{Prof. Peter Pietzuch}
-\newcommand{\reporttype}{MEng Individual Project}
+\newcommand{\reporttype}{meng individual project} % in small caps
 \newcommand{\degreetype}{MEng Computer Science}
 
-\renewcommand{\todo}{} %%%%%%%%%%%%%%%
 
 \begin{document}
 
 \import{./}{titlepage.tex}
 
 % page numbering etc.
+
 \pagenumbering{roman}
 \clearpage{\pagestyle{empty}\cleardoublepage}
-\setcounter{page}{1}
+
 \pagestyle{fancy}
+
+\setcounter{page}{1}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 \import{sections/0-abstract/}{0-abstract.tex}
 \end{abstract}
 
-\cleardoublepage
+\clearpage{\pagestyle{empty}\cleardoublepage}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \section*{Acknowledgments}
 % Thank you person.
@@ -36,6 +38,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--- table of contents, figures, listings, algos
+
 \fancyhead[RE,LO]{\hdrfamily {Table of Contents}}
 \tableofcontents
 \clearpage{\pagestyle{empty}}
@@ -46,11 +49,15 @@
 
 \fancyhead[RE,LO]{\hdrfamily {List of Listings}}
 \listoflistings
+\clearpage{\pagestyle{empty}}
 
 \fancyhead[RE,LO]{\hdrfamily {List of Algorithms}}
 \listofalgorithms
 
 \clearpage{\pagestyle{empty}\cleardoublepage}
+
+
+% Reset to arabic numbering
 \pagenumbering{arabic}
 \setcounter{page}{1}
 \fancyhead[LE,RO]{\slshape \rightmark}
@@ -85,6 +92,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Qualitative Evaluation and Future Work}
+\chaptermark{Qualitative Eval}
 \import{sections/5-qual-eval/}{0-overview.tex}
 \import{sections/5-qual-eval/}{1-pytorch-impl.tex}
 \import{sections/5-qual-eval/}{2-seq-only.tex}

@@ -1,4 +1,7 @@
+\sectionmark{Limitation to Sequences}
 \section{Limitation of Checkpointing to Sequences} \label{sec:5-qual-eval-seq-only}
+\sectionmark{Limitation to Sequences}
+
 In this thesis, I have worked exclusively on checkpointing \textit{sequential} neural networks; but what about more general graphs?
 The difficulties of handling these with checkpoinitng is possibly its biggest limitation.
 In this section, I will show how this limitation arises and evaluate the attempts to tackle it.
@@ -7,11 +10,14 @@ I will evaluate the role of my contributions with respect to this work and sugge
 In Section \ref{sec:2-bg-beyond-ff}, I introduced some of the non-linearities that are prevalent today.
 For example, consider a ResNet-like architecture \cite{He2016-resnet}, made from a sequence of residual units, which contain skip connections, shown in Figure \ref{fig:5-resnet-arch}.
 
-\begin{figure}[h]
+\begin{figure}[b]
     \centering
     \includegraphics[width=0.6\linewidth]{resnet-checkpointing-demo.png}
     \caption{The ResNet architecture at a high-level, showing the skip connections. Taken from \cite{Bulatov-checkpointing-article}.}
     \label{fig:5-resnet-arch}
+    \includegraphics[width=0.6\linewidth]{split-merge-checkpointing-demo.png}
+    \caption{A split-merge architecture. Taken from \cite{Bulatov-checkpointing-article}.}
+    \label{fig:5-split-merge-arch}
 \end{figure}
 
 This is almost a sequence.
@@ -27,15 +33,7 @@ To formalise this notion, what we need is a node that is a \textit{graph separat
 Every node on the right of this separator will not depend on any of the nodes on the left, only the separator.
 That is, the node separates the graph into two \textit{disjoint} subgraphs.
 
-Consider the split-merge architecture shown in Figre \ref{fig:5-split-merge-arch}, such as in GoogleLeNet \cite{Szegedy2015-inception}.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.6\linewidth]{split-merge-checkpointing-demo.png}
-    \caption{A split-merge architecture. Taken from \cite{Bulatov-checkpointing-article}.}
-    \label{fig:5-split-merge-arch}
-\end{figure}
-
+Consider the split-merge architecture shown in Figure \ref{fig:5-split-merge-arch}, such as in GoogleLeNet \cite{Szegedy2015-inception}.
 Again, not all nodes are viable checkpoints; only the `split' and `merge' nodes.
 The nodes of the parallel branches cannot be checkpointed invidually.
 However, they can be checkpointed \textit{together}.
@@ -43,26 +41,25 @@ That is, if we take one node from each branch, this forms a \textit{separating s
 Equivalently, we have merged nodes into bags such that the network at the bag-level is a sequence.
 This is shown in Figure \ref{fig:5-split-merge-separating-set}
 
-\begin{figure}[h]
+More generally, we can checkpoint any node of a computation \textit{tree}, because any node of the tree is a graph separator - it `subsumes' all the computation of its subtrees.
+This is shown in Figure \ref{fig:5-tree-checkpointing}.
+
+Before we can apply checkpointing to trees, we must solve how to merge nodes of our neural network graphs to form a tree of bags that can be checkpointed at the bag-level.
+We need to do this such that we minimise \textit{treewidth} - the maximum number of nodes merged into one bag - in order to be able to perform checkpointing as granularly as possible.
+Ideally, we also want to do this without user annotation.
+
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.6\linewidth]{split-merge-separating-set-checkpointing-demo.png}
     \caption{Separating sets of a split-merge architecture. The dashed lines indicated the merging of nodes into a bag. Taken from \cite{Bulatov-checkpointing-article}.}
     \label{fig:5-split-merge-separating-set}
 \end{figure}
-
-More generally, we can checkpoint any node of a computation \textit{tree}, because any node of the tree is a graph separator - it `subsumes' all the computation of its subtrees.
-This is shown in Figure \ref{fig:5-tree-checkpointing}.
-
-\begin{figure}[h]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.78\linewidth]{tree-checkpointing-demo.pdf}
     \caption{Checkpointing on a tree. The blue node on the right `subsumes' all the computation within the dashed lines on the left.}
     \label{fig:5-tree-checkpointing}
 \end{figure}
-
-Before we can apply checkpointing to trees, we must solve how to merge nodes of our neural network graphs to form a tree of bags that can be checkpointed at the bag-level.
-We need to do this such that we minimise \textit{treewidth} - the maximum number of nodes merged into one bag - in order to be able to perform checkpointing as granularly as possible.
-Ideally, we also want to do this without user annotation.
 
 This is known as a \textit{tree decomposition}.
 Bodlaender discovered an algorithm that can find the optimal tree decomposition in \(k\)-polynomial time, where \(k\) bounds the treewidth of the graph and is given by the user \cite{Bodlaender2005}.

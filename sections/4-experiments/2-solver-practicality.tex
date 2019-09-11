@@ -1,4 +1,8 @@
-\section{Investigating the Practicality of the Solver} \label{sec:4-exp-practicality}
+\sectionmark{Investigating Bucketing}
+\section{Investigating the Affects of Bucketing on the Solver}
+\sectionmark{Investigating Bucketing}
+\label{sec:4-exp-practicality}
+
 The policy solver has a continuous memory state, so it must solve the entire problem for \(m\,=\,1\) all the way up to the actual memory budget.
 Given that typical budgets would be in the range of gigabytes, so billions of bytes, that will obviously be intractable.
 Thus, we must apply some kind of bucketing to memory.
@@ -32,4 +36,4 @@ Thus, I explored bucketing further.
 We can see from the graph that, for the very large bucket size of 25MB, the execution time has dropped all the way to under a minute, which should be satisfactory in such a use case.
 The optimal computational cost has risen from the origin 1235ms to 1900ms, an overhead of 53\%.
 This is still reasonable, especially considering the stated use case was for models that will only be run for a short period of time.
-Clearly, enabling checkpointing will by far easier, cheaper and quicker for the researcher than implementing distribution to overcome the memory requirement.
+Clearly, enabling checkpointing will be far easier, cheaper and quicker for the researcher than implementing distribution to overcome the memory requirement.

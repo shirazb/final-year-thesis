@@ -1,4 +1,6 @@
+\sectionmark{Precise Costs}
 \section{The Efficacy of Using Precise Costs}
+\sectionmark{Precise Costs}
 The initial aim of this section was to investigate the efficacy of precise costs over uniform costs.
 This would be done by solving for a policy with precise costs and with uniform costs, then imposing both on the network and comparing the resulting compute and memory.
 To recreate the same problem for the solver but with uniform memory costs, the real costs would be averaged and the same memory budget used.
@@ -9,15 +11,15 @@ However, I unfortunately could not resolve some bugs in the test cases.
 Thus, I can only show the results of when profiling is turned on for both compute and memory.
 However, we will see this is enough to make such deductions about profiling versus uniform costs, as the solver behaves in a way that would be impossible with uniform costs.
 
-Figure \ref{fig:3-prof-results} shows the effect of batch size on the compute cost and memory cost of training ResNet-50 \cite{He2016-resnet}.
-I explored batch size until failure.
-
-\begin{figure}[h]
+\begin{figure}[th]
     \centering
     \includegraphics[width=0.9\textwidth]{costs_vs_batch_size_prof_only.png}
     \caption{Left: The (simulated) computational cost of executing one training step on ResNet-50 according to the precise optimal checkpointing policy. Right: The (simulated) peak memory step of the same operation.}
     \label{fig:3-prof-results}
 \end{figure}
+
+Figure \ref{fig:3-prof-results} shows the effect of batch size on the compute cost and memory cost of training ResNet-50 \cite{He2016-resnet}.
+I explored batch size until failure.
 
 We can see that the computational cost and the memory cost increase at a steady linear rate until just under batch size 100.
 This is because the solver is exploiting the plentiful memory and performing no (or very little) recomputation.

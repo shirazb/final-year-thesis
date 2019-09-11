@@ -1,3 +1,4 @@
+\newpage
 \section{Memory Requirements of Training} \label{sec:2-4-memory-analysis}
 In this section, I will show how to perform liveness analysis on an arbitrary computational graph to find the memory allocation strategy that yields the least peak memory.
 I will then apply this to the computational graph of training a neural network.
@@ -21,8 +22,7 @@ The following rules govern the placement of the pebbles:
 \end{enumerate}
 However, these rules allow for many allocation strategies - the order in which we place pebbles, remove them, and reuse them for other nodes.
 
-Consider the following graph in Figure \ref{fig:2-chain-to-pebble}.
-
+Consider the graph in Figure \ref{fig:2-chain-to-pebble}.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{pebble_chain_1.png}
@@ -33,19 +33,17 @@ Consider the following graph in Figure \ref{fig:2-chain-to-pebble}.
 One strategy for this graph would be to allocate all the inputs immediately.
 This is shown in Figure \ref{fig:2-pebble-chain-bad}.
 Coloured nodes are `pebbled' - allocated in memory.
-
-\begin{figure}[hp]
+By inspection, we can see the most pebbles (5) are allocated in the second step.
+Generalising, for a sequence of size \(n\), \(\Theta(n)\) memory is required.
+However, if we instead place pebbles as late as possible, like in Figure \ref{fig:2-pebble-chain-good}, we get a \(\Theta(1)\) strategy.
+\clearpage
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.95\linewidth]{pebble_chain_2_bad_strat.pdf}
     \caption{A poor pebbling strategy that allocates all leaves immediately. Peak memory is 5 pebbles, occuring in step 2.}
     \label{fig:2-pebble-chain-bad}
 \end{figure}
-
-By inspection, we can see the most pebbles (5) are allocated in the second step.
-Generalising, for a sequence of size \(n\), \(\Theta(n)\) memory is required.
-However, if we instead place pebbles as late as possible, like in Figure \ref{fig:2-pebble-chain-good}, we get a \(\Theta(1)\) strategy.
-
-\begin{figure}[hp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{pebble_chain_3_good_strat.pdf}
     \caption{A good pebbling strategy that allocates leaves lazily. Can handle any chain length with 3 pebbles.}
@@ -89,7 +87,7 @@ As stated in the whitepaper, PyTorch performs these optimisations aggressively d
 \subsection{Peak Memory Usage During Training} \label{sec:2-4-2-peak-mem-training}
 Recall the computational graph for one step of training a neural network, repeated in Figure \ref{fig:2-nn-comp-graph-2}.
 
-\begin{figure}[htb]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.97\linewidth]{backprop_full_comp_graph.png}
     \caption{The computational graph for one step of gradient descent on a neural network of four layers.}
@@ -112,7 +110,7 @@ However, there is some less obvious memory consumption too.
 
 In my implementation, I will account for the workspace memory as part of the memory required for the forwards and backwards operations.
 
-\begin{figure}[htb]
+\begin{figure}[b]
     \centering
     \includegraphics[width=0.7\linewidth]{network_memory_usage_breakdown.jpg}
     \caption{Breakdown of memory usage of popular networks. \cite[Figure~4]{Rhu2016}}
@@ -124,8 +122,8 @@ Figure \ref{fig:2-memory-breakdown} shows a break down of memory consumption of 
 As can be seen, the proportion of memory allocated to the weights is very small.
 The reason is that modern deep networks hardly use fully-connected layers,
 which cause an exponential growth in the number of weights.
-Instead, we mostly see layers such as the convolutional layer \todo{put in bg}.
-These typically apply a small filter, such as of size 3x3, to many large images. \todo{refs?}
+Instead, we mostly see layers such as the convolutional layer.
+These typically apply a small filter, such as of size 3x3, to many large images.
 The image is the layer output and the filter weights are the learnable parameters.
 Thus the parameters are very small compared to the forward and backward tensors.
 As the optimiser memory is usually equivalent to one or two extra values \textit{per parameter},
@@ -169,13 +167,6 @@ If there were no backwards pass, we could perform all the forwards in-place in \
 Only once \(b_i\) has been computed, can we finally free \(f_i\) and \(b_{i+1}\).
 As a result, peak memory occurs at the end of the forward pass, just before we start backpropagating.
 
-\begin{figure}[hp]
-    \centering
-    \includegraphics[width=0.95\linewidth]{nn_peak_mem.pdf}
-    \caption{Peak memory during backpropagation.}
-    \label{fig:2-nn-peak-mem}
-\end{figure}
-
 This is the result found in the literature, where per-layer uniform costs are assumed.
 However, I am going to be more precise than this;
 because the sizes of the tensors vary, peak memory could occur in say the third layer instead of the fourth, if the size of the newly allocated backward is greater than the size of the freed forward and backward together.
@@ -185,3 +176,14 @@ Thus, if \(\beta : \{f, b\}\times[0, N] \rightarrow \Z^+\) denotes the memory re
     \label{eqn:2-nn-peak-mem}
     \max_{0 \leq i \leq N}\; \sum_{l\;=\;0}^i \beta^f_l + \beta^b_{i+1} + \beta^b_i
 \end{equation}
+
+\vspace{4cm}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{nn_peak_mem.pdf}
+    \caption{Peak memory during backpropagation.}
+    \label{fig:2-nn-peak-mem}
+\end{figure}
+
+\newpage

@@ -1,11 +1,10 @@
 \section{Checkpointing} \label{sec:2-5-bg-checkpointing}
 In this section, I will show how to reduce the peak memory established in the previous section using checkpointing and motivate my extension to Gruslys et al.'s technique \cite{Gruslys2016}.
+I will also show that checkpointing has been rediscovered from the AD literature.
 % The first key behind all memory optimisations using this graph is that the entire training process is this exact same step repeated many times.
 % Thus, even though training may take days or even weeks [?], we only have to optimise a relatively small computational graph.
 % Compared to the time taken for a single training step, we can spend a huge amount of time solving for the best optimisation strategies; it only has to be fast relative to the entire training process.
 
-
-% something about redsicovered from AD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\texorpdfstring{\(\Theta(\sqrt{N})\)}{\textit{O(sqrt(N))}} Checkpointing}
 Consider the simplified computational graph of backpropagation that was derived in the previous Section \ref{sec:2-4-memory-analysis}, or more generically, the graph for computing the adjoint of a sequence of operations.
@@ -104,7 +103,6 @@ Before detailing Gruslys et al.'s \cite{Gruslys2016} work on memory-efficient RN
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Related Work}
 %\todo{TODO} This section should either be much more in-depth or removed.
-
 \texttt{REVOLVE} gives the optimal recursion depth for sequences of known length.
 Work has also been done for sequences of unknown length.
 \texttt{REVOLVE}'s optimality has been matched for sequences that do not exceed a length that has a certain bound with respect to the number of checkpoints per segment.
@@ -112,25 +110,14 @@ Some deep learning models, like \texttt{seq2seq} RNNs, do have unknown sequence 
 However, I only consider sequential neural networks where the sequence length is known.
 
 Dauvergne and Hasco\"{e}t reframe checkpointing in terms of the data-flow equations used in compilers \cite{Dauvergne2006}.
-They also formalise what other data-flow techniques from compilers look like for automatic differentiation, such as liveness analysis and \textit{to be recorderd} analysis, and seek to combine them with checkpointing in their \texttt{TAPENADE} platform.
+They also formalise what other data-flow techniques from compilers look like for automatic differentiation, such as liveness analysis and \textit{to be recorderd} analysis, and seek to combine them with checkpointing in their \texttt{TAPENADE} platform \cite{Hascoet2013-tapenade}.
 
 Siskind and Pearlmutter \cite{Siskind2018} generalised \texttt{REVOLVE} to arbitrary computation \textit{trees}, rather than just sequences.
 However, their implementation does not take into account precise per-operator costs and does not solve for the least computational cost given a memory budget, but instead gives \texttt{REVOLVE}-like optimality by finding the strategy of least recursion depth.
 Also, though non-linear architectures are now prevalent in neural networks, they tend to not be trees either.
 
-%{others} H-revolve? Imperial one? Those two new papers that generalise to arbitrary graphs?
-% heirarchical checkpointing: async and sync? num levels of memory? Assumptions on comp costs, memory costs, transfer costs, allocation costs?
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Optimal Compute Cost Checkpointing Through Dynamic Programming} \label{sec:2-5-dp-checkpointing}
-% 5. DeepMind
-% Finally something that gives optimal C for bounded B
-% Only for uniform cost RNNs
-% explain RNN cell and how they interpret `memory slots'
-% DP eqns and algo
-% Base cases: do in-place, do drop everything
-% rec case: forwards to k, right storing k, left
-% Policy can then be `traversed'
 Gruslys et al. solve for the checkpointing policy that gives the least computational cost, subject to a memory budget \cite{Gruslys2016}.
 They formulate this as a dynamic programming (DP) problem where the subproblems are over the sub-sequences and the size of the memory budget.
 The solution is defined for RNNs, where every layer in the sequence is an identitical RNN \textit{cell}, leading to uniform per-layer costs.
@@ -163,14 +150,14 @@ For \(C(1, m)\), we simply perform the forwards and backwards for that single ce
 For \(C(t, 1)\), we use the \(\Theta(1)\) space technique discussed above that recomputes everything, resulting in a quadratic cost.
 For \(C(t, m)\) where \(m \geq t\), there is enough memory to not do any checkpointing, resulting in linear computational cost.
 
-\begin{figure}[thb]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.97\linewidth]{dp-checkpointing-recursive-case.png}
     \caption{The recursive case \(Q(t, m, y)\): computing the forwards to \(y\), recursing on the right whilst storing \(y\), and recursing on the left with all the slots \cite[Figure~1]{Gruslys2016}. `hidden states' refer to the forwards.}
     \label{fig:2-dp-checkpointing-rec}
 \end{figure}
 
-The recursive case can be formulated as shown in Figure \ref{fig:2-dp-checkpointing-rec}, taken from the original paper\footnote{This is spcifically for BPTT-HSM, where the hidden states are checkpointed. See the paper for more details.}.
+The recursive case can be formulated as shown in Figure \ref{fig:2-dp-checkpointing-rec}, taken from the original paper\footnote{This is spcifically for BPTT-HSM, where the hidden states are checkpointed. See the paper for more details \cite{Gruslys2016}.}.
 For \(Q(t, m, y)\), we first compute the forwards up to \(y\) without storing them, incurring a compute cost of \(y\).
 Then, we recurse on the right hand side holding \(y\) in a memory slot.
 That means we are recursing on a sequence of length \(t-y\) with \(m-1\) slots.

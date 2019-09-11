@@ -1,4 +1,6 @@
-\section{Optimal Policy Solver with Arbitrary Per-Layer Costs} \label{sec:3-policy-solver}
+\section{Optimal Policy Solver with Precise Per-Layer Costs} \label{sec:3-policy-solver}
+\sectionmark{Precise Policy Solver}
+
 It is important to have a firm grasp of Algorithm \ref{alg:2-policy-solver} before reading this section.
 
 Let us restate the exact problem it is solving, which is for a sequence of uniform layers:
@@ -41,13 +43,6 @@ Iterating over the search space bottom-up no longer means iterating over increas
 We can break this down recursively by saying that for any \(i < k < j\), we have already encountered all subsequences of \((i,\, k)\) and \((k,\, j)\).
 Note, given my formulation of the computational graph, only subsequences where \(i < j\) are defined, so \((i,\, i)\) is not a valid subsequence.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.8\linewidth]{subproblem-order-traversal.jpg}
-    \caption{Visualisation of traversing all subsequences in `subproblem order'. The vertical bars represent a subproblem \((i,\, j)\). Traversal order goes from top to bottom. Notice that, whenever an \((i,\, j)\) is encountered, all of its subproblems have already been done.}
-    \label{fig:3-subproblem-order-traversal}
-\end{figure}
-
 The way in which I traverse the subsequences is visualised in Figure \ref{fig:3-subproblem-order-traversal}.
 For some sequence \((s, e)\), we will traverse all subsequences using iterators \(i\) and \(j\).
 We start at the end, that is \(i = e-1\) and \(j=e\).
@@ -62,6 +57,13 @@ Again, we move \(i\) left one to \(e-3\) and initialise \(j\) to \(e-2\).
 Once we have solved this case, we move \(j\) right, knowing that we have already solved all \((i,\, i^\prime)\) and \((i^\prime,\, j)\), for all \(i' \geq i\).
 We keep traversing like this until eventually we have moved \(i\) left to \(i\), and then \(j\) right to \(e\).
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{subproblem-order-traversal.jpg}
+    \caption{Visualisation of traversing all subsequences in `subproblem order'. The horizontal bars represent a subproblem \((i,\, j)\). Traversal order goes from top to bottom. Notice that, whenever an \((i,\, j)\) is encountered, all of its subproblems have already been done.}
+    \label{fig:3-subproblem-order-traversal}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Redefining \texorpdfstring{\(Q(\cdot)\)}{\textit{Q()}} with Per-Layer Costs}
 To recap, so far we have introduced per-layer costs, redefined the problem to be on all possible subsequences, and seen how to set up the solver to traverse the subsequences bottom-up.
@@ -72,11 +74,11 @@ Next, we give the new definition of the cost-action function that takes into acc
 This is the same as before, except we now incur the \textit{precise} costs of executing the forwards to \(f_k\), and recurse on the right with the \textit{precise} reduction in memory from checkpointing \(f_k\).
 Note \(f_i\) is given by the definition of the problem so we start the sum of the forwards at \(f_{i+1}\).
 
+It would seem we have finished describing the new solver.
+However, all is not so simple;
+the fact that we are now being precise about memory causes a lot of issues.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Handling the Continuous Memory State by Tracking the Peak Memory Cost of Subproblems, \texorpdfstring{\(B(\cdot)\)}{\textit{B()}}}
-However, all is not so simple.
-The fact that we are now being precise about memory causes a lot of issues.
-
 Previously, for RNNs, we divided memory into coarse-grained slots, and every layer always used exactly one slot - no more, no less.
 Now, layers use a precise amount of memory, so when we checkpoint a tensor and recurse to the right, the new memory budget could be any arbitrary number.
 This means memory is now a \textit{continuous} state.
@@ -200,20 +202,14 @@ This is shown in Figure \ref{fig:3-b-j-placement-new-right}.
     \label{fig:3-b-j-placement-new-right}
 \end{figure}
 
-This new definition of \(C(\cdot)\) of course affects our analysis of peak memory
-for \(Q(i,\,j,\,k,\,m)\) in Equation \ref{eqn:3-b-k-1}.
+This new definition of \(C(\cdot)\) of course affects our analysis of peak memory for
+\(Q(i,\,j,\,k,\,m)\) in Equation \ref{eqn:3-b-k-1}.
 We must take into account the fact the \(b_j\) is using part of the \(m\) memory.
 Thus, the first stage where we compute the forwards to \(f_k\) must be done within \(m-\beta^b_j\) memory.
 Then, we recurse on the right with the same \(m-\beta^f_k\) memory as before, but now the definition of the subcall is that it must also place \(b_j\) within that memory.
 By the time the subcall has finished, \(b_j\) will be long gone and \(b_k\) will be all that remains in its \(m-\beta^f_k\) memory.
 We then recurse on the left with the same \(m\) memory as before;
 the left subcall is now responsible for placing \(b_k\) within that \(m\) memory (and then freeing it), rather than saying \(b_k\) is in some separate memory to \(m\) whilst the left subcall proceeds.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.7\linewidth]{new_Q_peak_mem.pdf}
-    \caption{How peak memory occurs across the three stages of \(Q(\cdot)\).}
-    \label{fig:3-new-Q-peak-mem}
-\end{figure}
 
 The peak memory across the three stages is visualised Figure \ref{fig:3-new-Q-peak-mem}.
 Specifically, we update the peak memory of \(Q(i,\,j,\,k,\,m)\) as established in Equation \ref{eqn:3-b-k-1} to the following:
@@ -231,6 +227,13 @@ Specifically, we update the peak memory of \(Q(i,\,j,\,k,\,m)\) as established i
 \end{align}
 As before, we will have to check each of these stages for failure before evaluating \(Q(\cdot)\).
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.7\linewidth]{new_Q_peak_mem.pdf}
+    \caption{How peak memory occurs across the three stages of \(Q(\cdot)\). The red cross denotes the memory being freed by the supercall before recursing left.}
+    \label{fig:3-new-Q-peak-mem}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{The New Algorithm So Far}
 In the above sections, I have accounted for per-layer costs; how to traverse the subproblem space; introduced \(B(\cdot)\); accounted for failure; and changed how the problem is modelled so the backwards actually get freed during the backward pass.
@@ -242,11 +245,11 @@ There are a still a few minor details to note. First, whereas Gruslys et al. def
 Second, according to our definition of \(C(i,\,j,\,m)\), the \(m\) memory budget does not include \(f_i\) but does include \(b_j\).
 This means the largest subproblem on \((0,\,N+1)\) must be solved within \(M-\beta^f_0\) memory, not \(M\), as there must be enough space remaining in the original \(M\) to store \(f_0\) and separately compute \(C(0,\,N+1,\,m-\beta^f_0)\).
 
-Also, \(\alpha^f_{N+1}\) and \(\beta^f_{N+1}\) are not actually defined tensors, but since \(\alpha^b_{N+1}\) and \(\beta^b_{N+1}\) are defined, I make the second dimension of their arrays \(N+2\).
+Also, \(\alpha^f_{N+1}\) and \(\beta^f_{N+1}\) are not actually defined costs as \(f_{N+1}\) does not exist, but since \(\alpha^b_{N+1}\) and \(\beta^b_{N+1}\) are defined, I make the second dimension of their arrays \(N+2\).
+I make a similar simplification for the DP tables \(B,\, C,\, D\).
 
-Lastly, as arrays start at 0, but memory starts at 1, we will index \(B,\, C,\, D\) with \(m-1\) when referring to \(m\) memory.
-
-\begin{algorithm}[htbp]
+Lastly, as arrays start at 0, but memory starts at 1, I will index \(B,\, C,\, D\) with \(m-1\) when referring to \(m\) memory.
+\begin{algorithm}[H]
     \DontPrintSemicolon
     \SetKwData{PeakFs}{peak\textsubscript{F}}
     \SetKwData{Failed}{failed}
@@ -340,6 +343,7 @@ Lastly, as arrays start at 0, but memory starts at 1, we will index \(B,\, C,\, 
     \caption{The new policy solver thus far, incorporating the changes from the above sections.}
     \label{alg:3-policy-solver-intermediate}
 \end{algorithm}
+\newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{More Memoisation of Costs}
@@ -411,7 +415,7 @@ Recall from Equation \ref{eqn:2-nn-peak-mem} the peak memory of running backprop
 \end{equation*}
 Figure \ref{fig:3-base-case-peak-mem} visualises some possibilities of what this looks like.
 
-\begin{figure}[h]
+\begin{figure}[b]
     \centering
     \includegraphics[width=0.7\linewidth]{no_recompute_peak_mem_vis.jpg}
     \caption{Two possibilities for when peak memory occurs. The blue line indicates peak memory occurs at the beginning of the backward pass. The red line indicates when we are computing the backward of the second layer.}
@@ -517,7 +521,7 @@ Thus, as the \(j\) loop moves right, we can can memoise the peak of the forward 
 That is, the new overall peak becomes the max of (i) the peak of the forwards so far plus this layer's backward and (ii) the backward step for this layer.
 This is shown in Algorithm \ref{alg:3-memoise-quad-mem}. The conditional on \(j-2\,=\,i\) is because we do not count the memory of \(f_i\).
 
-\begin{algorithm}[htb]
+\begin{algorithm}[t]
     \DontPrintSemicolon
     \SetKwData{PeakF}{fpeak\textsubscript{quad}}
     \SetKwData{PeakQuad}{peak\textsubscript{quad}}
@@ -539,22 +543,7 @@ This is shown in Algorithm \ref{alg:3-memoise-quad-mem}. The conditional on \(j-
     \caption{Memoising the peak memory cost of the ``recompute everything'' strategy across the \(j\) loop.}
     \label{alg:3-memoise-quad-mem}
 \end{algorithm}
-
-Now we look at the compute costs.
-Equation \ref{eqn:3-comp-quad} sums over the layers \(j\).
-There are two separate sums for the forwards and backwards costs.
-Though it was easier to explain it in that way, we can rethink it to be more suited to memoisation.
-
-Consider we are at some \((i,\, j)\) subsequence.
-Say \(c\) is the memoised cost of executing the quadratic (no recomputation) strategy on that subsequence.
-As we move right to \((i,\, j+1)\), we want to add the marginal cost of performing quadratic on this longer subsequence.
-The strategy on \((i,\,j+1)\) does everything the strategy on \(i,\,j\) does, except it has an extra step at the beginning where all the forwards from \(f_{i+1}\) to \(f_{j-1}\) are calculated, and then \(b_{j-1}\) is calculated.
-This cost can be trivially memoised by accumulated the marginal cost as we move right over the layers.
-However, it involves summing the forward costs from \(f_{i+1}\) to \(f_{j-1}\) every time.
-To avoid this, we separately memoise the cost of a single pass over the forwards.
-The memoisation is demonstrated in Algorithmm \ref{alg:3-memoise-quad-comp}.
-
-\begin{algorithm}[htb]
+\begin{algorithm}[t]
     \DontPrintSemicolon
     \SetKwData{ComputeF}{fcompute\textsubscript{quad}}
     \SetKwData{ComputeQuad}{compute\textsubscript{quad}}
@@ -577,15 +566,30 @@ The memoisation is demonstrated in Algorithmm \ref{alg:3-memoise-quad-comp}.
     \label{alg:3-memoise-quad-comp}
 \end{algorithm}
 
+Now we look at the compute costs.
+Equation \ref{eqn:3-comp-quad} sums over the layers \(j\).
+There are two separate sums for the forwards and backwards costs.
+Though it was easier to explain it in that way, we can rethink it to be more suited to memoisation.
+
+Consider we are at some \((i,\, j)\) subsequence.
+Say \(c\) is the memoised cost of executing the quadratic (no recomputation) strategy on that subsequence.
+As we move right to \((i,\, j+1)\), we want to add the marginal cost of performing quadratic on this longer subsequence.
+The strategy on \((i,\,j+1)\) does everything the strategy on \(i,\,j\) does, except it has an extra step at the beginning where all the forwards from \(f_{i+1}\) to \(f_{j-1}\) are calculated, and then \(b_{j-1}\) is calculated.
+This cost can be trivially memoised by accumulated the marginal cost as we move right over the layers.
+However, it involves summing the forward costs from \(f_{i+1}\) to \(f_{j-1}\) every time.
+To avoid this, we separately memoise the cost of a single pass over the forwards.
+The memoisation is demonstrated in Algorithmm \ref{alg:3-memoise-quad-comp}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection*{Removing the Separate Base Case Loop}
-Lastly, I will show that, unlike in the original policy solver in Algorithm \ref{alg:2-policy-solver}, there is no need for ato separately \(C(\cdot)\) with the base cases prior to the main loop.
+Lastly, I will show that, unlike the original policy solver in Algorithm \ref{alg:2-policy-solver}, there is no need to separately initialise \(C(\cdot)\) with the base cases prior to the main loop.
 
 Recall when we discussed the \(j\,=\,i+1\) base case.
 We concluded that it can be done inside the main loop, as it traverses the subproblems in order, including that base case.
 It is the only `real' base case.
 
 The second one we looked at, when no recomputation is required, turned out to no longer be a separate base case.
+
 The last base case of recomputing everything is not something that for any \((i,\,j,\,m)\) subsequence we trivially know how to set.
 It requires knowing the costs across the layers, which can be memoised as above.
 We do this as part of the main loop over \(j\).
