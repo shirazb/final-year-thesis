@@ -249,7 +249,8 @@ Also, \(\alpha^f_{N+1}\) and \(\beta^f_{N+1}\) are not actually defined costs as
 I make a similar simplification for the DP tables \(B,\, C,\, D\).
 
 Lastly, as arrays start at 0, but memory starts at 1, I will index \(B,\, C,\, D\) with \(m-1\) when referring to \(m\) memory.
-\begin{algorithm}[H]
+
+\begin{algorithm}[!hp]
     \DontPrintSemicolon
     \SetKwData{PeakFs}{peak\textsubscript{F}}
     \SetKwData{Failed}{failed}
